@@ -24,6 +24,13 @@ export const useUserStore = defineStore("user", () => {
     return obj;
   }
 
+  function isAdmin() {
+    let userInfo = localStorage.getItem("userInfo")
+    userInfo = JSON.parse(userInfo as string);
+    let isAdmin = userInfo.role === "admin";
+    return isAdmin;
+  }
+
   // user logout
   function logout() {
     localStorage.removeItem('token');
@@ -56,7 +63,8 @@ export const useUserStore = defineStore("user", () => {
     setUserInfo,
     getUserInfo,
     resetToken,
-    logout
+    logout,
+    isAdmin,
 
   };
 });

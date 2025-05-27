@@ -27,10 +27,17 @@
             </el-form-item>
           </div>
         </el-form>
-        <p class="mt-0 mb-2 font-bold" v-show="advanceSettingVisible">高级设置</p>
-        <el-form label-width="120px" :model="formData" v-show="advanceSettingVisible">
+        <p class="mt-0 mb-2 font-bold" v-show="advanceSettingVisible">
+          高级设置
+          <el-button title="提示词切换" link type="primary" @click="togglePromptSettingVisible" v-if="userStore.isAdmin()">
+            <el-icon class="rotate-90">
+              <Sort />
+            </el-icon>
+          </el-button>
+        </p>
+        <el-form :model="formData" v-show="advanceSettingVisible">
 
-          <el-form-item label="生成方式:">
+          <el-form-item label-width="120px" v-show="!promptSettingVisible" label="生成方式:">
             <el-radio-group v-model="formData.type" prop="type">
               <el-radio value="1">
                 <span class="w-[80px] inline-block">整页形式</span>
@@ -40,7 +47,7 @@
               </el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="理论讲解:">
+          <el-form-item label-width="120px" v-show="!promptSettingVisible" label="理论讲解:">
             <el-radio-group v-model="formData.planType" prop="planType">
               <el-radio value="1"><span class="w-[80px] inline-block">概述</span></el-radio>
               <el-radio value="2">
@@ -56,16 +63,16 @@
               </el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="仿真代码:">
+          <el-form-item label-width="120px" v-show="!promptSettingVisible" label="仿真代码:">
             <el-radio-group v-model="formData.hasCode" prop="hasCode">
               <el-radio value="1"><span class="w-[80px] inline-block">有</span></el-radio>
               <el-radio value="2"><span class="w-[80px] inline-block">无</span></el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item v-show="formData.hasCode == '1'">
+          <el-form-item label-width="120px" v-show="!promptSettingVisible && formData.hasCode == '1'">
             <el-input v-model="formData.codeRequirement" placeholder="请输入仿真代码要求，如帮我生成QPSK算法的matlab仿真"></el-input>
           </el-form-item>
-          <el-form-item label="学科垂域大模型:">
+          <el-form-item label-width="120px" v-show="!promptSettingVisible" label="学科垂域大模型:">
             <el-radio-group disabled>
               <el-radio value="1">通信垂域大模型</el-radio>
               <el-radio value="2">机电垂域大模型</el-radio>
@@ -73,7 +80,13 @@
               <el-radio value="4">自建模型</el-radio>
             </el-radio-group>
           </el-form-item>
+
+          <el-form-item label-width="90px" v-show="promptSettingVisible" label="提示词:">
+            <el-input type="textarea" :rows="5" v-model="formData.prompt" placeholder="请输入提示词"></el-input>
+          </el-form-item>
         </el-form>
+
+
         <div>
           <el-button type="primary" link @click="toggleAdvanceSettingVisible">
             <el-icon>
@@ -82,6 +95,7 @@
             </el-icon>
             高级设置
           </el-button>
+
           <el-button type="primary" class="w-[200px]" @click="handleSubmit">一键生成</el-button>
         </div>
 
@@ -141,6 +155,10 @@ import moment from 'moment'
 import router from '@/router'
 import { getPlanList, generatePlan, removePlan } from '@/api/plan'
 
+import { useUserStore } from "@/store"
+
+const userStore = useUserStore();
+
 const genForm = ref(null)
 
 const formData = reactive({
@@ -151,6 +169,8 @@ const formData = reactive({
   planType: '1',
   hasCode: '2',
   codeRequirement: '',
+
+  prompt: '',
 })
 
 const rules = {
@@ -170,6 +190,11 @@ const advanceSettingVisible = ref(false)
 
 const toggleAdvanceSettingVisible = () => {
   advanceSettingVisible.value = !advanceSettingVisible.value
+}
+
+const promptSettingVisible = ref(false)
+const togglePromptSettingVisible = () => {
+  promptSettingVisible.value = !promptSettingVisible.value
 }
 
 
@@ -277,12 +302,20 @@ import genPrompts from './promptGen.js'
 const handleSubmit = () => {
   genForm.value.validate((valid) => {
     if (valid) {
+      let promptText = '';
+      if (!promptSettingVisible.value) {
+        promptText = genPrompts(formData.type, formData.planType, formData.hasCode, formData.codeRequirement)
+      } else {
+        promptText = formData.prompt
+      }
+
       let req = {
         name: formData.name,
         title: formData.title,
         knowledgePoints: formData.knowledgePoints,
-        instruction: genPrompts(formData.type, formData.planType, formData.hasCode, formData.codeRequirement)
+        instruction: promptText,
       }
+
       generatePlan(req).then(res => {
         ElMessage.success({
           message: '发送成功！请耐心等待讲义生成完成!',
