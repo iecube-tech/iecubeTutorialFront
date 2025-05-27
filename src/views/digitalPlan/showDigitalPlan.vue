@@ -190,14 +190,19 @@ const short = async () => {
   doc.body.style.overflow = 'visible'
   doc.body.style.height = 'auto'
 
-  const canvas = await html2canvas(iframe.contentWindow.document.body, {
-    useCORS: true,
-    scrollX: window.scrollX,
-    scrollY: window.scrollY,
-    windowWidth: iframe.contentDocument.documentElement.scrollWidth,
-    windowHeight: iframe.contentDocument.documentElement.scrollHeight
-  });
-  screenshotUrl.value = canvas.toDataURL('image/png');
+  try {
+    const canvas = await html2canvas(iframe.contentWindow.document.body, {
+      useCORS: true,
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      windowWidth: iframe.contentDocument.documentElement.scrollWidth,
+      windowHeight: iframe.contentDocument.documentElement.scrollHeight
+    });
+    screenshotUrl.value = canvas.toDataURL('image/png');
+  } catch (e) {
+    console.log('截图失败>>>>>>>>>>>')
+    screenshotUrl.value = ''
+  }
 }
 
 // 等待DOM就绪

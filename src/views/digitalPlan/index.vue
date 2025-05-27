@@ -85,8 +85,6 @@
             <el-input type="textarea" :rows="5" v-model="formData.prompt" placeholder="请输入提示词"></el-input>
           </el-form-item>
         </el-form>
-
-
         <div>
           <el-button type="primary" link @click="toggleAdvanceSettingVisible">
             <el-icon>
@@ -95,7 +93,6 @@
             </el-icon>
             高级设置
           </el-button>
-
           <el-button type="primary" class="w-[200px]" @click="handleSubmit">一键生成</el-button>
         </div>
 
@@ -158,6 +155,8 @@ import { getPlanList, generatePlan, removePlan } from '@/api/plan'
 import { useUserStore } from "@/store"
 
 const userStore = useUserStore();
+
+
 
 const genForm = ref(null)
 
@@ -298,6 +297,9 @@ const handleRemove = (row) => {
 
 import genPrompts from './promptGen.js'
 
+import { Base64 } from 'js-base64'
+
+
 // 一键生成讲义
 const handleSubmit = () => {
   genForm.value.validate((valid) => {
@@ -308,6 +310,8 @@ const handleSubmit = () => {
       } else {
         promptText = formData.prompt
       }
+
+      promptText = Base64.encode(promptText)
 
       let req = {
         name: formData.name,
