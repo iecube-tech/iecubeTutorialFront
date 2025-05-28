@@ -63,13 +63,13 @@
               </el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label-width="120px" v-show="!promptSettingVisible" label="仿真代码:">
+          <el-form-item label-width="120px" v-show="!promptSettingVisible" label="交互动画:">
             <el-radio-group v-model="formData.hasCode" prop="hasCode">
               <el-radio value="1"><span class="w-[80px] inline-block">有</span></el-radio>
               <el-radio value="2"><span class="w-[80px] inline-block">无</span></el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label-width="120px" v-show="!promptSettingVisible && formData.hasCode == '1'">
+          <el-form-item label-width="120px" v-show="!promptSettingVisible" label="仿真代码:">
             <el-input v-model="formData.codeRequirement" placeholder="请输入仿真代码要求，如帮我生成QPSK算法的matlab仿真"></el-input>
           </el-form-item>
           <el-form-item label-width="120px" v-show="!promptSettingVisible" label="学科垂域大模型:">
@@ -166,7 +166,7 @@ const formData = reactive({
   knowledgePoints: '',
   type: '1',
   planType: '1',
-  hasCode: '2',
+  hasCode: '1',
   codeRequirement: '',
 
   prompt: '',
