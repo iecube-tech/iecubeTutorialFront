@@ -26,6 +26,8 @@ export default defineConfig({
     colors: {
       primary: "var(--el-color-primary)",
       primary_dark: "var(--el-color-primary-light-5)",
+      blod: "var(--text-blod)",
+      zeng: "var(--zeng)",
     },
   },
   presets: [

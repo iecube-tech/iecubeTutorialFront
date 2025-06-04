@@ -25,12 +25,13 @@ body {
   width: 100%;
   height: 100%;
   margin: 0;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  font-family: "微软雅黑","Microsoft YaHei","Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+     Arial, sans-serif;
+  
   line-height: inherit;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizelegibility;
+  -webkit-font-smoothing: antialiased; /* Chrome, Safari */
+  -moz-osx-font-smoothing: grayscale; /* Firefox */
+  text-rendering: optimizeLegibility; /* 优化可读性 */
 }
 
 a {
@@ -73,4 +74,13 @@ a:focus,
 a:active,
 div:focus {
   outline: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6{
+  color: var(--text-blod)
 }

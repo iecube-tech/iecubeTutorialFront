@@ -23,6 +23,16 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
+    path: "/login1",
+    component: () => import("@/views/login/index1.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/terms",
+    component: () => import("@/views/login/terms.vue"),
+    meta: { hidden: true },
+  },
+  {
     path: "/signup",
     component: () => import("@/views/login/signupPage.vue"),
     meta: { hidden: true },
@@ -32,7 +42,6 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/login/applyBetaCode.vue"),
     meta: { hidden: true },
   },
-
   {
     path: "/",
     name: "/",
@@ -68,11 +77,11 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/digitalPlan/showDigitalPlan.vue"),
         meta: { hidden: true },
       },
-      {
-        path: "/userManage",
-        component: () => import("@/views/userManage/index.vue"),
-        meta: { hidden: true },
-      }
+      // {
+      //   path: "/userManage",
+      //   component: () => import("@/views/userManage/index.vue"),
+      //   meta: { hidden: true },
+      // }
     ],
   },
   {
@@ -93,7 +102,42 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
       ]
   },
-
+   {
+      path: "/",
+      name: 'group',
+      component: Layout,
+      redirect: "/groupManage",
+      children: [
+        {
+          component: () => import("@/views/groupManage/index.vue"),
+            path: "/groupManage",
+            name: "groupManage",
+            meta: {
+              title: "组织管理",
+              icon: "document",
+              keepAlive: true,
+            },
+        },
+      ]
+  },
+  {
+      path: "/",
+      name: 'user',
+      component: Layout,
+      redirect: "/userManage",
+      children: [
+        {
+          component: () => import("@/views/userManage/index.vue"),
+            path: "/userManage",
+            name: "userManage",
+            meta: {
+              title: "用户管理",
+              icon: "document",
+              keepAlive: true,
+            },
+        },
+      ]
+  },
   // 外部链接
   // {
   //   path: "/external-link",

@@ -48,6 +48,9 @@ function goHome() {
   @apply flex-x-between;
 
   height: $navbar-height;
-  background: var(--el-bg-color);
+  // background: var(--el-bg-color);
+  box-sizing: border-box;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 </style>

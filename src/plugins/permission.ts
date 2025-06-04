@@ -12,7 +12,7 @@ import { usePermissionStore, useUserStore } from "@/store";
 
 export function setupPermission() {
   // 白名单路由
-  const whiteList = ["/login", "/signup", "/applyBetaCode"];
+  const whiteList = ["/login","/login1", "/terms", "/signup", "/applyBetaCode"];
 
   router.beforeEach(async (to, from, next) => {
     NProgress.start();

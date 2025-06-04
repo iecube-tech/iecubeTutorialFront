@@ -77,5 +77,8 @@
   "i18n-ally.localesPaths": [
     "src/lang"
   ],
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  },
 
 }

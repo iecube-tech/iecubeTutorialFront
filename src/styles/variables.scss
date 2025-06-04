@@ -21,36 +21,57 @@
     "page": #f5f8fd,
   )
 );
-
+// 主题色
+$zeng: #339498;
 /** 全局SCSS变量 */
-
 :root {
-  --menu-background: #var(--el-bg-color);
-  --menu-text: #606266;
-  --menu-active-text: #409eff;
-  --menu-hover: #ddeefd; 
+  --zeng: #{$zeng};
+  --el-menu-bg-color: #1d2129;  // 菜单背景色
+  --el-menu-text-color: #8A9199; // 菜单文字颜色
+  --el-menu-active-color: #{$zeng}; // 菜单激活文字颜色
+  --el-menu-hover-bg-color: #{rgba($zeng, 0.3)}; // 菜单悬停背景色 #1A3668
+
+  --menu-border-color: #2C313A;
   --sidebar-logo-background: #var(--el-bg-color);
   // 修复表格 fixed 列被选中后由于透明色导致叠字的 bug
   .el-table {
     --el-table-current-row-bg-color: rgb(235 243 250);
   }
+  --border-color: #dcdfe6;
+  --border-line-color: #dee0e3;
+  --icon-color: #8f959e; // 图标颜色
+  
+  --text-blod: #303133; // 加粗文字颜色
+  --el-text-color-primary: #646a73; // 加粗文字颜色
+  --el-text-color-regular: #646a73; // 普通文字颜色
+  --el-text-color-secondary: #909399; // 辅助文字颜色
+  --el-text-color-placeholder: #c0c4cc; // 占位文字颜色
 }
 
 /** 暗黑主题 */
 html.dark {
-  --menu-background: var(--el-bg-color-overlay);
-  --menu-text: #fff;
-  --menu-active-text: var(--el-menu-active-color);
-  --menu-hover: rgb(0 0 0 / 20%);
+  --zeng: #{$zeng};
+  --el-menu-bg-color: var(--el-bg-color-overlay);
+  --el-menu-text-color: #8A9199;
+  --el-menu-active-color: #{$zeng}; // 菜单激活文字颜色
+  --el-menu-hover-bg-color: #{rgba($zeng, 0.3)};; // 菜单悬停背景色
+
   --sidebar-logo-background: rgb(0 0 0 / 20%);
+
+  --border-color: #434343;
+  --border-line-color: #434343;
+  --icon-color: #8f959e; // 图标颜色
+
+  --text-blod: #fff; // 加粗文字颜色
+  --el-text-color-primary: #e0e0e0; // 加粗文字颜色
+  --el-text-color-regular: #e0e0e0; // 普通文字颜色
+  --el-text-color-secondary: #a0a0a0; // 辅助文字颜色
+  --el-text-color-placeholder: #707070; // 占位文字颜色
 }
 
-$menu-background: var(--menu-background); // 菜单背景色
-$menu-text: var(--menu-text); // 菜单文字颜色
-$menu-active-text: var(--menu-active-text); // 菜单激活文字颜色
-$menu-hover: var(--menu-hover); // 菜单悬停背景色
-$sidebar-logo-background: var(--sidebar-logo-background); // 侧边栏 Logo 背景色
 
+
+$sidebar-logo-background: var(--sidebar-logo-background); // 侧边栏 Logo 背景色
 $sidebar-width: 210px; // 侧边栏宽度
 $sidebar-width-collapsed: 54px; // 侧边栏收缩宽度
 $navbar-height: 50px; // 导航栏高度

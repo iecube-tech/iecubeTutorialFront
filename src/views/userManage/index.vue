@@ -1,9 +1,9 @@
 <template>
   <div class="app-container userManage-container">
-    <el-breadcrumb separator="/" class="mb-4">
+    <!-- <el-breadcrumb separator="/" class="mb-4">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-    </el-breadcrumb>
+    </el-breadcrumb> -->
 
     <div class="bg-white p-4">
       <el-table :data="tableData" style="width: 100%">

@@ -1,24 +1,12 @@
-<!-- 左侧边菜单：包括左侧布局(left)、顶部布局(all)、混合布局(left) -->
+<!-- 左侧边菜单：包括左侧布局(left)、顶部布局(all)、混合布局(left)
+:background-color="variables['menu-background']"
+:text-color="variables['menu-text']"
+:active-text-color="variables['menu-active-text']" 
+-->
 <template>
-  <el-menu
-    ref="menuRef"
-    :default-active="currentRoute.path"
-    :collapse="!appStore.sidebar.opened"
-    :background-color="variables['menu-background']"
-    :text-color="variables['menu-text']"
-    :active-text-color="variables['menu-active-text']"
-    :unique-opened="false"
-    :collapse-transition="false"
-    :mode="mode"
-    @open="handleOpen"
-    @close="handleClose"
-  >
-    <SidebarMenuItem
-      v-for="route in menuList"
-      :key="route.path"
-      :item="route"
-      :base-path="resolvePath(route.path)"
-    />
+  <el-menu ref="menuRef" :default-active="currentRoute.path" :collapse="!appStore.sidebar.opened" :unique-opened="false"
+    :collapse-transition="false" :mode="mode" @open="handleOpen" @close="handleClose">
+    <SidebarMenuItem v-for="route in menuList" :key="route.path" :item="route" :base-path="resolvePath(route.path)" />
   </el-menu>
 </template>
 
@@ -26,7 +14,7 @@
 import { useSettingsStore, useAppStore } from "@/store";
 import { isExternal } from "@/utils/index";
 import path from "path-browserify";
-import variables from "@/styles/variables.module.scss";
+// import variables from "@/styles/variables.module.scss";
 import { LayoutEnum } from "@/enums/LayoutEnum";
 import type { MenuInstance } from "element-plus";
 

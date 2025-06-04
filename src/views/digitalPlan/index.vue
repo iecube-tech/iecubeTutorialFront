@@ -156,8 +156,6 @@ import { useUserStore } from "@/store"
 
 const userStore = useUserStore();
 
-
-
 const genForm = ref(null)
 
 const formData = reactive({

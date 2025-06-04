@@ -2,7 +2,7 @@
   <div class="wh-full flex flex-col overflow-hidden" :class="classObj">
 
     <NavBar></NavBar>
-    <div class="w-full flex ">
+    <div class="w-full flex">
       <Sidebar class="sidebar-container" v-show="isOpenSidebar" />
       <AppMain class="flex-1" />
     </div>
@@ -96,24 +96,20 @@ watch(route, () => {
 
 <style lang="scss" scoped>
 .sidebar-container {
-  // position: fixed;
-  // top: 0;
-  // bottom: 0;
-  // left: 0;
   z-index: 999;
   width: $sidebar-width;
-  background-color: $menu-background;
+  background-color: var(--el-menu-bg-color);
   transition: width 0.28s;
 
   :deep(.el-menu) {
     border: none;
   }
 
-  :deep(.el-menu-item:hover),
-  :deep(.el-sub-menu__title:hover) {
-    color: $menu-active-text;
-    background-color: $menu-hover ;
-  }
+  // :deep(.el-menu-item:hover),
+  // :deep(.el-sub-menu__title:hover) {
+  //   color: var(--el-menu-active-color);
+  //   background-color: $menu-hover ;
+  // }
 }
 
 .main-container {
@@ -210,10 +206,6 @@ watch(route, () => {
         height: 50px;
         line-height: 50px;
         box-shadow: 0 0 6px -2px var(--el-color-primary);
-
-        div:hover {
-          background-color: var(--menu-background);
-        }
 
         :deep(svg) {
           color: var(--el-color-primary) !important;

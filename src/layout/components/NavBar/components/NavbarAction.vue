@@ -64,7 +64,7 @@
 </el-dropdown>
 </template> -->
     <div class="flex items-center">
-      <span class="text-ms mr-10px">{{ userInfoFirstName }}老师, 你好 !</span>
+      <span class="text-ms mr-10px text-blod">{{ userInfoFirstName }}老师, 你好 !</span>
     </div>
 
     <!-- 用户头像 -->
