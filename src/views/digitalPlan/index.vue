@@ -7,7 +7,7 @@
           动态讲义
         </template>
         <p class="mt-0 mb-2" style="display: flow-root;">
-          <span class="font-bold float-left">基础信息</span>
+          <span class="font-bold text-bold">基础信息</span>
         </p>
         <el-form :model="formData" :rules="rules" ref="genForm" inline label-width="90px">
           <div class="flex">
@@ -28,7 +28,7 @@
           </div>
         </el-form>
         <p class="mt-0 mb-2 font-bold" v-show="advanceSettingVisible">
-          高级设置
+          <span class="text-bold">高级设置</span>
           <el-button title="提示词切换" link type="primary" @click="togglePromptSettingVisible" v-if="userStore.isAdmin()">
             <el-icon class="rotate-90">
               <Sort />
@@ -98,7 +98,7 @@
 
         <el-divider class="my-4" />
 
-        <p class="mt-0 mb-4 font-bold">历史记录</p>
+        <p class="mt-0 mb-4 font-bold text-bold">历史记录</p>
         <div class="p-4">
           <el-table :data="tableData" style="width: 100%">
             <el-table-column prop="name" label="文件名称" />
@@ -115,7 +115,7 @@
                 <el-tag :type="scope.row.status == 'NOTReady' ? 'info' :
                   scope.row.status == 'GENERATING' ? 'warning' :
                     scope.row.status == 'DONE' ? 'success' : 'danger'" class="w-[60px]">{{ scope.row.statusZn
-                    }}</el-tag>
+                  }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="operation" label="操作" width="200">

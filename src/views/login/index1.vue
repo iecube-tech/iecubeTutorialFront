@@ -56,7 +56,7 @@
           <div class="mt-4 mb-2">
             <div class="step-title">输入手机号验证码</div>
             <p class="text-sm">
-              请输入发送至 <span class="font-bold text-blod">+86{{ maskedPhone }}</span> 的 6 位验证码，5 分钟内有效。
+              请输入发送至 <span class="font-bold text-bold">+86{{ maskedPhone }}</span> 的 6 位验证码，5 分钟内有效。
             </p>
           </div>
 
@@ -110,7 +110,7 @@
             你可以进入一下组织
           </div>
           <div class="text-sm">
-            <span class="font-bold text-blod">+86{{ maskedPhone }}</span> 已在以下组织绑定了账号，你可以进入以下任意组织
+            <span class="font-bold text-bold">+86{{ maskedPhone }}</span> 已在以下组织绑定了账号，你可以进入以下任意组织
           </div>
           <div class="flex-1 mt-6 px-2">
             <div class="h-[70px] border-1 rounded-md mb-2 p-[10px]
@@ -524,7 +524,7 @@ html.dark .login-container {
   font-weight: 600;
   line-height: 30px;
   margin-bottom: 20px;
-  @apply text-blod;
+  @apply text-bold;
 }
 
 :deep(.el-card__body) {
@@ -553,7 +553,7 @@ html.dark .login-container {
 }
 
 .separator-line {
-  @apply text-2xl font-bold select-none text-blod;
+  @apply text-2xl font-bold select-none text-bold;
 }
 
 /* 输入框样式 */
@@ -605,7 +605,7 @@ html.dark .login-container {
 }
 
 .border-wrapper {
-  border: .5px solid var(--border-line-color);
+  border: .5px solid var(--border-color);
 }
 
 .icon-font {
@@ -628,7 +628,7 @@ html.dark .login-container {
 .group-name {
   font-size: 16px;
   font-weight: 600;
-  @apply text-blod;
+  @apply text-bold;
 }
 
 .user-name {

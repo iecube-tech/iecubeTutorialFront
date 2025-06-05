@@ -1,7 +1,7 @@
 @forward "element-plus/theme-chalk/src/common/var.scss" with (
   $colors: (
     "primary": (
-      "base": #4080ff,
+      "base": #339498,
     ),
     "success": (
       "base": #23c343,
@@ -16,60 +16,95 @@
       "base": #a9aeb8,
     ),
   ),
-
-  $bg-color: (
-    "page": #f5f8fd,
-  )
 );
-// 主题色
-$zeng: #339498;
+
+$zeng: #339498; // 主题色
+
+$bg-color-1-light: #f5f7fa; // 背景颜色1
+$bg-color-1-dark: #141414; // 暗黑模式背景颜色1
+$bg-color-2-light: $bg-color-1-light; // 背景颜色2
+$bg-color-2-dark: $bg-color-1-dark; // 暗黑模式背景颜色2
+$bg-color-3-light: #f0f2f5; // 背景颜色3
+$bg-color-3-dark: #1f1f1f; // 暗黑模式背景颜色3
+
+//  边框颜色
+$border-color-light: #EBEEF5; // 边框颜色
+$border-color-dark: #2C313A; // 暗黑模式边框颜色
+
+// 阴影颜色
+$box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06); // 阴影颜色
+$box-shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.12); // 暗黑模式阴影颜色
+
+// 导航栏文字颜色
+$nav-text-color-light: #333333;
+$nav-text-color-dark: #FFFFFF;
+
 /** 全局SCSS变量 */
 :root {
   --zeng: #{$zeng};
-  --el-menu-bg-color: #1d2129;  // 菜单背景色
-  --el-menu-text-color: #8A9199; // 菜单文字颜色
-  --el-menu-active-color: #{$zeng}; // 菜单激活文字颜色
-  --el-menu-hover-bg-color: #{rgba($zeng, 0.3)}; // 菜单悬停背景色 #1A3668
 
-  --menu-border-color: #2C313A;
+  --el-menu-bg-color:  #{$bg-color-2-light}; // 菜单背景色
+  --el-menu-text-color:  #8A9199; // 菜单文字颜色
+  --el-menu-active-color:  #{$zeng}; // 菜单激活文字颜色
+  --el-menu-hover-bg-color:  #{rgba($zeng, 0.3)}; // 菜单悬停背景色
+
+  --border-color: #{$border-color-light}; // 边框颜色
+  --box-shadow: #{$box-shadow-light}; // 阴影颜色
+  
+  --nav-bg-color: #{$bg-color-1-light}; // 导航栏背景色
+
+  --el-bg-color-page: #{$bg-color-3-light};
+
   --sidebar-logo-background: #var(--el-bg-color);
   // 修复表格 fixed 列被选中后由于透明色导致叠字的 bug
   .el-table {
     --el-table-current-row-bg-color: rgb(235 243 250);
   }
-  --border-color: #dcdfe6;
-  --border-line-color: #dee0e3;
+
   --icon-color: #8f959e; // 图标颜色
   
-  --text-blod: #303133; // 加粗文字颜色
+  --text-bold: #303133; // 加粗文字颜色
   --el-text-color-primary: #646a73; // 加粗文字颜色
   --el-text-color-regular: #646a73; // 普通文字颜色
-  --el-text-color-secondary: #909399; // 辅助文字颜色
+  --el-text-color-secondary:  #646a73; // 辅助文字颜色
   --el-text-color-placeholder: #c0c4cc; // 占位文字颜色
+
+  // 主色调（保持与之前一致）
+  --el-color-primary: #339498 !important;
+  --el-color-primary-light-3: #5AA9AD !important;
+  --el-color-primary-light-5: #81BEC2 !important;
+  --el-color-primary-light-7: #A8D3D7 !important;
+  --el-color-primary-light-8: #BFDFE1 !important;
+  --el-color-primary-light-9: #D6EAEC !important;
+  --el-color-primary-dark-2: #287578 !important;
+  --el-color-primary-active: #287578 !important;
 }
 
 /** 暗黑主题 */
 html.dark {
   --zeng: #{$zeng};
-  --el-menu-bg-color: var(--el-bg-color-overlay);
-  --el-menu-text-color: #8A9199;
+  --el-menu-bg-color: #{$bg-color-2-dark}; // 菜单背景色
+  --el-menu-text-color: #8A9199; // 菜单文字颜色
   --el-menu-active-color: #{$zeng}; // 菜单激活文字颜色
-  --el-menu-hover-bg-color: #{rgba($zeng, 0.3)};; // 菜单悬停背景色
+  --el-menu-hover-bg-color: #143d3f; // 菜单悬停背景色
+
+  --border-color: #{$border-color-dark}; // 边框颜色
+  --box-shadow: #{$box-shadow-dark}; // 阴影颜色
+
+  --nav-bg-color: #{$bg-color-1-dark}; // 导航栏背景色
+
+  --el-bg-color-page: #{$bg-color-3-dark};
 
   --sidebar-logo-background: rgb(0 0 0 / 20%);
 
-  --border-color: #434343;
-  --border-line-color: #434343;
   --icon-color: #8f959e; // 图标颜色
 
-  --text-blod: #fff; // 加粗文字颜色
-  --el-text-color-primary: #e0e0e0; // 加粗文字颜色
-  --el-text-color-regular: #e0e0e0; // 普通文字颜色
-  --el-text-color-secondary: #a0a0a0; // 辅助文字颜色
+  --text-bold: #e5e5e5; // 加粗文字颜色
+  --el-text-color-primary: #b2b8bd; // 加粗文字颜色
+  --el-text-color-regular: #b2b8bd; // 普通文字颜色
+  --el-text-color-secondary: #8a9099; // 辅助文字颜色
   --el-text-color-placeholder: #707070; // 占位文字颜色
 }
-
-
 
 $sidebar-logo-background: var(--sidebar-logo-background); // 侧边栏 Logo 背景色
 $sidebar-width: 210px; // 侧边栏宽度

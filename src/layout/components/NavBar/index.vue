@@ -12,7 +12,7 @@
     <!-- 导航栏右侧 -->
     <div class="flex flex-row justify-center items-center space-x-2 ml-4" @click="goHome">
       <img :src="logo" class="logo-image w30px h30px" />
-      <span class="logo-title text-20px font-bold" style="color: #339498">
+      <span class="logo-title text-20px font-bold text-zeng">
         {{ defaultSettings.title }}
       </span>
     </div>
@@ -46,11 +46,11 @@ function goHome() {
 <style lang="scss" scoped>
 .navbar-container {
   @apply flex-x-between;
-
   height: $navbar-height;
-  // background: var(--el-bg-color);
   box-sizing: border-box;
   padding: 0 20px;
-  border-bottom: 1px solid var(--border-color);
+  background: var(--nav-bg-color);
+  // border-bottom: .5px solid var(--border-color);
+  box-shadow: var(--box-shadow);
 }
 </style>

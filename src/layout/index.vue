@@ -100,9 +100,15 @@ watch(route, () => {
   width: $sidebar-width;
   background-color: var(--el-menu-bg-color);
   transition: width 0.28s;
+  box-sizing: border-box;
+  border-right: .5px solid var(--border-color);
 
   :deep(.el-menu) {
     border: none;
+  }
+
+  :deep(.el-menu-item:hover) {
+    color: var(--el-menu-active-color);
   }
 
   // :deep(.el-menu-item:hover),
