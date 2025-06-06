@@ -5,10 +5,10 @@
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
     </el-breadcrumb> -->
 
-    <div class="bg-white p-4">
+    <div class="p-4">
       <el-table :data="tableData" style="width: 100%">
-        <el-table-column prop="fileName" label="用户名称"  />
-        <el-table-column prop="role" label="用户角色"  />
+        <el-table-column prop="fileName" label="用户名称" />
+        <el-table-column prop="role" label="用户角色" />
         <el-table-column prop="time" label="更新时间" width="200" />
         <el-table-column prop="operation" label="操作" width="200">
           <template #default="scope">
