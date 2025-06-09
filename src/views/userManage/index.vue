@@ -5,7 +5,6 @@
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
     </el-breadcrumb> -->
 
-    <div class="p-4">
       <el-table :data="tableData" style="width: 100%">
         <el-table-column prop="fileName" label="用户名称" />
         <el-table-column prop="role" label="用户角色" />
@@ -17,7 +16,6 @@
           </template>
         </el-table-column>
       </el-table>
-    </div>
   </div>
 </template>
 

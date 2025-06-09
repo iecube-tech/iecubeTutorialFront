@@ -138,6 +138,24 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
       ]
   },
+  {
+      path: "/",
+      name: 'configuration',
+      component: Layout,
+      redirect: "/configurationManage",
+      children: [
+        {
+          component: () => import("@/views/configurationManage/index.vue"),
+            path: "/configurationManage",
+            name: "configurationManage",
+            meta: {
+              title: "配置管理",
+              icon: "document",
+              keepAlive: true,
+            },
+        },
+      ]
+  },
   // 外部链接
   // {
   //   path: "/external-link",

@@ -3,7 +3,7 @@
 
     <div class="login-header">
       <img :src="logo" class="logo-image w30px h30px mr10px" />
-      <span class="logo-title text-20px font-bold" style="color: #339498">
+      <span class="logo-title">
         {{ defaultSettings.title }}
       </span>
     </div>
@@ -511,6 +511,9 @@ html.dark .login-container {
   justify-content: flex-start;
 }
 
+.logo-title {
+  @apply text-20px font-bold text-zeng;
+}
 .login-card {
   width: 500px;
   height: 500px;
