@@ -45,6 +45,7 @@ $nav-text-color-dark: #FFFFFF;
 /** 全局SCSS变量 */
 :root {
   --zeng: #{$zeng};
+  --bg-color: #ffffff;
 
   --el-menu-bg-color:  #{$bg-color-2-light}; // 菜单背景色
   --el-menu-text-color:  #8A9199; // 菜单文字颜色
@@ -67,7 +68,7 @@ $nav-text-color-dark: #FFFFFF;
   --icon-color: #8f959e; // 图标颜色
   
   --text-bold: #303133; // 加粗文字颜色
-  --el-text-color-primary: #646a73; // 加粗文字颜色
+  --el-text-color-primary: #303133; // 加粗文字颜色
   --el-text-color-regular: #646a73; // 普通文字颜色
   --el-text-color-secondary:  #646a73; // 辅助文字颜色
   --el-text-color-placeholder: #c0c4cc; // 占位文字颜色
@@ -77,6 +78,9 @@ $nav-text-color-dark: #FFFFFF;
 /** 暗黑主题 */
 html.dark {
   --zeng: #{$zeng};
+ 
+  --bg-color: #1f1f1f;
+
   --el-menu-bg-color: #{$bg-color-2-dark}; // 菜单背景色
   --el-menu-text-color: #8A9199; // 菜单文字颜色
   --el-menu-active-color: #{$zeng}; // 菜单激活文字颜色
@@ -93,9 +97,9 @@ html.dark {
 
   --icon-color: #8f959e; // 图标颜色
 
-  --text-bold: #e5e5e5; // 加粗文字颜色
-  --el-text-color-primary: #b2b8bd; // 加粗文字颜色
-  --el-text-color-regular: #b2b8bd; // 普通文字颜色
+  --text-bold: #e4e7ed; // 加粗文字颜色
+  --el-text-color-primary: #e4e7ed; // 加粗文字颜色
+  --el-text-color-regular: #a4a7b0; // 普通文字颜色
   --el-text-color-secondary: #8a9099; // 辅助文字颜色
   --el-text-color-placeholder: #707070; // 占位文字颜色
 }

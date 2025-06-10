@@ -115,7 +115,7 @@ const handleRemove = ( index) => {
 .subject-title {
   @apply flex items-center mt-6 mb-2 font-semibold;
 
-  &:first-of-type {
+  &:first-child  {
     @apply mt-0;
   }
 

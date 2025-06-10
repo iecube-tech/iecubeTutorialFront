@@ -1,7 +1,31 @@
 <template>
-  <div class="app-container">
-    <div class="h-full flex flex-col">
-      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
+  <div class="app-container group-container">
+    <div class="tree-container">
+      <div class="tree-header">
+        <el-input v-model="filterText" placeholder="请输入组织名称" clearable class="mr-2" :suffix-icon="Search" />
+        <el-button type="primary" icon="Plus" @click="handleAddRoot" class="mr-2">新建组织</el-button>
+      </div>
+      <div class="flex-1 pr-2 pb-2 overflow-y-auto">
+        <el-tree ref="treeRef" :data="levelTreeData" :props="defaultProps" :filter-node-method="filterNode"
+          default-expand-all @node-click="handleNodeClick" class="h-full">
+          <template #default="{ node, data }">
+            <div class="w-full flex justify-between items-center">
+              <span>{{ node.label }}</span>
+              <span>
+                <el-icon class="mr-2">
+                  <Edit @click.stop="handleGroupUpdate( data)" />
+                </el-icon>
+                <el-icon @click.stop="removeGroupNode(node, data)">
+                  <Delete />
+                </el-icon>
+              </span>
+            </div>
+          </template>
+        </el-tree>
+      </div>
+    </div>
+    <div class="group-content">
+      <!-- <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
         <el-form-item label="组织名称" prop="deptName">
           <el-input v-model="queryParams.deptName" placeholder="请输入组织名称" clearable style="width: 200px"
             @keyup.enter="handleQuery" />
@@ -9,7 +33,6 @@
 
         <el-form-item class="ml-[-20px]">
           <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-          <!--  <el-button icon="Refresh" @click="resetQuery">重置</el-button> -->
         </el-form-item>
       </el-form>
 
@@ -17,10 +40,20 @@
         <el-col :span="1.5">
           <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
         </el-col>
-        <!-- <el-col :span="1.5">
-          <el-button type="info" plain icon="Sort" @click="toggleExpandAll">展开/折叠</el-button>
-        </el-col> -->
-      </el-row>
+      </el-row> -->
+      <div class="mb-4">
+        <span class="text-bold text-lg">当前组织: {{ currentGroup }}</span>
+      </div>
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <el-button type="primary" icon="Plus" @click="handleAdd">添加</el-button>
+        </div>
+        <div>
+          <el-input v-model="searchText" placeholder="搜索内容"></el-input>
+        </div>
+        
+
+      </div>
 
       <div class="flex-1 w-full">
         <el-table ref="tableRef" v-if="refreshTable" :max-height="maxHeight" row-key="id" :data="groupList"
@@ -86,11 +119,39 @@
         </template>
       </el-dialog>
     </div>
+
+    <el-dialog :title="groupTitle" v-model="groupOpen" width="600px" append-to-body>
+      <el-form ref="deptRef" :model="groupFormData" :rules="groupFormRules" label-width="80px">
+        <el-form-item label="组织名称" prop="name">
+          <el-input v-model="groupFormData.name" placeholder="请输入组织名称" />
+        </el-form-item>
+        <el-form-item label="负责人" prop="leader">
+          <el-input v-model="groupFormData.leader" placeholder="请输入负责人" />
+        </el-form-item>
+        <el-form-item label="电话" prop="phone">
+          <el-input v-model="groupFormData.phone" maxlength="11" placeholder="请输入联系电话" />
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="groupFormData.email" placeholder="请输入邮箱" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="handleGroupSubmit">确 定</el-button>
+          <el-button @click="handleGroupClose">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
-<script setup name="Dept">
+<script setup name="Dept" lang="ts">
+import { Delete, Edit, Search } from '@element-plus/icons-vue'
 import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from "@/api/dept"
+
+// 当前组织名称
+const currentGroup = ref('')
+const searchText = ref('')
 
 const tableRef = ref(null)
 const maxHeight = ref(400)
@@ -111,7 +172,7 @@ onBeforeUnmount(() => {
 })
 
 const { proxy } = getCurrentInstance()
-// const { sys_normal_disable } = proxy.useDict("sys_normal_disable")
+
 
 const groupList = ref([{
   id: 1,
@@ -252,7 +313,7 @@ function reset() {
     email: undefined,
     status: "0"
   }
-  // proxy.resetForm("deptRef")
+ 
 }
 
 /** 搜索按钮操作 */
@@ -262,16 +323,14 @@ function handleQuery() {
 
 /** 重置按钮操作 */
 function resetQuery() {
-  // proxy.resetForm("queryRef")
+  
   handleQuery()
 }
 
 /** 新增按钮操作 */
 function handleAdd(row) {
   reset()
-  // listDept().then(response => {
-  //   groupList.value = proxy.handleTree(response.data, "id")
-  // })
+
   if (row != undefined) {
     form.value.parentId = row.id
   }
@@ -289,16 +348,7 @@ function toggleExpandAll() {
 }
 
 /** 修改按钮操作 */
-function handleUpdate(row) {
-  // reset()
-  // listDeptExcludeChild(row.id).then(response => {
-  //   groupList.value = proxy.handleTree(response.data, "id")
-  // })
-  // getDept(row.id).then(response => {
-  //   form.value = response.data
-  //   open.value = true
-  //   title.value = "修改组织"
-  // })
+function handleUpdate(row) { 
   form.value = row
   open.value = true
   title.value = "修改组织"
@@ -334,4 +384,135 @@ function handleDelete(row) {
 }
 
 getList()
+
+// 左侧树相关操作
+const levelTreeData = ref([])
+levelTreeData.value = [
+  {
+    id: 1,
+    label: '西安电子科技大学',
+  },
+  {
+    id: 2,
+    label: '北京大学',
+  },
+  {
+    id: 3,
+    label: '清华大学',
+  },
+];
+
+
+const treeRef = ref(null)
+const filterText = ref('') // 树形控件过滤
+const defaultProps = {
+  children: 'children',
+  label: 'label'
+}
+const handleNodeClick = (data) => {
+  console.log('>>>>>>>>>>>>>> hanlder click node ')
+  console.log(data)
+  let rawData = toRaw(data)
+  currentGroup.value = rawData.label
+  // TODO  getlist();
+}
+const filterNode = (value, data) => {
+  if (!value) return true
+  return data.label.includes(value)
+}
+watch(filterText, (val) => {
+  treeRef.value!.filter(val)
+})
+
+const removeGroupNode = (node) => {
+  const parent = node.parent
+  const children = parent.data.children || parent.data
+  const index = children.findIndex(d => d.id === node.data.id)
+  children.splice(index, 1)
+
+  // 确认删除弹框
+  ElMessageBox.confirm('是否确认删除名称为"' + node.data.label + '"的数据项?').then(function () {
+    return delDept(node.data.id)
+  }).then(() => {
+    getList()
+    proxy.$modal.msgSuccess("删除成功")
+  }).catch(() => { })
+}
+
+const groupTitle = ref('新建组织')
+const groupOpen = ref(false)
+const groupFormData = reactive({
+  name: '',
+  leader: '',
+  phone: '',
+  email: '',
+})
+
+import { validatePhone, validateEmail } from '@/utils/validate'
+
+const groupFormRules = reactive({
+  name: [{ required: true, message: "请输入组织名称", trigger: "blur" }],
+  leader: [{ required: true, message: "请输入组织负责人", trigger: "blur" }],
+  phone: [{ required: true, message: "请输入组织负责人电话", trigger: "blur" },
+    { validator: validatePhone, trigger: "blur" },
+  ],
+  email: [{ required: true, message: "请输入组织负责人邮箱", trigger: "blur" }],
+})
+
+const handleAddRoot = () => {
+  groupTitle.value = '新建组织'
+  groupOpen.value = true
+}
+
+const handleGroupClose = () => {
+  groupOpen.value = false
+}
+
+const handleGroupSubmit = () => {
+  proxy.$refs["groupFormRef"].validate(valid => {
+    if (valid) {
+      if (form.value.id != undefined) {
+        updateDept(form.value).then(response => {
+          open.value = false
+          getList()
+        })
+      } else { }
+    }
+  })
+}
+
+const handleGroupUpdate = (data) => {
+  let rawData = toRaw(data)
+  groupTitle.value = '修改组织'
+  groupOpen.value = true
+  groupFormData.id = rawData.id
+  groupFormData.name = rawData.label
+  groupFormData.leader = rawData.leader
+  groupFormData.phone = rawData.phone
+  groupFormData.email = rawData.email
+}
+
+
+
 </script>
+
+<style lang="scss" scoped>
+.group-container {
+  @apply flex flex-row;
+}
+
+.tree-container {
+  @apply flex flex-col mr-2;
+  width: 340px;
+  border-right: .5px solid var(--border-color);
+}
+
+.group-content {
+  @apply flex-1 flex flex-col;
+}
+
+.tree-header {
+  @apply flex justify-between items-center mb-2 pb-2;
+  border-bottom: .5px solid var(--border-color);
+}
+</style>
