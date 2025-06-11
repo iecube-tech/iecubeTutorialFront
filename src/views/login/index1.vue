@@ -20,7 +20,7 @@
             <div class="mb-4 text-sm">
               <span style="color:#3370ff;">手机号</span>
             </div>
-            <el-input v-model="phone" maxlength="11" placeholder="请输入手机号" size="large" class="mb-4">
+            <el-input v-model="phone" @input="handlePhoneInput" maxlength="11" placeholder="请输入手机号" size="large" class="mb-4">
               <template #prepend>
                 <span>+86</span>
               </template>
@@ -154,6 +154,10 @@ import { login, getVerifCode, checkPhoneIsRegisterUser } from "@/api/login"
 const step = ref(3)
 const phone = ref('')
 const agreed = ref(false)
+
+const handlePhoneInput = (event) => {
+  phone.value = phone.value.replace(/\D/g, '')
+}
 
 const maskedPhone = computed(() => {
   return phone.value.replace(/(\d{3})\d{6}(\d{2})/, '$1******$2')

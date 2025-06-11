@@ -7,9 +7,9 @@
           <Add></Add>
         </Icon>
       </div>
-      <div class="flex-1 pr-2 pb-2 overflow-y-auto">
+      <div class="flex-1 pr-2 pb-2 overflow-y-auto overflow-x-hidden">
         <el-tree ref="treeRef" :data="levelTreeData" :props="defaultProps" :filter-node-method="filterNode"
-          default-expand-all @node-click="handleNodeClick" class="h-full">
+          default-expand-all highlight-current @node-click="handleNodeClick" class="h-full">
           <template #default="{ node, data }">
             <div class="w-full flex justify-between items-center">
               <span>{{ node.label }}</span>
@@ -28,9 +28,12 @@
     </div>
     <div class="group-content">
       <div class="mb-4">
-        <span class="text-bold text-lg">父组织名称: {{ currentGroup }}</span>
+        <span class="text-bold">
+          <span>父组织名称: </span>
+          <el-tag type="primary" v-show="currentGroup !== ''">{{ currentGroup }}</el-tag>
+        </span>
       </div>
-      <div class="flex justify-between items-center mb-4">
+      <div class="flex justify-between items-center">
         <el-button type="primary" icon="Plus" :disabled="currentGroupId === ''" title="先选择一个父组织"
           @click="handleAddSubGroup">新建子组织</el-button>
         <el-input v-model="searchText" placeholder="搜索内容" class="w200px" :suffix-icon="Search" clearable />
@@ -371,16 +374,18 @@ const handleGroupUpdate = (data) => {
 <style lang="scss" scoped>
 .tree-container {
   @apply flex flex-col mr-2;
-  width: 240px;
+  width: $left-tree-weidth;
   border-right: .5px solid var(--border-color);
-}
-
-.group-content {
-  @apply flex-1 flex flex-col;
 }
 
 .tree-header {
   @apply flex justify-between items-center mb-2 pb-2;
   border-bottom: .5px solid var(--border-color);
 }
+
+.group-content {
+  @apply flex-1 flex flex-col;
+}
+
+
 </style>

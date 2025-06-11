@@ -2,6 +2,15 @@ export const validateEmail = (rule, value, callback) => {
   const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
   if (!emailRegex.test(value)) {
     callback(new Error("请输入正确的邮箱格式"));
+  } else  {
+    callback();
+  }
+}
+
+export const validateEduEmail = (rule, value, callback) => {
+  const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
+  if (!emailRegex.test(value)) {
+    callback(new Error("请输入正确的邮箱格式"));
   } else if (!value.endsWith(".edu.cn")) {
     callback(new Error("请输入完整的校园邮箱"));
   } else {
