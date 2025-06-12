@@ -75,7 +75,7 @@
           class="rounded-full mr-10px w24px h24px"
         /> -->
         <!-- 固定一个头像 -->
-        <img :src="userImg" class="rounded-full mr-10px w24px h24px">
+        <img :src="userImg" class="rounded-full mr-10px w24px h24px" />
       </div>
       <template #dropdown>
         <el-dropdown-menu>
@@ -91,8 +91,43 @@
           <el-dropdown-item divided @click="logout">
             {{ $t("navbar.logout") }}
           </el-dropdown-item>-->
-          <el-dropdown-item @click="logout">
-            {{ $t("navbar.logout") }}
+          <el-dropdown-item>消费明细</el-dropdown-item>
+
+          <el-dropdown-item>
+            <el-popover placement="left" width="300">
+              <template #default>
+                <el-icon class="mr-2"><Phone /></el-icon>
+                <span>联系客服</span>
+                <br />
+                <span>电话：400-123-4567</span>
+              </template>
+              <template #reference>我要充值</template>
+            </el-popover>
+          </el-dropdown-item>
+
+          <el-dropdown-item>
+            <el-popover placement="left" width="300">
+              <template #default>
+                <div
+                  class="account-wrapper"
+                  v-for="item in 2"
+                  :key="item"
+                >
+                  <div class="group-wrapper">曾</div>
+                  <div class="flex-1">
+                    <div class="group-name">曾益慧创</div>
+                    <div class="usesr-name">朱晓曦</div>
+                  </div>
+                  <el-icon class="cursor-pointer text-xl icon-font">
+                    <ArrowRightBold />
+                  </el-icon>
+                </div>
+              </template>
+              <template #reference>账号切换</template>
+            </el-popover>
+          </el-dropdown-item>
+          <el-dropdown-item @click="logout" divided>
+            {{ $t('navbar.logout') }}
           </el-dropdown-item>
         </el-dropdown-menu>
       </template>
@@ -107,123 +142,160 @@
   </div>
 </template>
 <script setup lang="ts">
-import {
-  useAppStore,
-  useTagsViewStore,
-  useUserStore,
-  useSettingsStore,
-} from "@/store";
-import defaultSettings from "@/settings";
-import { DeviceEnum } from "@/enums/DeviceEnum";
-import { MessageTypeEnum, MessageTypeLabels } from "@/enums/MessageTypeEnum";
+  import { useAppStore, useTagsViewStore, useUserStore, useSettingsStore } from '@/store'
+  import defaultSettings from '@/settings'
+  import { DeviceEnum } from '@/enums/DeviceEnum'
+  import { MessageTypeEnum, MessageTypeLabels } from '@/enums/MessageTypeEnum'
 
-import userImg from "@/assets/images/userImg.png";
+  import userImg from '@/assets/images/userImg.png'
 
-const appStore = useAppStore();
-const tagsViewStore = useTagsViewStore();
-const userStore = useUserStore();
-const userInfoFirstName = computed(() => userStore.getUserInfo().name.substring(0, 1));
+  const appStore = useAppStore()
+  const tagsViewStore = useTagsViewStore()
+  const userStore = useUserStore()
+  const userInfoFirstName = computed(() => userStore.getUserInfo().name.substring(0, 1))
 
-const settingStore = useSettingsStore();
+  const settingStore = useSettingsStore()
 
-const route = useRoute();
-const router = useRouter();
+  const route = useRoute()
+  const router = useRouter()
 
-const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE);
+  const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE)
 
-const { isFullscreen, toggle } = useFullscreen();
+  const { isFullscreen, toggle } = useFullscreen()
 
-const activeTab = ref(MessageTypeEnum.MESSAGE);
+  const activeTab = ref(MessageTypeEnum.MESSAGE)
 
-const messages = ref([
-  {
-    id: 1,
-    title: "系统升级通知：服务器将于今晚12点进行升级维护，请提前保存工作内容。",
-    type: MessageTypeEnum.MESSAGE,
-  },
-  {
-    id: 2,
-    title: "新功能发布：我们的应用程序现在支持多语言功能。",
-    type: MessageTypeEnum.MESSAGE,
-  },
-  {
-    id: 3,
-    title: "重要提醒：请定期更改您的密码以保证账户安全。",
-    type: MessageTypeEnum.MESSAGE,
-  },
-  {
-    id: 4,
-    title: "通知：您有一条未读的系统消息，请及时查看。",
-    type: MessageTypeEnum.NOTICE,
-  },
-  {
-    id: 5,
-    title: "新订单通知：您有一笔新的订单需要处理。",
-    type: MessageTypeEnum.NOTICE,
-  },
-  {
-    id: 6,
-    title: "审核提醒：您的审核请求已被批准。",
-    type: MessageTypeEnum.NOTICE,
-  },
-  { id: 7, title: "待办事项：完成用户权限设置。", type: MessageTypeEnum.TODO },
-  { id: 8, title: "待办事项：更新产品列表。", type: MessageTypeEnum.TODO },
-  { id: 9, title: "待办事项：备份数据库。", type: MessageTypeEnum.TODO },
-]);
+  const messages = ref([
+    {
+      id: 1,
+      title: '系统升级通知：服务器将于今晚12点进行升级维护，请提前保存工作内容。',
+      type: MessageTypeEnum.MESSAGE
+    },
+    {
+      id: 2,
+      title: '新功能发布：我们的应用程序现在支持多语言功能。',
+      type: MessageTypeEnum.MESSAGE
+    },
+    {
+      id: 3,
+      title: '重要提醒：请定期更改您的密码以保证账户安全。',
+      type: MessageTypeEnum.MESSAGE
+    },
+    {
+      id: 4,
+      title: '通知：您有一条未读的系统消息，请及时查看。',
+      type: MessageTypeEnum.NOTICE
+    },
+    {
+      id: 5,
+      title: '新订单通知：您有一笔新的订单需要处理。',
+      type: MessageTypeEnum.NOTICE
+    },
+    {
+      id: 6,
+      title: '审核提醒：您的审核请求已被批准。',
+      type: MessageTypeEnum.NOTICE
+    },
+    { id: 7, title: '待办事项：完成用户权限设置。', type: MessageTypeEnum.TODO },
+    { id: 8, title: '待办事项：更新产品列表。', type: MessageTypeEnum.TODO },
+    { id: 9, title: '待办事项：备份数据库。', type: MessageTypeEnum.TODO }
+  ])
 
-const getFilteredMessages = (type: MessageTypeEnum) => {
-  return messages.value.filter((message) => message.type === type);
-};
+  const getFilteredMessages = (type: MessageTypeEnum) => {
+    return messages.value.filter(message => message.type === type)
+  }
 
-/* 注销 */
-function logout() {
-  ElMessageBox.confirm("确定注销并退出系统吗？", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-    lockScroll: false,
-  }).then(() => {
-    userStore
-      .logout()
-      // .then(() => {
-      //   tagsViewStore.delAllViews();
-      // })
-      .then(() => {
-        router.push(`/login?redirect=${route.fullPath}`);
-      });
-  });
-}
+  /* 注销 */
+  function logout() {
+    ElMessageBox.confirm('确定注销并退出系统吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+      lockScroll: false
+    }).then(() => {
+      userStore
+        .logout()
+        // .then(() => {
+        //   tagsViewStore.delAllViews();
+        // })
+        .then(() => {
+          router.push(`/login?redirect=${route.fullPath}`)
+        })
+    })
+  }
 </script>
 <style lang="scss" scoped>
-.nav-action-item {
-  display: inline-block;
-  min-width: 40px;
-  height: $navbar-height;
-  line-height: $navbar-height;
-  color: var(--el-text-color);
-  text-align: center;
-  cursor: pointer;
+  .nav-action-item {
+    display: inline-block;
+    min-width: 40px;
+    height: $navbar-height;
+    line-height: $navbar-height;
+    color: var(--el-text-color);
+    text-align: center;
+    cursor: pointer;
 
-  &:hover {
+    &:hover {
+      background: rgb(0 0 0 / 10%);
+    }
+  }
+
+  :deep(.message .el-badge__content.is-fixed.is-dot) {
+    top: 5px;
+    right: 10px;
+  }
+
+  :deep(.el-divider--horizontal) {
+    margin: 10px 0;
+  }
+
+  .dark .nav-action-item:hover {
+    background: rgb(255 255 255 / 20%);
+  }
+
+  .layout-top .nav-action-item,
+  .layout-mix .nav-action-item {
+    color: #fff;
+  }
+
+  // 切换账号样式
+  .account-wrapper {
+    @apply h-[60px] mb-2 p-[10px] flex justify-center items-center rounded-md;
+    border-bottom: .5px solid var(--border-color);
+  }
+  
+  .account-wrapper:hover {
     background: rgb(0 0 0 / 10%);
   }
-}
+  
+  .dark .account-wrapper:hover {
+    background: rgb(255 255 255 / 20%);
+  }
+  
+  .account-wrapper:last-of-type{
+    margin-bottom: 0 ;
+    border-bottom: none  ;
+  }
+  
+  .group-wrapper {
+    background: linear-gradient(to right, #3578fe, #6095ff);
+    width: 30px;
+    height: 30px;
+    border-radius: 20%;
+    margin-right: 10px;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-:deep(.message .el-badge__content.is-fixed.is-dot) {
-  top: 5px;
-  right: 10px;
-}
+  .group-name {
+    @apply text-bold;
+    font-size: 14px;
+    font-weight: 600;
+  }
 
-:deep(.el-divider--horizontal) {
-  margin: 10px 0;
-}
-
-.dark .nav-action-item:hover {
-  background: rgb(255 255 255 / 20%);
-}
-
-.layout-top .nav-action-item,
-.layout-mix .nav-action-item {
-  color: #fff;
-}
+  .user-name {
+    font-size: 12px;
+  }
 </style>
