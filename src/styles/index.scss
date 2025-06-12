@@ -1,8 +1,8 @@
 @use "./reset";
 
 .app-container {
-  height: calc(100vh - 50px);
-  margin: 15px;
+  // height: calc(100vh - 80px);
+  height: 100%;
   overflow-y: auto;
 }
 

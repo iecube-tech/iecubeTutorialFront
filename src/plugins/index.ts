@@ -4,6 +4,7 @@ import { setupRouter } from "@/router";
 import { setupStore } from "@/store";
 import type { App } from "vue";
 import { setupElIcons } from "./icons";
+import { setupVIcon } from './vicons'
 import { setupPermission } from "./permission";
 // import { setupVxeTable } from "./vxeTable";
 
@@ -22,6 +23,7 @@ export default {
     setupI18n(app);
     // Element-plus图标
     setupElIcons(app);
+    setupVIcon(app);
     // 路由守卫
     setupPermission();
   },

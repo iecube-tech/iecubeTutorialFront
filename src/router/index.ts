@@ -61,7 +61,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           keepAlive: true,
         },
       },
-      
+
       {
         path: "401",
         component: () => import("@/views/error-page/401.vue"),
@@ -85,76 +85,112 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-      path: "/",
-      name: 'learn',
-      component: Layout,
-      redirect: "/digitalPlan", // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
-      children: [
-        {
-          component: () => import("@/views/digitalPlan/index.vue"),
-            path: "/digitalPlan",
-            name: "digitalPlan",
-            meta: {
-              title: "数字教案",
-              icon: "document",
-              keepAlive: true,
-            },
+    path: "/",
+    name: 'learn',
+    component: Layout,
+    redirect: "/digitalPlan", // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
+    children: [
+      {
+        component: () => import("@/views/digitalPlan/index.vue"),
+        path: "/digitalPlan",
+        name: "digitalPlan",
+        meta: {
+          title: "数字教案",
+          icon: "document",
+          keepAlive: true,
         },
-      ]
-  },
-   {
-      path: "/",
-      name: 'group',
-      component: Layout,
-      redirect: "/groupManage",
-      children: [
-        {
-          component: () => import("@/views/groupManage/index.vue"),
-            path: "/groupManage",
-            name: "groupManage",
-            meta: {
-              title: "组织管理",
-              icon: "document",
-              keepAlive: true,
-            },
-        },
-      ]
+      },
+    ]
   },
   {
-      path: "/",
-      name: 'user',
-      component: Layout,
-      redirect: "/userManage",
-      children: [
-        {
-          component: () => import("@/views/userManage/index.vue"),
-            path: "/userManage",
-            name: "userManage",
-            meta: {
-              title: "用户管理",
-              icon: "document",
-              keepAlive: true,
-            },
+    path: "/",
+    name: 'group',
+    component: Layout,
+    redirect: "/groupManage",
+    children: [
+      {
+        component: () => import("@/views/groupManage/index.vue"),
+        path: "/groupManage",
+        name: "groupManage",
+        meta: {
+          title: "组织管理",
+          icon: "document",
+          keepAlive: true,
         },
-      ]
+      },
+    ]
   },
   {
-      path: "/",
-      name: 'configuration',
-      component: Layout,
-      redirect: "/configurationManage",
-      children: [
-        {
-          component: () => import("@/views/configurationManage/index.vue"),
-            path: "/configurationManage",
-            name: "configurationManage",
-            meta: {
-              title: "配置管理",
-              icon: "document",
-              keepAlive: true,
-            },
+    path: "/",
+    name: 'user',
+    component: Layout,
+    redirect: "/userManage",
+    children: [
+      {
+        component: () => import("@/views/userManage/index.vue"),
+        path: "/userManage",
+        name: "userManage",
+        meta: {
+          title: "用户管理",
+          icon: "document",
+          keepAlive: true,
         },
-      ]
+      },
+    ]
+  },
+  {
+    path: "/",
+    name: 'configuration',
+    component: Layout,
+    redirect: "/configurationManage",
+    children: [
+      {
+        component: () => import("@/views/configurationManage/index.vue"),
+        path: "/configurationManage",
+        name: "configurationManage",
+        meta: {
+          title: "配置管理",
+          icon: "document",
+          keepAlive: true,
+        },
+      },
+    ]
+  },
+  {
+    path: "/",
+    name: 'point',
+    component: Layout,
+    redirect: "/pointManage",
+    children: [
+      {
+        component: () => import("@/views/pointManage/index.vue"),
+        path: "/pointManage",
+        name: "pointManage",
+        meta: {
+          title: "积分管理",
+          icon: "document",
+          keepAlive: true,
+        },
+      },
+    ]
+  },
+  {
+    path: "/",
+    name: 'approval',
+    component: Layout,
+    redirect: "/myApproval",
+    children: [
+      {
+        component: () => import("@/views/myApproval/index.vue"),
+        path: "/myApproval",
+        name: "myApproval",
+        meta: {
+          title: "我的审批",
+          icon: "document",
+          keepAlive: true,
+        },
+      },
+    ]
   },
   // 外部链接
   // {

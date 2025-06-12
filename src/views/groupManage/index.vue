@@ -376,6 +376,7 @@ const handleGroupUpdate = (data) => {
   @apply flex flex-col mr-2;
   width: $left-tree-weidth;
   border-right: .5px solid var(--border-color);
+  box-sizing: border-box;
 }
 
 .tree-header {

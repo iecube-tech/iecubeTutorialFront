@@ -54,7 +54,7 @@
             <div class="w-1/2 pl16px">
               <el-upload ref="uploadRef" class="flex" :on-change="handleChange" :auto-upload="false" accept=".xlsx,.xls"
                 :limit="1" :show-file-list="false">
-                <el-tooltip content="上传的单个Excel文件，知识点需要写在第一列" placement="top">
+                <el-tooltip content="上传单个Excel文件，【不需要表头】知识点需要写在【第一列】" placement="top">
                   <el-button type="primary" plain>
                     <el-icon v-if="!loading" class="el-icon--upload">
                       <upload-filled />
