@@ -1,22 +1,39 @@
 <template>
   <div class="app-container approval-container">
-    <div class="flex gap-8 mb-2">
-      <div class="stat-card bg-custom-yellow">
-        <div class="stat-item">
-          <span class="stat-number">{{ statistics.pending }}</span>
-          <span class="stat-label">待审批</span>
+    <div class="grid grid-cols-3 gap-4 mb-8">
+      <div class="stat-card pending">
+        <div class="">
+          <Icon :size="cardIconSize">
+            <Time />
+          </Icon>
+        </div>
+        <div class="ml-4">
+          <countTo class="stat-number" :endVal="statistics.pending" :duration="1000"></countTo>
+          <div class="stat-label">待审批</div>
         </div>
       </div>
-      <div class="stat-card bg-custom-green">
-        <div class="stat-item">
-          <span class="stat-number">{{ statistics.approved }}</span>
-          <span class="stat-label">已通过</span>
+
+      <div class="stat-card approved">
+        <div class="">
+          <Icon :size="cardIconSize">
+            <Checkmark />
+          </Icon>
+        </div>
+        <div class="ml-4">
+          <countTo class="stat-number" :endVal="statistics.approved" :duration="1000"></countTo>
+          <div class="stat-label">已通过</div>
         </div>
       </div>
-      <div class="stat-card bg-custom-red">
-        <div class="stat-item">
-          <span class="stat-number">{{ statistics.rejected }}</span>
-          <span class="stat-label">已拒绝</span>
+
+      <div class="stat-card rejected">
+        <div class="">
+          <Icon :size="cardIconSize">
+            <WarningAlt />
+          </Icon>
+        </div>
+        <div class="ml-4">
+          <countTo class="stat-number" :endVal="statistics.rejected" :duration="1000"></countTo>
+          <div class="stat-label">已拒绝</div>
         </div>
       </div>
     </div>
@@ -194,7 +211,9 @@
 </template>
 
 <script setup>
-  import { Search, Refresh } from '@element-plus/icons-vue'
+  import { Time , Checkmark, WarningAlt} from '@vicons/carbon'
+  import { CountTo } from 'vue3-count-to'
+  const cardIconSize = ref(24);
 
   // 状态配置
   const statusOptions = [
@@ -591,74 +610,67 @@
   }
 
   .stat-card {
-    @apply flex-1 p-4 rounded-lg shadow-lg mb-4;
-    border-width: 1px;
-  }
+    @apply flex items-center rounded-lg p-4 shadow-md h-[100px];
 
-  .stat-item {
-    @apply flex flex-col items-center font-bold;
-  }
-
-  .stat-number {
-    @apply text-3xl mb-2;
+    &:hover {
+      .stat-number {
+        @apply text-3xl;
+      }
+    }
   }
 
   .stat-label {
-    @apply text-2xl font-medium;
+    @apply text-sm font-medium;
   }
 
-  /* 使用更透明的三色渐变 - 浅色模式 */
-  .bg-custom-yellow {
-    @apply text-yellow-700;
-    background: linear-gradient(
-      45deg,
-      rgba(255, 154, 46, 0.3) 0%,
-      rgba(255, 179, 102, 0.2) 50%,
-      rgba(255, 248, 240, 0.1) 100%
-    );
-    border-color: rgba(255, 154, 46, 0.4);
+  .stat-number {
+    @apply text-2xl font-semibold h-[40px] block;
   }
 
-  .bg-custom-green {
-    @apply text-green-700;
-    background: linear-gradient(
-      45deg,
-      rgba(35, 195, 67, 0.3) 0%,
-      rgba(77, 211, 101, 0.2) 50%,
-      rgba(240, 253, 242, 0.1) 100%
-    );
-    border-color: rgba(35, 195, 67, 0.4);
+  .stat-card.pending {
+    background-color: #ecf5ff;
+    border: 0.5px solid #409eff;
+    color: #409eff;
   }
 
-  .bg-custom-red {
-    @apply text-red-700;
-    background: linear-gradient(
-      45deg,
-      rgba(247, 101, 96, 0.3) 0%,
-      rgba(255, 143, 138, 0.2) 50%,
-      rgba(255, 242, 242, 0.1) 100%
-    );
-    border-color: rgba(247, 101, 96, 0.4);
+  .stat-card.approved {
+    background-color: #f0f9eb;
+    border: 0.5px solid #67c23a;
+    color: #67c23a;
+  }
+
+  .stat-card.rejected {
+    background-color: #FEF0F0;
+    border: 0.5px solid #F56C6C;
+    color: #F56C6C;
+  }
+
+  .stat-card.expiring {
+    background-color: #fdf6ec;
+    border: 0.5px solid #e6a23c;
+    color: #e6a23c;
   }
 
   /* 深色模式透明渐变 */
   @media (prefers-color-scheme: dark) {
-    .bg-custom-yellow {
-      @apply text-yellow-400;
-      background: rgba(255, 154, 46, 0.2);
-      border-color: rgba(204, 122, 36, 0.5);
+    .stat-card.pending {
+      background-color: #409eff50;
+      color: rgb(255, 255, 255, 0.9);
     }
 
-    .bg-custom-green {
-      @apply text-green-400;
-      background: rgba(35, 195, 67, 0.2);
-      border-color: rgba(28, 161, 53, 0.5);
+    .stat-card.approved {
+      background-color: #67c23a50;
+      color: rgb(255, 255, 255, 0.9);
     }
 
-    .bg-custom-red {
-      @apply text-red-400;
-      background: rgba(247, 101, 96, 0.2);
-      border-color: rgba(212, 84, 80, 0.5);
+    .stat-card.rejected {
+      background-color: #F56C6C50;
+      color: rgb(255, 255, 255, 0.9);
+    }
+
+    .stat-card.expiring {
+      background-color: #e6a23c50;
+      color: rgb(255, 255, 255, 0.9);
     }
   }
 </style>

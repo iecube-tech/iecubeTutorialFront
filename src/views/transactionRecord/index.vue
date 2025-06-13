@@ -6,22 +6,29 @@
     </div>
 
     <!-- 余额提醒 -->
-    <div class="alert-section mb-4">
-      <el-alert type="warning" :closable="false" show-icon>
-        <template #title>
-          <span>账号余额不足，请&nbsp;</span>
-          <contact-us placement="top">
-            <template #default>
-              <span class="text-blue-500 cursor-pointer">联系我们</span>
-            </template>
-          </contact-us>
-          <span>&nbsp;充值！</span>
+    <div class="flex justify-between items-center mb-8">
+      <div class="w-3/4">
+        <el-alert type="error" :closable="false" show-icon>
+          <template #title>
+            <span>账号余额不足，请&nbsp;</span>
+            <contact-us placement="top">
+              <template #default>
+                <span class="text-blue-500 cursor-pointer">联系我们</span>
+              </template>
+            </contact-us>
+            <span>&nbsp;充值！</span>
+          </template>
+        </el-alert>
+      </div>
+      <contact-us placement="left">
+        <template #default>
+          <el-button type="primary">立即充值</el-button>
         </template>
-      </el-alert>
+      </contact-us>
     </div>
 
     <!-- 统计卡片 -->
-    <div class="mb-4">
+    <div class="mb-8">
       <div class="grid grid-cols-4 gap-4">
         <div class="stat-card currentUsers">
           <div class="">
@@ -95,43 +102,20 @@
                 <h4 class="text-base font-semibold mb-3 text-gray-700">{{ row.month }} 消费明细</h4>
                 <el-table :data="row.details" size="small">
                   <el-table-column prop="date" label="日期" width="120" />
-                  <el-table-column prop="description" label="消费项目" />
-                  <el-table-column prop="points" label="消耗积分" width="120" align="right">
+                  <el-table-column prop="description" label="项目" />
+                  <el-table-column prop="points" label="积分" width="120" align="right">
                     <template #default="{ row: detail }">
                       <span class="text-red-500 font-medium">-{{ detail.points }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column prop="type" label="类型" width="100">
-                    <template #default="{ row: detail }">
-                      <el-tag size="small" :type="getTypeColor(detail.type)">
-                        {{ detail.type }}
-                      </el-tag>
                     </template>
                   </el-table-column>
                 </el-table>
               </div>
             </template>
           </el-table-column>
-
-          <el-table-column prop="month" label="月份"  />
-          <el-table-column prop="quota" label="当月额度" width="120" align="right">
-            <template #default="{ row }">
-              <span class="font-medium">{{ row.quota.toLocaleString() }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="consumed" label="月消耗积分" width="140" align="right">
+          <el-table-column prop="month" label="月份" />
+          <el-table-column prop="consumed" label="月消耗积分" width="200" align="right">
             <template #default="{ row }">
               <span class="text-red-500 font-medium">{{ row.consumed.toLocaleString() }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="expiring" label="即将过期" width="120" align="right">
-            <template #default="{ row }">
-              <span class="text-yellow-600 font-medium">{{ row.expiring.toLocaleString() }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="remaining" label="剩余积分" width="120" align="right">
-            <template #default="{ row }">
-              <span class="text-green-600 font-medium">{{ row.remaining.toLocaleString() }}</span>
             </template>
           </el-table-column>
         </el-table>

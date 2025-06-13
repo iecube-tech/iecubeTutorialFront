@@ -2,11 +2,11 @@
   <div class="plan-container" ref="planContainer">
 
     <div class="btn-tools">
-      <div class="inline-block float-left">
+      <div class="w-0 flex-1">
         <span v-show="showloading" class="whitespace-nowrap text-xl font-bold color-blue-500">{{ loadingText }}</span>
       </div>
 
-      <div class="inline-block float-right h-full flex flex-row justify-center items-center space-x-3">
+      <div class="h-full flex justify-center items-center gap-2">
         <el-icon size="20px" class="hovrer:cursor-pointer hover:text-blue-500" title="保存" v-show="editorVisible"
           @click="handleSave">
           <FolderChecked />
@@ -31,10 +31,10 @@
       </div>
     </div>
 
-    <div class="flex flex-row space-x-2" style="height: calc(100% - 32px);">
+    <div class="flex gap-2" style="height: calc(100% - 32px);">
       <iframe ref="iframeRef" :src="relativeFilePath + `?t=${t}`" loading="lazy"
-        :class="editorVisible ? 'w-1/2' : 'w-full'" class="h-full overflow-auto" @load="closeLoadingText"></iframe>
-      <div ref="editorContainer" :class="editorVisible ? 'w-1/2' : 'hidden'" class="h-full overflow-auto"></div>
+        :class="editorVisible ? 'flex-1' : 'w-full'" class="h-full overflow-auto" @load="closeLoadingText"></iframe>
+      <div ref="editorContainer" :class="editorVisible ? 'flex-1' : 'hidden'" class="h-full overflow-auto"></div>
     </div>
 
     <el-dialog v-model="shareVisible" title="分享" align-center>
@@ -276,12 +276,13 @@ init();
 
 <style lang="scss" scoped>
 .plan-container {
-  height: calc(100vh - 50px);
-  width: 100vw;
+  height: calc(100vh - 65px);
+  width: 100%;
 }
 
 .btn-tools {
   height: 32px;
   padding: 0 20px;
+  @apply flex justify-between items-center;
 }
 </style>
