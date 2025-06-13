@@ -132,7 +132,7 @@
             {{ currentRow.childOrg }}
           </el-descriptions-item>
           <el-descriptions-item label="申请金额">
-            ¥{{ currentRow.amount.toLocaleString() }}
+            {{ currentRow.amount.toLocaleString() }}RMB
           </el-descriptions-item>
           <el-descriptions-item label="当前状态">
             <el-tag :type="getStatusConfig(currentRow.status).type">

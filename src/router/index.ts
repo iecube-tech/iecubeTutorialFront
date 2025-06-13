@@ -47,6 +47,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: '/',
     component: Layout,
     redirect: '/dashboard',
+    meta: {
+      
+    },
     children: [
       {
         path: 'dashboard',
@@ -112,6 +115,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: 'group',
     component: Layout,
     redirect: '/groupManage',
+    meta: {
+      roles: ['admin']
+    },
     children: [
       {
         component: () => import('@/views/groupManage/index.vue'),
@@ -130,6 +136,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: 'user',
     component: Layout,
     redirect: '/userManage',
+    meta: {
+      roles: ['admin']
+    },
     children: [
       {
         component: () => import('@/views/userManage/index.vue'),
@@ -148,6 +157,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: 'configuration',
     component: Layout,
     redirect: '/configurationManage',
+    meta: {
+      roles: ['admin']
+    },
     children: [
       {
         component: () => import('@/views/configurationManage/index.vue'),
@@ -166,6 +178,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: 'application',
     component: Layout,
     redirect: '/myApplication',
+    meta: {
+      roles: ['admin']
+    },
     children: [
       {
         component: () => import('@/views/myApplication/index.vue'),
@@ -184,6 +199,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: 'approval',
     component: Layout,
     redirect: '/myApproval',
+    meta: {
+      roles: ['admin']
+    },
     children: [
       {
         component: () => import('@/views/myApproval/index.vue'),
