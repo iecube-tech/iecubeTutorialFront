@@ -1,7 +1,7 @@
-import type { App } from "vue";
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
+import type { App } from 'vue'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 
-export const Layout = () => import("@/layout/index.vue");
+export const Layout = () => import('@/layout/index.vue')
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
@@ -18,180 +18,185 @@ export const constantRoutes: RouteRecordRaw[] = [
   // },
 
   {
-    path: "/login",
-    component: () => import("@/views/login/index.vue"),
-    meta: { hidden: true },
+    path: '/login',
+    component: () => import('@/views/login/index.vue'),
+    meta: { hidden: true }
   },
   {
-    path: "/login1",
-    component: () => import("@/views/login/index1.vue"),
-    meta: { hidden: true },
+    path: '/login1',
+    component: () => import('@/views/login/index1.vue'),
+    meta: { hidden: true }
   },
   {
-    path: "/terms",
-    component: () => import("@/views/login/terms.vue"),
-    meta: { hidden: true },
+    path: '/terms',
+    component: () => import('@/views/login/terms.vue'),
+    meta: { hidden: true }
   },
   {
-    path: "/signup",
-    component: () => import("@/views/login/signupPage.vue"),
-    meta: { hidden: true },
+    path: '/signup',
+    component: () => import('@/views/login/signupPage.vue'),
+    meta: { hidden: true }
   },
   {
-    path: "/applyBetaCode",
-    component: () => import("@/views/login/applyBetaCode.vue"),
-    meta: { hidden: true },
+    path: '/applyBetaCode',
+    component: () => import('@/views/login/applyBetaCode.vue'),
+    meta: { hidden: true }
   },
   {
-    path: "/",
-    name: "/",
+    path: '/',
+    name: '/',
     component: Layout,
-    redirect: "/dashboard",
+    redirect: '/dashboard',
     children: [
       {
-        path: "dashboard",
-        component: () => import("@/views/dashboard/index.vue"),
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index.vue'),
         // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
         // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
-        name: "Dashboard",
+        name: 'Dashboard',
         meta: {
-          title: "dashboard",
-          icon: "homepage",
+          title: 'dashboard',
+          icon: 'homepage',
           affix: true,
-          keepAlive: true,
-        },
+          keepAlive: true
+        }
       },
 
       {
-        path: "401",
-        component: () => import("@/views/error-page/401.vue"),
-        meta: { hidden: true },
+        path: '401',
+        component: () => import('@/views/error-page/401.vue'),
+        meta: { hidden: true }
       },
       {
-        path: "404",
-        component: () => import("@/views/error-page/404.vue"),
-        meta: { hidden: true },
+        path: '404',
+        component: () => import('@/views/error-page/404.vue'),
+        meta: { hidden: true }
       },
       {
-        path: "/showDigitalPlan",
-        component: () => import("@/views/digitalPlan/showDigitalPlan.vue"),
-        meta: { hidden: true },
+        path: '/showDigitalPlan',
+        component: () => import('@/views/digitalPlan/showDigitalPlan.vue'),
+        meta: { hidden: true }
       },
+      {
+        path: '/transactionRecord',
+        component: () => import('@/views/transactionRecord/index.vue'),
+        meta: { hidden: true }
+      }
       // {
       //   path: "/userManage",
       //   component: () => import("@/views/userManage/index.vue"),
       //   meta: { hidden: true },
       // }
-    ],
+    ]
   },
   {
-    path: "/",
+    path: '/',
     name: 'learn',
     component: Layout,
-    redirect: "/digitalPlan", // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
+    redirect: '/digitalPlan', // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
     children: [
       {
-        component: () => import("@/views/digitalPlan/index.vue"),
-        path: "/digitalPlan",
-        name: "digitalPlan",
+        component: () => import('@/views/digitalPlan/index.vue'),
+        path: '/digitalPlan',
+        name: 'digitalPlan',
         meta: {
-          title: "数字教案",
-          icon: "document",
-          keepAlive: true,
-        },
-      },
+          title: '数字教案',
+          icon: 'document',
+          keepAlive: true
+        }
+      }
     ]
   },
   {
-    path: "/",
+    path: '/',
     name: 'group',
     component: Layout,
-    redirect: "/groupManage",
+    redirect: '/groupManage',
     children: [
       {
-        component: () => import("@/views/groupManage/index.vue"),
-        path: "/groupManage",
-        name: "groupManage",
+        component: () => import('@/views/groupManage/index.vue'),
+        path: '/groupManage',
+        name: 'groupManage',
         meta: {
-          title: "组织管理",
-          icon: "document",
-          keepAlive: true,
-        },
-      },
+          title: '组织管理',
+          icon: 'document',
+          keepAlive: true
+        }
+      }
     ]
   },
   {
-    path: "/",
+    path: '/',
     name: 'user',
     component: Layout,
-    redirect: "/userManage",
+    redirect: '/userManage',
     children: [
       {
-        component: () => import("@/views/userManage/index.vue"),
-        path: "/userManage",
-        name: "userManage",
+        component: () => import('@/views/userManage/index.vue'),
+        path: '/userManage',
+        name: 'userManage',
         meta: {
-          title: "用户管理",
-          icon: "document",
-          keepAlive: true,
-        },
-      },
+          title: '用户管理',
+          icon: 'document',
+          keepAlive: true
+        }
+      }
     ]
   },
   {
-    path: "/",
+    path: '/',
     name: 'configuration',
     component: Layout,
-    redirect: "/configurationManage",
+    redirect: '/configurationManage',
     children: [
       {
-        component: () => import("@/views/configurationManage/index.vue"),
-        path: "/configurationManage",
-        name: "configurationManage",
+        component: () => import('@/views/configurationManage/index.vue'),
+        path: '/configurationManage',
+        name: 'configurationManage',
         meta: {
-          title: "配置管理",
-          icon: "document",
-          keepAlive: true,
-        },
-      },
+          title: '配置管理',
+          icon: 'document',
+          keepAlive: true
+        }
+      }
     ]
   },
   {
-    path: "/",
+    path: '/',
     name: 'point',
     component: Layout,
-    redirect: "/pointManage",
+    redirect: '/pointManage',
     children: [
       {
-        component: () => import("@/views/pointManage/index.vue"),
-        path: "/pointManage",
-        name: "pointManage",
+        component: () => import('@/views/pointManage/index.vue'),
+        path: '/pointManage',
+        name: 'pointManage',
         meta: {
-          title: "积分管理",
-          icon: "document",
-          keepAlive: true,
-        },
-      },
+          title: '积分管理',
+          icon: 'document',
+          keepAlive: true
+        }
+      }
     ]
   },
   {
-    path: "/",
+    path: '/',
     name: 'approval',
     component: Layout,
-    redirect: "/myApproval",
+    redirect: '/myApproval',
     children: [
       {
-        component: () => import("@/views/myApproval/index.vue"),
-        path: "/myApproval",
-        name: "myApproval",
+        component: () => import('@/views/myApproval/index.vue'),
+        path: '/myApproval',
+        name: 'myApproval',
         meta: {
-          title: "我的审批",
-          icon: "document",
-          keepAlive: true,
-        },
-      },
+          title: '我的审批',
+          icon: 'document',
+          keepAlive: true
+        }
+      }
     ]
-  },
+  }
   // 外部链接
   // {
   //   path: "/external-link",
@@ -243,7 +248,7 @@ export const constantRoutes: RouteRecordRaw[] = [
              },
          ]
      }*/
-];
+]
 
 /**
  * 创建路由
@@ -252,19 +257,19 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: constantRoutes,
   // 刷新时，滚动条位置还原
-  scrollBehavior: () => ({ left: 0, top: 0 }),
-});
+  scrollBehavior: () => ({ left: 0, top: 0 })
+})
 
 // 全局注册 router
 export function setupRouter(app: App<Element>) {
-  app.use(router);
+  app.use(router)
 }
 
 /**
  * 重置路由
  */
 export function resetRouter() {
-  router.replace({ path: "/login" });
+  router.replace({ path: '/login' })
 }
 
-export default router;
+export default router

@@ -68,7 +68,7 @@
     </div>
 
     <!-- 用户头像 -->
-    <el-dropdown class="nav-action-item" trigger="click">
+    <el-dropdown class="nav-action-item" trigger="click" @command="handleCommand">
       <div class="flex-center h100% p10px">
         <!-- <img
           :src="userStore.user.avatar + '?imageView2/1/w/80/h/80'"
@@ -91,18 +91,10 @@
           <el-dropdown-item divided @click="logout">
             {{ $t("navbar.logout") }}
           </el-dropdown-item>-->
-          <el-dropdown-item>消费明细</el-dropdown-item>
+          <el-dropdown-item command="transactionRecord">消费明细</el-dropdown-item>
 
           <el-dropdown-item>
-            <el-popover placement="left" width="300">
-              <template #default>
-                <el-icon class="mr-2"><Phone /></el-icon>
-                <span>联系客服</span>
-                <br />
-                <span>电话：400-123-4567</span>
-              </template>
-              <template #reference>我要充值</template>
-            </el-popover>
+            <contact-us></contact-us>
           </el-dropdown-item>
 
           <el-dropdown-item>
@@ -222,6 +214,15 @@
           router.push(`/login?redirect=${route.fullPath}`)
         })
     })
+  }
+  
+  
+  // 处理命令
+  const handleCommand = (command: string) => {
+    if (command === 'transactionRecord') {
+      let path = router.resolve({'path': '/transactionRecord'})
+      window.open(path.href, '_blank')
+    }
   }
 </script>
 <style lang="scss" scoped>
