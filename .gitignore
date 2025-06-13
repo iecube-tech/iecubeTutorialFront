@@ -13,7 +13,6 @@ dist-ssr
 *.sln
 *.local
 .vscode
-.vscode/*
 .prettierrc
 
 package-lock.json
