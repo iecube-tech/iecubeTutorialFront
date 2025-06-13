@@ -163,16 +163,16 @@ export const constantRoutes: RouteRecordRaw[] = [
   },
   {
     path: '/',
-    name: 'point',
+    name: 'application',
     component: Layout,
-    redirect: '/pointManage',
+    redirect: '/myApplication',
     children: [
       {
-        component: () => import('@/views/pointManage/index.vue'),
-        path: '/pointManage',
-        name: 'pointManage',
+        component: () => import('@/views/myApplication/index.vue'),
+        path: '/myApplication',
+        name: 'myApplication',
         meta: {
-          title: '积分管理',
+          title: '我的申请',
           icon: 'document',
           keepAlive: true
         }
