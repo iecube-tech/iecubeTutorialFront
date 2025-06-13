@@ -52,7 +52,7 @@
           <el-tag type="primary" v-show="currentGroup !== ''">{{ currentGroup }}</el-tag>
         </span>
       </div>
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center mb-4">
         <el-button
           type="primary"
           icon="Plus"
@@ -281,7 +281,6 @@
 
   //
   const handleExpandChange = (row: any, expandedRows: any) => {
-    console.log(expandedRows)
     row.leader = '张三'
     row.phone = 'aaaaaaaaaa'
     row.email = 'aaaaaaaaaa'

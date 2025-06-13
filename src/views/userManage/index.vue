@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="user-container">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center mb-2">
         <span class="text-bold">
           <span class="mr-2">当前组织名称:</span>
           <el-tag type="primary" v-show="currentGroup != ''">
@@ -35,7 +35,7 @@
           </el-tag>
         </span>
       </div>
-      <div class="flex justify-between items-center mt-2">
+      <div class="flex justify-between items-center mb-4">
         <div>
           <el-button type="primary" icon="Plus" @click="addNewUser">添加新用户</el-button>
           <el-button type="primary" icon="Plus" @click="addExsistUser">添加已有用户</el-button>

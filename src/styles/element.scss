@@ -10,6 +10,12 @@
   --el-color-primary-active: #287578 !important;
 }
 
+
+html.dark {
+  --el-color-primary-light-8: #266f7250 !important;
+  --el-color-primary-light-9: #33949850 !important;
+}
+
 .el-card{
   color: var(--el-text-color-regular) !important;
 }
