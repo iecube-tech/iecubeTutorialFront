@@ -11,7 +11,7 @@
         />
         <Icon
           class="text-zeng text-2xl mr-2 cursor-pointer"
-          @click="handleAddRoot"
+          @click="AddGroup"
           title="新建父组织"
         >
           <Add></Add>
@@ -25,7 +25,7 @@
           :filter-node-method="filterNode"
           default-expand-all
           highlight-current
-          @node-click="handleNodeClick"
+          @node-click="clickTreeNode"
           class="h-full"
         >
           <template #default="{ node, data }">
@@ -33,9 +33,9 @@
               <span>{{ node.label }}</span>
               <span>
                 <el-icon class="mr-2">
-                  <Edit @click.stop="handleGroupUpdate(data)" />
+                  <Edit @click.stop="updateGroup(data)" />
                 </el-icon>
-                <el-icon @click.stop="removeGroupNode(node, data)">
+                <el-icon @click.stop="removeGroup(node, data)">
                   <Delete />
                 </el-icon>
               </span>
@@ -48,18 +48,20 @@
     <div class="group-content">
       <div class="mb-4">
         <span class="text-bold">
-          <span>父组织名称:</span>
+          <span class="mr-2">父组织:</span>
           <el-tag type="primary" v-show="currentGroup !== ''">{{ currentGroup }}</el-tag>
         </span>
       </div>
       <div class="flex justify-between items-center mb-4">
         <el-button
           type="primary"
-          icon="Plus"
           :disabled="currentGroupId === ''"
           title="先选择一个父组织"
-          @click="handleAddSubGroup"
+          @click="AddSubGroup"
         >
+          <Icon size="20">
+            <Add></Add>
+          </Icon>
           新建子组织
         </el-button>
         <el-input
@@ -78,7 +80,6 @@
           :data="groupList"
           @expand-change="handleExpandChange"
         >
-          <!-- <el-table-column prop="parentName" label="父组织" /> -->
           <el-table-column type="expand">
             <template #default="props">
               <div class="px-4">
@@ -87,30 +88,30 @@
                   <el-descriptions-item label="电话">{{ props.row.phone }}</el-descriptions-item>
                   <el-descriptions-item label="邮箱">{{ props.row.email }}</el-descriptions-item>
                   <el-descriptions-item label="已用积分">
-                    <span class="text-red-500">{{ props.row.consumed }}</span>
+                    <span class="text-red-400">{{ props.row.consumed }}</span>
                   </el-descriptions-item>
                   <el-descriptions-item label="剩余积分">
-                    <span class="text-green-500">{{ props.row.remainPoint }}</span>
+                    <span class="text-green-400">{{ props.row.remainPoint }}</span>
                   </el-descriptions-item>
                 </el-descriptions>
               </div>
             </template>
           </el-table-column>
           <el-table-column prop="name" label="子组织" />
-          <!-- <el-table-column prop="leader" label="负责人" />
-          <el-table-column prop="phone" label="电话" />
-           <el-table-column prop="email" label="邮箱" /> -->
           <el-table-column
             label="操作"
             align="center"
             class-name="small-padding fixed-width"
-            width="240px"
+            width="300"
           >
             <template #default="scope">
               <el-button link type="primary" icon="Wallet" @click="openRechargeDialog(scope.row)">
                 充值
               </el-button>
-              <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">
+              <el-button link type="primary" icon="Document" @click="openBillPage(scope.row)">
+                账单
+              </el-button>
+              <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">
                 修改
               </el-button>
               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">
@@ -123,18 +124,9 @@
     </div>
 
     <el-dialog :title="groupTitle" v-model="groupOpen" width="600px" append-to-body>
-      <el-form ref="deptRef" :model="groupFormData" :rules="groupFormRules" label-width="80px">
-        <el-form-item label="组织名称" prop="name">
+      <el-form ref="groupFormRef" :model="groupFormData" label-width="80px">
+        <el-form-item label="组织名称" prop="name" :rules="groupFormRules.name">
           <el-input v-model="groupFormData.name" placeholder="请输入组织名称" />
-        </el-form-item>
-        <el-form-item label="负责人" prop="leader">
-          <el-input v-model="groupFormData.leader" placeholder="请输入负责人" />
-        </el-form-item>
-        <el-form-item label="电话" prop="phone">
-          <el-input v-model="groupFormData.phone" maxlength="11" placeholder="请输入联系电话" />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="groupFormData.email" placeholder="请输入邮箱" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -147,9 +139,9 @@
 
     <el-dialog :title="subGroupTitle" v-model="openSubGroup" width="600px" append-to-body>
       <el-form
-        ref="deptRef"
+        ref="subGroupFormRef"
         :model="subGroupFormData"
-        :rules="subGroupFormRules"
+        :rules="groupFormRules"
         label-width="80px"
       >
         <el-form-item label="父组织" prop="parentId">
@@ -168,7 +160,7 @@
         <el-form-item label="负责人" prop="leader">
           <el-input v-model="subGroupFormData.leader" placeholder="请输入负责人" maxlength="20" />
         </el-form-item>
-        <el-form-item label="联系电话" prop="phone">
+        <el-form-item label="电话" prop="phone">
           <el-input v-model="subGroupFormData.phone" placeholder="请输入联系电话" maxlength="11" />
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
@@ -177,107 +169,24 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
+          <el-button type="primary" @click="handleSubGroupSubmit">确 定</el-button>
+          <el-button @click="handleSubGroupClose">取 消</el-button>
         </div>
       </template>
     </el-dialog>
+    
+    <rechangeDialog ref="rechangeDialogRef" />
 
-    <el-dialog
-      v-model="rechargeVisible"
-      title="积分充值"
-      width="720px"
-      :close-on-click-modal="false"
-      class="recharge-dialog"
-    >
-      <el-form
-        ref="rechargeFormRef"
-        :model="rechargeForm"
-        :rules="rechargeRules"
-        label-width="100px"
-      >
-        <el-form-item label="父组织" prop="parentGroup">
-          <el-select
-            v-model="rechargeForm.parentGroup"
-            placeholder="请选择父组织"
-            clearable
-            filterable
-            class="w-full"
-            @change="handlePrimaryOrgChange"
-          >
-            <el-option
-              v-for="org in primaryOrganizations"
-              :key="org.value"
-              :label="org.label"
-              :value="org.value"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="子组织" prop="subGroup">
-          <el-select
-            v-model="rechargeForm.subGroup"
-            placeholder="请选择子组织"
-            clearable
-            filterable
-            class="w-full"
-            :disabled="!rechargeForm.parentGroup"
-          >
-            <el-option
-              v-for="org in filteredSecondaryOrganizations"
-              :key="org.value"
-              :label="org.label"
-              :value="org.value"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="充值金额" prop="amountCents">
-          <div class="w400px flex items-center gap-2">
-            <el-input-number
-              v-model="rechargeForm.amountCents"
-              :min="1"
-              :max="100000"
-              :step="100"
-              :precision="0"
-              placeholder="请输入充值金额"
-              controls-position="right"
-              class="flex-1"
-            />
-            <span class="ml-2">单位：元</span>
-          </div>
-        </el-form-item>
-
-        <el-form-item label="备注" prop="remarks">
-          <el-input
-            v-model="rechargeForm.remarks"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入备注信息（选填）"
-            maxlength="200"
-            show-word-limit
-            class="w-full"
-          />
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <div class="flex justify-end space-x-3">
-          <el-button type="primary" @click="handleConfirmRecharge" :disabled="!isFormValid">
-            确认充值
-          </el-button>
-          <el-button @click="handleCancelRecharge">取消</el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup name="Dept" lang="ts">
   import { Delete, Edit, Search, Plus } from '@element-plus/icons-vue'
   import { Icon } from '@vicons/utils'
-  import { Add } from '@vicons/carbon'
+  import { Add, Statement } from '@vicons/carbon'
+  import rechangeDialog  from '../myApplication/rechangeDialog.vue'
   import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from '@/api/dept'
+  const router = useRouter()
 
   //
   const handleExpandChange = (row: any, expandedRows: any) => {
@@ -287,10 +196,6 @@
     row.consumed = 1000
     row.remainPoint = 200
   }
-  
-  
-  // 充值弹框
-  
 
   // 当前组织名称
   const currentGroupId = ref('')
@@ -315,7 +220,7 @@
     window.removeEventListener('resize', computeHeight)
   })
 
-  const { proxy } = getCurrentInstance()
+  // const { proxy } = getCurrentInstance()
 
   const groupList = ref([
     {
@@ -347,31 +252,37 @@
       name: '电子信息与电气工程学院'
     }
   ])
+
+  // 子组织
   const openSubGroup = ref(false)
   const subGroupTitle = ref('')
-
+  const subGroupFormRef = ref(null)
   const refreshTable = ref(true)
+  const subGroupFormData = ref({
+    id: '',
+    parentId: '',
+    name: '',
+    leader: '',
+    phone: '',
+    email: ''
+  })
 
-  const subGroupFormData = ref({})
+  import { validatePhone, validateEmail } from '@/utils/validate'
 
-  const subGroupFormRules = ref({
+  const groupFormRules = reactive({
     parentId: [{ required: true, message: '上级组织不能为空', trigger: 'blur' }],
-    deptName: [{ required: true, message: '组织名称不能为空', trigger: 'blur' }],
-    orderNum: [{ required: true, message: '显示排序不能为空', trigger: 'blur' }],
-    email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }],
+    name: [{ required: true, message: '请输入子组织名称', trigger: ['blur', 'change'] }],
+    leader: [{ required: true, message: '请输入负责人', trigger: ['blur', 'change'] }],
     phone: [
-      { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' }
-    ]
+      { required: true, message: '请输入正确电话号码', trigger: ['blur', 'change'] },
+      { validator: validatePhone, trigger: ['blur', 'change'] }
+    ],
+    email: [{ required: true,  type: 'email', message: '请输入正确邮箱', trigger: ['blur', 'change'] }]
   })
 
   /** 查询组织列表 */
   function getList() {
     return groupList.value
-  }
-
-  /** 取消按钮 */
-  function cancel() {
-    openSubGroup.value = false
   }
 
   /** 搜索按钮操作 */
@@ -385,39 +296,52 @@
   }
 
   /** 新增按钮操作 */
-  function handleAddSubGroup(row) {
+  function resetSubGroupForm() {
     subGroupFormData.value.id = ''
     subGroupFormData.value.parentId = currentGroupId.value
     subGroupFormData.value.name = ''
     subGroupFormData.value.leader = ''
     subGroupFormData.value.phone = ''
     subGroupFormData.value.email = ''
-
+  }
+  
+    /** 取消按钮 */
+  function handleSubGroupClose() {
+    openSubGroup.value = false
+    resetSubGroupForm();
+    subGroupFormRef.value.resetFields()
+    subGroupFormRef.value.clearValidate()
+  }
+  
+  function AddSubGroup(row) {
     subGroupTitle.value = '新建子组织'
     openSubGroup.value = true
+    subGroupFormData.value.parentId = currentGroupId.value
   }
 
   /** 修改按钮操作 */
-  function handleUpdate(row) {
+  function handleEdit(row) {
     subGroupFormData.value = row
     subGroupTitle.value = '修改子组织'
     openSubGroup.value = true
   }
 
   /** 提交按钮 */
-  function submitForm() {
-    proxy.$refs['deptRef'].validate(valid => {
+  function handleSubGroupSubmit() {
+    subGroupFormRef.value.validate(valid => {
       if (valid) {
         if (subGroupFormData.value.id != undefined) {
-          updateDept(subGroupFormData.value).then(response => {
-            openSubGroup.value = false
-            getList()
-          })
+          // updateDept(subGroupFormData.value).then(response => {
+          //   openSubGroup.value = false
+          //   getList()
+          // })
+          handleSubGroupClose()
         } else {
-          addDept(subGroupFormData.value).then(response => {
-            openSubGroup.value = false
-            getList()
-          })
+          // addDept(subGroupFormData.value).then(response => {
+          //   openSubGroup.value = false
+          //   getList()
+          // })
+          handleSubGroupClose()
         }
       }
     })
@@ -425,13 +349,13 @@
 
   /** 删除按钮操作 */
   function handleDelete(row) {
-    ElMessageBox.confirm('是否确认删除名称为"' + row.deptName + '"的数据项?')
+    ElMessageBox.confirm(`确认删除 [${row.name}] ?`)
       .then(function () {
         return delDept(row.id)
       })
       .then(() => {
         getList()
-        proxy.$modal.msgSuccess('删除成功')
+        ElMessage.success('删除成功')
       })
       .catch(() => {})
   }
@@ -461,7 +385,7 @@
     children: 'children',
     label: 'label'
   }
-  const handleNodeClick = data => {
+  const clickTreeNode = data => {
     let rawData = toRaw(data)
     subGroupFormData.value.parentId = rawData.id
     currentGroupId.value = rawData.id
@@ -476,193 +400,80 @@
     treeRef.value!.filter(val)
   })
 
-  const removeGroupNode = node => {
-    const parent = node.parent
-    const children = parent.data.children || parent.data
-    const index = children.findIndex(d => d.id === node.data.id)
-    children.splice(index, 1)
-
-    // 确认删除弹框
-    ElMessageBox.confirm('是否确认删除名称为"' + node.data.label + '"的数据项?')
+  const removeGroup = node => {
+    ElMessageBox.confirm(`确认删除 ${node.data.label} ?`)
       .then(function () {
-        return delDept(node.data.id)
-      })
-      .then(() => {
-        getList()
-        proxy.$modal.msgSuccess('删除成功')
+        // delDept(node.data.id)
+        const parent = node.parent
+        const children = parent.data.children || parent.data
+        const index = children.findIndex(d => d.id === node.data.id)
+        children.splice(index, 1)
+        
+        ElMessage.success('删除成功')
       })
       .catch(() => {})
   }
 
+  // 父组织
   const groupTitle = ref('新建组织')
+  const groupFormRef = ref(null)
   const groupOpen = ref(false)
-  const groupFormData = reactive({
-    name: '',
-    leader: '',
-    phone: '',
-    email: ''
+  const groupFormData = ref({
+    id: '',
+    name: ''
   })
+  
+  const resetGroupForm = () => {
+    groupFormData.value.id = ''
+    groupFormData.value.name = ''
+  }
 
-  import { validatePhone, validateEmail } from '@/utils/validate'
-
-  const groupFormRules = reactive({
-    name: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
-    leader: [{ required: true, message: '请输入组织负责人', trigger: 'blur' }],
-    phone: [
-      { required: true, message: '请输入组织负责人电话', trigger: 'blur' },
-      { validator: validatePhone, trigger: 'blur' }
-    ],
-    email: [{ required: true, message: '请输入组织负责人邮箱', trigger: 'blur' }]
-  })
-
-  const handleAddRoot = () => {
+  // 打开父组织弹框
+  const AddGroup = () => {
     groupTitle.value = '新建组织'
     groupOpen.value = true
   }
 
+  // 关闭父组织弹框
   const handleGroupClose = () => {
     groupOpen.value = false
+    resetGroupForm();
+    groupFormRef.value.resetFields()
+    groupFormRef.value.clearValidate()
   }
 
+  // 提交父组织表单
   const handleGroupSubmit = () => {
-    proxy.$refs['groupFormRef'].validate(valid => {
+    groupFormRef.value.validate(valid => {
       if (valid) {
-        if (subGroupFormData.value.id != undefined) {
-          updateDept(subGroupFormData.value).then(response => {
-            openSubGroup.value = false
-            getList()
-          })
+        if (groupFormData.value.id != undefined) {
+          handleGroupClose()
         } else {
+          handleGroupClose()
         }
       }
     })
   }
 
-  const handleGroupUpdate = data => {
+  const updateGroup = data => {
     let rawData = toRaw(data)
     groupTitle.value = '修改组织'
+    groupFormData.value.id = rawData.id
+    groupFormData.value.name = rawData.label
     groupOpen.value = true
-    groupFormData.id = rawData.id
-    groupFormData.name = rawData.label
-    groupFormData.leader = rawData.leader
-    groupFormData.phone = rawData.phone
-    groupFormData.email = rawData.email
   }
-  
-  
-  
-  
-    // 充值相关数据
-  const rechargeVisible = ref(false);
-  const rechargeFormRef = ref(null);
-
-  // 充值表单数据
-  const rechargeForm = ref({
-    parentGroup: '',
-    subGroup: '',
-    amountCents: 0,
-    remarks: '',
-  });
-
-  // 表单验证规则
-  const rechargeRules = {
-    parentGroup: [{ required: true, message: '请选择父组织', trigger: 'change' }],
-    subGroup: [{ required: true, message: '请选择子组织', trigger: 'change' }],
-    amountCents: [
-      { required: true, message: '请输入充值积分数量', trigger: 'blur' },
-      {
-        type: 'number',
-        min: 1,
-        max: 100000,
-        message: '充值积分数量必须在1-100000之间',
-        trigger: 'blur',
-      },
-    ],
-  };
-
-  // 组织数据
-  const primaryOrganizations = ref([
-    { value: 'tech', label: '技术部' },
-    { value: 'sales', label: '销售部' },
-    { value: 'marketing', label: '市场部' },
-    { value: 'hr', label: '人力资源部' },
-    { value: 'finance', label: '财务部' },
-  ]);
-
-  const secondaryOrganizations = ref([
-    { value: 'tech-frontend', label: '前端组', parentId: 'tech' },
-    { value: 'tech-backend', label: '后端组', parentId: 'tech' },
-    { value: 'tech-mobile', label: '移动端组', parentId: 'tech' },
-    { value: 'sales-online', label: '线上销售组', parentId: 'sales' },
-    { value: 'sales-offline', label: '线下销售组', parentId: 'sales' },
-    { value: 'marketing-digital', label: '数字营销组', parentId: 'marketing' },
-    { value: 'marketing-brand', label: '品牌推广组', parentId: 'marketing' },
-    { value: 'hr-recruit', label: '招聘组', parentId: 'hr' },
-    { value: 'hr-training', label: '培训组', parentId: 'hr' },
-    { value: 'finance-accounting', label: '会计组', parentId: 'finance' },
-    { value: 'finance-audit', label: '审计组', parentId: 'finance' },
-  ]);
-
-  // 计算属性
-  const filteredSecondaryOrganizations = computed(() => {
-    if (!rechargeForm.value.parentGroup) return [];
-    return secondaryOrganizations.value.filter(
-      (org) => org.parentId === rechargeForm.value.parentGroup
-    );
-  });
-
-  const isFormValid = computed(() => {
-    return (
-      rechargeForm.value.parentGroup &&
-      rechargeForm.value.subGroup &&
-      rechargeForm.value.amountCents &&
-      rechargeForm.value.amountCents > 0
-    );
-  });
-
-  // 方法
-  const handlePrimaryOrgChange = () => {
-    rechargeForm.value.subGroup = '';
-  };
-
-  const handleCancelRecharge = () => {
-    rechargeVisible.value = false;
-    resetRechargeForm();
-  };
-
-  const handleConfirmRecharge = async () => {
-    if (!rechargeFormRef.value) return;
-
-    try {
-      await rechargeFormRef.value.validate();
-
-      // 模拟API调用
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      ElMessage.success('积分充值成功！');
-      rechargeVisible.value = false;
-      resetRechargeForm();
-    } catch (error) {
-      console.error('表单验证失败:', error);
-    } finally {
-    }
-  };
-
-  const resetRechargeForm = () => {
-    rechargeForm.value = {
-      parentGroup: '',
-      subGroup: '',
-      amountCents: 0,
-      remarks: '',
-    };
-    rechargeFormRef.value!.resetFields();
-    rechargeFormRef.value!.clearValidate();
-  };
 
   // 打开充值弹框的方法
-  const openRechargeDialog = () => {
-    rechargeVisible.value = true;
-  };
+  const rechangeDialogRef = ref(null)
+  const openRechargeDialog = (row) => {
+    rechangeDialogRef.value.disabledOpen(currentGroupId, row.id)
+  }
+
+  //
+  const openBillPage = row => {
+    let path = router.resolve({ path: '/transactionRecord' })
+    window.open(path.href, '_blank')
+  }
 </script>
 
 <style lang="scss" scoped>

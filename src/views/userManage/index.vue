@@ -37,8 +37,18 @@
       </div>
       <div class="flex justify-between items-center mb-4">
         <div>
-          <el-button type="primary" icon="Plus" @click="addNewUser">添加新用户</el-button>
-          <el-button type="primary" icon="Plus" @click="addExsistUser">添加已有用户</el-button>
+          <el-button type="primary" @click="addNewUser">
+            <Icon size="20">
+              <Add></Add>
+            </Icon>
+            添加新用户
+          </el-button>
+          <el-button type="primary" @click="addExsistUser">
+            <Icon size="20">
+              <Add></Add>
+            </Icon>
+            添加已有用户
+          </el-button>
         </div>
         <div>
           <el-input
@@ -140,6 +150,7 @@
 </template>
 
 <script setup lang="ts">
+  import { Add } from '@vicons/carbon'
   import { validateEmail, validatePhone } from '@/utils/validate'
   // left content
   const filterText = ref('')
