@@ -144,7 +144,13 @@
   const appStore = useAppStore()
   const tagsViewStore = useTagsViewStore()
   const userStore = useUserStore()
-  const userInfoFirstName = computed(() => userStore.getUserInfo().name.substring(0, 1))
+  const userInfoFirstName = computed(() => {
+    if(userStore.getUserInfo() && userStore.getUserInfo().name){
+      return userStore.getUserInfo().name.substring(0, 1)
+    }else {
+      return ''
+    }
+  })
 
   const settingStore = useSettingsStore()
 

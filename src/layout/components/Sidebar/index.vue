@@ -30,7 +30,10 @@
   const layout = computed(() => settingsStore.layout)
 
   const filterRoutes = computed(() => {
-    let role = userStore.getUserInfo().role.toLowerCase()
+    let role = 'user'
+    if(userStore.getUserInfo() && userStore.getUserInfo().role){
+      role = userStore.getUserInfo().role.toLowerCase()
+    }
     let res = permissionStore.routes.filter(item => {
       if (item.meta == undefined) return true
       if (

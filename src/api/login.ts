@@ -21,7 +21,7 @@ export const registerUser = (data: any) => {
 // 用户登录
 export const login = (data: any) => {
   return request({
-    url: '/account/login',
+    url: '/auth/login',
     method: 'post',
     data: data
   })
@@ -35,13 +35,12 @@ export const userLogout = () => {
   })
 }
 
-
 // 发送验证码
-export const getVerifCode = (data: any) => {
+export const getVerifCode = (phone: any) => {
   return request({
-    url: '/sms/code/send',
-    method: 'post',
-    data: data
+    url: '/auth/login',
+    method: 'get',
+    params: { phone }
   })
 }
 
@@ -50,6 +49,18 @@ export const checkPhoneIsRegisterUser = (phone: string) => {
   return request({
     url: '/account/hasregister',
     method: 'post',
-    params: {phone}
+    params: { phone }
+  })
+}
+
+// 获取新的token
+export const refreshToken = () => {
+  // 发送一个post请求，请求的url为'/auth/refresh'，请求的参数为refreshToken为'token'
+  return request({
+    url: '/auth/refresh',
+    method: 'post',
+    params: {
+      refreshToken: 'token'
+    }
   })
 }
