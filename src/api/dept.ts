@@ -1,55 +1,25 @@
 import request from '@/utils/request'
 
-// 获取部门列表
-export const listDept = (params: any) => {
+// 获取一级部门列表
+export const getFirstGroup = (params: any) => {
   return request({
-    url: '/dept/list',
+    url: '/sm/o/osg/top',
     method: 'get',
-    params: params
   })
 }
 
-// 获取部门详情
-export const getDept = (id: string | number) => {
+// 获取第二组列表
+export const getSecondGroupList = (id: any) => {
   return request({
-    url: `/dept/${id}`,
-    method: 'get'
+    url: `/sm/o/osg/sec/${id}`,
   })
 }
 
-// 删除部门
-export const delDept = (id: string | number) => {
+// 新建一级组织
+export const createFirstGroup = (name: any) => {
   return request({
-    url: `/dept/${id}`,
-    method: 'delete'
-  })
-}
-
-// 添加部门
-export const addDept = (data: any) => {
-  return request({
-    url: '/dept',
+    url: '/sm/o/org/top/create',
     method: 'post',
-    data: data
+    data: {name, type: 'ORGANIZATION'},
   })
 }
-
-// 更新部门
-export const updateDept = (id: string | number, data: any) => {
-  return request({
-    url: `/dept/${id}`,
-    method: 'put',
-    data: data
-  })
-}
-
-// 获取部门列表（排除子部门）
-export const listDeptExcludeChild = (params: any) => {
-  return request({
-    url: '/dept/list/exclude-child',
-    method: 'get',
-    params: params
-  })
-}
-
-

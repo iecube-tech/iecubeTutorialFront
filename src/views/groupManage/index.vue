@@ -9,11 +9,7 @@
           class="mr-2"
           :suffix-icon="Search"
         />
-        <Icon
-          class="text-zeng text-2xl mr-2 cursor-pointer"
-          @click="AddGroup"
-          title="新建父组织"
-        >
+        <Icon class="text-zeng text-2xl mr-2 cursor-pointer" @click="AddGroup" title="新建父组织">
           <Add></Add>
         </Icon>
       </div>
@@ -22,6 +18,7 @@
           ref="treeRef"
           :data="GroupTree"
           :props="defaultProps"
+          node-key="id"
           :filter-node-method="filterNode"
           default-expand-all
           highlight-current
@@ -35,9 +32,9 @@
                 <el-icon class="mr-2">
                   <Edit @click.stop="updateGroup(data)" />
                 </el-icon>
-                <el-icon @click.stop="removeGroup(node, data)">
+               <!--  <el-icon @click.stop="removeGroup(node, data)">
                   <Delete />
-                </el-icon>
+                </el-icon> -->
               </span>
             </div>
           </template>
@@ -77,21 +74,30 @@
           ref="tableRef"
           v-if="refreshTable"
           :max-height="maxHeight"
-          :data="groupList"
+          :data="filterTableData"
           @expand-change="handleExpandChange"
         >
           <el-table-column type="expand">
             <template #default="props">
               <div class="px-4">
                 <el-descriptions :column="2" border>
-                  <el-descriptions-item label="负责人">{{ props.row.leader }}</el-descriptions-item>
-                  <el-descriptions-item label="电话">{{ props.row.phone }}</el-descriptions-item>
-                  <el-descriptions-item label="邮箱">{{ props.row.email }}</el-descriptions-item>
                   <el-descriptions-item label="已用积分">
                     <span class="text-red-400">{{ props.row.consumed }}</span>
                   </el-descriptions-item>
                   <el-descriptions-item label="剩余积分">
                     <span class="text-green-400">{{ props.row.remainPoint }}</span>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="创建时间">
+                    <span>{{ moment(props.row.createTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="人数限制">
+                    {{ props.row.limit }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="组织类型">
+                    {{ getGroupTypeZn(props.row.type).label }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="状态">
+                    {{ getGroupStatusZn(props.row.status).label }}
                   </el-descriptions-item>
                 </el-descriptions>
               </div>
@@ -174,42 +180,20 @@
         </div>
       </template>
     </el-dialog>
-    
-    <rechangeDialog ref="rechangeDialogRef" />
 
+    <rechangeDialog ref="rechangeDialogRef" />
   </div>
 </template>
 
 <script setup name="Dept" lang="ts">
+  import moment from 'moment'
+  import { getGroupTypeZn, getGroupStatusZn } from '@/utils/cnMap'
   import { Delete, Edit, Search, Plus } from '@element-plus/icons-vue'
   import { Icon } from '@vicons/utils'
   import { Add, Statement } from '@vicons/carbon'
-  import rechangeDialog  from '../myApplication/rechangeDialog.vue'
-  import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from '@/api/dept'
+  import rechangeDialog from '../myApplication/rechangeDialog.vue'
+  import { getFirstGroup, getSecondGroupList, createFirstGroup } from '@/api/dept'
   const router = useRouter()
-
-  //
-  const handleExpandChange = (row: any, expandedRows: any) => {
-    row.leader = '张三'
-    row.phone = 'aaaaaaaaaa'
-    row.email = 'aaaaaaaaaa'
-    row.consumed = 1000
-    row.remainPoint = 200
-  }
-
-  // 当前组织名称
-  const currentGroupId = ref('')
-  const currentGroup = ref('')
-  const searchText = ref('')
-
-  const tableRef = ref(null)
-  const maxHeight = ref(400)
-  const computeHeight = async () => {
-    maxHeight.value = window.innerHeight - 178
-    refreshTable.value = false
-    await nextTick()
-    refreshTable.value = true
-  }
 
   onMounted(() => {
     computeHeight()
@@ -220,38 +204,37 @@
     window.removeEventListener('resize', computeHeight)
   })
 
-  // const { proxy } = getCurrentInstance()
+  //
+  const handleExpandChange = (row: any, expandedRows: any) => {
+    
+    row.consumed = 1000
+    row.remainPoint = 200
+  }
 
-  const groupList = ref([
-    {
-      id: 1,
-      parentId: 1,
-      date: '2016-05-02',
-      parentName: '西安电子科技大学',
-      name: '计算机科学与技术学院'
-    },
-    {
-      id: 2,
-      parentId: 2,
-      date: '2016-05-04',
-      parentName: '西安电子科技大学',
-      name: '软件学院'
-    },
-    {
-      id: 3,
-      parentId: 3,
-      date: '2016-05-01',
-      parentName: '西安电子科技大学',
-      name: '信息科学与工程学院'
-    },
-    {
-      id: 4,
-      parentId: 1,
-      date: '2016-05-03',
-      parentName: '西安电子科技大学',
-      name: '电子信息与电气工程学院'
-    }
-  ])
+  // 右侧相关数据
+  const currentGroupId = ref('')
+  const currentGroup = ref('')
+  const searchText = ref('')
+  
+  const filterTableData = computed(() =>
+  subGroupList.value.filter(
+    (data) =>
+      !searchText.value ||
+      data.name.toLowerCase().includes(searchText.value.toLowerCase())
+  )
+)
+  
+
+  const tableRef = ref(null)
+  const maxHeight = ref(400)
+  const computeHeight = async () => {
+    maxHeight.value = window.innerHeight - 178
+    refreshTable.value = false
+    await nextTick()
+    refreshTable.value = true
+  }
+
+  const subGroupList = ref([])
 
   // 子组织
   const openSubGroup = ref(false)
@@ -277,17 +260,14 @@
       { required: true, message: '请输入正确电话号码', trigger: ['blur', 'change'] },
       { validator: validatePhone, trigger: ['blur', 'change'] }
     ],
-    email: [{ required: true,  type: 'email', message: '请输入正确邮箱', trigger: ['blur', 'change'] }]
+    email: [
+      { required: true, type: 'email', message: '请输入正确邮箱', trigger: ['blur', 'change'] }
+    ]
   })
-
-  /** 查询组织列表 */
-  function getList() {
-    return groupList.value
-  }
 
   /** 搜索按钮操作 */
   function handleQuery() {
-    getList()
+    getSubGroupList()
   }
 
   /** 重置按钮操作 */
@@ -304,15 +284,15 @@
     subGroupFormData.value.phone = ''
     subGroupFormData.value.email = ''
   }
-  
-    /** 取消按钮 */
+
+  /** 取消按钮 */
   function handleSubGroupClose() {
     openSubGroup.value = false
-    resetSubGroupForm();
+    resetSubGroupForm()
     subGroupFormRef.value.resetFields()
     subGroupFormRef.value.clearValidate()
   }
-  
+
   function AddSubGroup(row) {
     subGroupTitle.value = '新建子组织'
     openSubGroup.value = true
@@ -331,16 +311,8 @@
     subGroupFormRef.value.validate(valid => {
       if (valid) {
         if (subGroupFormData.value.id != undefined) {
-          // updateDept(subGroupFormData.value).then(response => {
-          //   openSubGroup.value = false
-          //   getList()
-          // })
           handleSubGroupClose()
         } else {
-          // addDept(subGroupFormData.value).then(response => {
-          //   openSubGroup.value = false
-          //   getList()
-          // })
           handleSubGroupClose()
         }
       }
@@ -351,50 +323,52 @@
   function handleDelete(row) {
     ElMessageBox.confirm(`确认删除 [${row.name}] ?`)
       .then(function () {
-        return delDept(row.id)
+        // return delDept(row.id)
       })
       .then(() => {
-        getList()
+        getSubGroupList()
         ElMessage.success('删除成功')
       })
       .catch(() => {})
   }
 
-  getList()
-
   // 左侧树相关操作
   const GroupTree = ref([])
-  GroupTree.value = [
-    {
-      id: 1,
-      label: '西安电子科技大学'
-    },
-    {
-      id: 2,
-      label: '北京大学'
-    },
-    {
-      id: 3,
-      label: '清华大学'
-    }
-  ]
+
+  // 一级部门
+  function getFirstGroupTree() {
+    getFirstGroup().then(res => {
+      GroupTree.value = res.data
+    })
+  }
+
+  getFirstGroupTree()
+
+  // 二级部门
+  function getSubGroupList() {
+    let firstGroupId = currentGroupId.value
+    getSecondGroupList(firstGroupId).then(res => {
+      subGroupList.value = res.data
+    })
+  }
 
   const treeRef = ref(null)
   const filterText = ref('') // 树形控件过滤
   const defaultProps = {
-    children: 'children',
-    label: 'label'
+    children: '', // 默认只显示一级树不显示子集 children为空
+    label: 'name'
   }
   const clickTreeNode = data => {
     let rawData = toRaw(data)
     subGroupFormData.value.parentId = rawData.id
     currentGroupId.value = rawData.id
-    currentGroup.value = rawData.label
-    getList()
+    currentGroup.value = rawData.name
+    searchText.value = ''
+    getSubGroupList()
   }
   const filterNode = (value, data) => {
     if (!value) return true
-    return data.label.includes(value)
+    return data.name.includes(value)
   }
   watch(filterText, val => {
     treeRef.value!.filter(val)
@@ -408,7 +382,7 @@
         const children = parent.data.children || parent.data
         const index = children.findIndex(d => d.id === node.data.id)
         children.splice(index, 1)
-        
+
         ElMessage.success('删除成功')
       })
       .catch(() => {})
@@ -422,7 +396,7 @@
     id: '',
     name: ''
   })
-  
+
   const resetGroupForm = () => {
     groupFormData.value.id = ''
     groupFormData.value.name = ''
@@ -437,20 +411,24 @@
   // 关闭父组织弹框
   const handleGroupClose = () => {
     groupOpen.value = false
-    resetGroupForm();
+    resetGroupForm()
     groupFormRef.value.resetFields()
     groupFormRef.value.clearValidate()
   }
 
   // 提交父组织表单
-  const handleGroupSubmit = () => {
-    groupFormRef.value.validate(valid => {
+  const handleGroupSubmit = async () => {
+    groupFormRef.value.validate(async valid => {
       if (valid) {
-        if (groupFormData.value.id != undefined) {
-          handleGroupClose()
+        if (groupFormData.value.id != '') {
+          // 更新
         } else {
-          handleGroupClose()
+          // 新增
+          await createFirstGroup(groupFormData.value.name).then( res=>{
+          })
         }
+        handleGroupClose()
+        getFirstGroupTree()
       }
     })
   }
@@ -465,7 +443,7 @@
 
   // 打开充值弹框的方法
   const rechangeDialogRef = ref(null)
-  const openRechargeDialog = (row) => {
+  const openRechargeDialog = row => {
     rechangeDialogRef.value.disabledOpen(currentGroupId, row.id)
   }
 
