@@ -2,19 +2,19 @@
  * 全局状态映射中文对照关系表
  */
 
-export const getGroupTypeZn = (label_en: string) => {
+export const getGroupTypeZn = (en: string) => {
   const ar = [
-    {label_en: 'ORGANIZATION', label: '团队类型', type: 'success'},
-    {label_en: 'INDIVIDUAL', label: '个人类型', type: 'info'},
+    {en: 'ORGANIZATION', label: '组织', type: 'success'},
+    {en: 'INDIVIDUAL', label: '个人', type: 'info'},
   ]
-  let item = ar.find((item) => item.label_en === label_en)
+  let item = ar.find((item) => item.en === en)
   return item
 }
 
-export const getGroupStatusZn = (label_en: string) => {
+export const getGroupStatusZn = (en: string) => {
   const ar = [
-    {label_en: 'ENABLED', label: '已启用', type: 'success'},
+    {en: 'ENABLED', label: '已启用', type: 'success'},
   ]
-  let item = ar.find((item) => item.label_en === label_en)
+  let item = ar.find((item) => item.en === en)
   return item
 }
