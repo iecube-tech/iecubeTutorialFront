@@ -1,7 +1,7 @@
 
 import { resetRouter } from "@/router";
 import { store } from "@/store";
-import {userLogout} from '@/api/login'
+import {userLogout, apiRefreshToken} from '@/api/login'
 
 export const useUserStore = defineStore("user", () => {
   const user = ref({
@@ -56,6 +56,16 @@ export const useUserStore = defineStore("user", () => {
       resolve();
     });
   }
+  
+  function refreshUserToken() {
+    apiRefreshToken().then(res=>{
+      if (res.state == 200) {
+          let { accessToken, refreshToken } = res.data
+          localStorage.setItem('token', accessToken)
+          localStorage.setItem('refreshToken', refreshToken)
+        }
+    })
+  }
 
   return {
     user,
@@ -63,6 +73,7 @@ export const useUserStore = defineStore("user", () => {
     setUserInfo,
     getUserInfo,
     resetToken,
+    refreshUserToken,
     logout,
     isAdmin,
 

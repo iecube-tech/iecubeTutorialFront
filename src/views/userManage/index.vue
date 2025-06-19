@@ -14,7 +14,7 @@
         <el-tree
           ref="treeRef"
           node-key="id"
-          :data="levelTreeData"
+          :data="deptTreeData"
           :props="defaultProps"
           :filter-node-method="filterNode"
           highlight-current
@@ -25,29 +25,29 @@
       </div>
     </div>
     <div class="user-container">
-      <div class="flex justify-between items-center mb-2">
+      <div class="flex justify-between items-center mb-4">
         <span class="text-bold">
           <span class="mr-2">当前组织名称:</span>
-          <el-tag type="primary" v-show="currentGroup != ''">
-            {{ currentParentGroup }}
+          <el-tag type="primary" v-show="currentNode.name != ''">
+            {{ currentNode.parentName }}
             <span class="px-1">-</span>
-            {{ currentGroup }}
+            {{ currentNode.name }}
           </el-tag>
         </span>
       </div>
       <div class="flex justify-between items-center mb-4">
         <div>
-          <el-button type="primary" @click="addNewUser">
+          <el-button type="primary" @click="addNewUser" :disabled="currentNode.id == ''">
             <Icon size="20">
-              <Add></Add>
+              <Add />
             </Icon>
             添加新用户
           </el-button>
-          <el-button type="primary" @click="addExsistUser">
+          <el-button type="primary" @click="addExsistUser" :disabled="currentNode.id == ''">
             <Icon size="20">
-              <Add></Add>
+              <Link />
             </Icon>
-            添加已有用户
+            关联已有用户
           </el-button>
         </div>
         <div>
@@ -63,6 +63,7 @@
       <div class="flex-1 w-full">
         <el-table :data="tableData">
           <el-table-column prop="name" label="姓名" />
+          <el-table-column prop="role" label="角色" />
           <el-table-column prop="phone" label="电话" />
           <el-table-column prop="email" label="邮箱" />
           <el-table-column prop="gouprs" label="组织" />
@@ -92,10 +93,30 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="addUserForm.email" />
         </el-form-item>
+        <el-form-item label="角色" prop="role">
+          <el-select v-model="addUserForm.role" placeholder="请选择角色">
+            <el-option
+              v-for="item in roleOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="审批人" prop="approver">
+          <el-select v-model="addUserForm.approver" placeholder="请选择审批人">
+            <el-option
+              v-for="item in approverOptions"
+              :key="item.phone"
+              :label="item.name"
+              :value="item.phone"
+            />
+          </el-select>
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="addUserDialogVisible = false">确 定</el-button>
+          <el-button type="primary" @click="handleSubmitUser">确 定</el-button>
           <el-button @click="closeAddUserDialog">取 消</el-button>
         </span>
       </template>
@@ -150,14 +171,18 @@
 </template>
 
 <script setup lang="ts">
-  import { Add } from '@vicons/carbon'
+  import { Add, Link } from '@vicons/carbon'
   import { validateEmail, validatePhone } from '@/utils/validate'
+
+  import { addSecondUser } from '@/api/user'
+  import { getDeptTree, getApproverList } from '@/api/dept'
+
   // left content
   const filterText = ref('')
 
   const defaultProps = ref({
-    children: 'children',
-    label: 'label'
+    children: 'osecList',
+    label: 'name'
   })
 
   const filterNode = (value: string, data: any) => {
@@ -166,119 +191,67 @@
   }
 
   const handleNodeClick = (nodeData, node, tree, event) => {
-    let rawData = toRaw(node)
-    if (rawData.isLeaf) {
-      currentGroupId.value = rawData.id
-      currentGroup.value = rawData.label
-
-      currentParentGroup.value = rawData.parent.data.label
+    if (node.level == 1) {
+      currentNode.value.id = ''
+      currentNode.value.name = ''
+      currentNode.value.parentName = ''
+      tableData.value = []
+    }
+    if (node.level == 2) {
+      let parentNodeData = toRaw(node.parent.data)
+      let rawData = toRaw(node.data)
+      currentNode.value.id = rawData.id
+      currentNode.value.name = rawData.name
+      currentNode.value.parentName = parentNodeData.name
     }
   }
 
-  const levelTreeData = ref([])
-  levelTreeData.value = [
-    {
-      id: 1,
-      label: '西安电子科技大学',
-      children: [
-        {
-          id: 11,
-          label: '计算机科学与技术学院'
-        },
-        {
-          id: 12,
-          label: '电子工程学院'
-        },
-        {
-          id: 13,
-          label: '通信工程学院'
-        },
-        {
-          id: 14,
-          label: '软件学院'
-        },
-        {
-          id: 15,
-          label: '网络与信息安全学院'
-        }
-      ]
-    },
-    {
-      id: 2,
-      label: '北京大学',
-      children: [
-        {
-          id: 21,
-          label: '信息科学技术学院'
-        },
-        {
-          id: 22,
-          label: '数学科学学院'
-        },
-        {
-          id: 23,
-          label: '物理学院'
-        },
-        {
-          id: 24,
-          label: '化学与分子工程学院'
-        },
-        {
-          id: 25,
-          label: '生命科学学院'
-        }
-      ]
-    },
-    {
-      id: 3,
-      label: '清华大学',
-      children: [
-        {
-          id: 31,
-          label: '计算机科学与技术系'
-        },
-        {
-          id: 32,
-          label: '电子工程系'
-        },
-        {
-          id: 33,
-          label: '自动化系'
-        },
-        {
-          id: 34,
-          label: '软件学院'
-        },
-        {
-          id: 35,
-          label: '网络科学与网络空间研究院'
-        }
-      ]
-    }
-  ]
+  const deptTreeData = ref([])
+  const initDeptTreeData = async () => {
+    getDeptTree().then(res => {
+      if (res.state == 200) {
+        deptTreeData.value = res.data
+      }
+    })
+  }
+  initDeptTreeData()
 
   // right content
-  const currentGroupId = ref('')
-  const currentParentGroup = ref('')
-  const currentGroup = ref('')
 
-  const tableData = ref([
-    {
-      name: '张三',
-      time: '2023-01-01 12:00:00'
-    },
-    {
-      name: '李四',
-      time: '2023-01-01 12:00:00'
-    },
-    {
-      name: '王五',
-      time: '2023-01-01 12:00:00'
-    }
-  ])
+  const currentNode = ref({
+    id: '',
+    name: '',
+    parentName: ''
+  })
+
+  const tableData = ref([])
 
   const addUserFormRef = ref(null)
   const addUserDialogVisible = ref(false)
+
+  const handleSubmitUser = () => {
+    addUserFormRef.value.validate((valid: boolean) => {
+      if (valid) {
+        if (addUserForm.value.id == '') {
+          let user = toRaw(addUserForm.value)
+          delete user.id
+          addSecondUser({ 
+            approver: addUserForm.value.approver,
+            users: [user],
+            oSecId: currentNode.value.id
+          }).then(res => {
+            if (res.state == 200) {
+              ElMessage.success('提交审批成功！')
+              addUserDialogVisible.value = false
+            }
+          })
+        } else {
+          // 更新
+        }
+      }
+    })
+  }
+
   const closeAddUserDialog = () => {
     setDefaultValue()
     addUserDialogVisible.value = false
@@ -288,6 +261,8 @@
     addUserForm.value.name = ''
     addUserForm.value.phone = ''
     addUserForm.value.email = ''
+    addUserForm.value.role = 'USER'
+    addUserForm.value.approver = ''
 
     addUserFormRef.value.resetFields()
     addUserFormRef.value.clearValidate()
@@ -299,10 +274,35 @@
 
   const addUserTitle = ref('添加新用户')
   const addUserForm = ref({
+    id: '',
     name: '',
     phone: '',
-    email: ''
+    email: '',
+    role: 'USER',
+    approver: ''
   })
+
+  const approverOptions = ref([])
+
+  const initApproverList = async () => {
+    getApproverList().then(res => {
+      if (res.state == 200) {
+        approverOptions.value = res.data
+      }
+    })
+  }
+  initApproverList()
+
+  const roleOptions = ref([
+    {
+      label: '管理员',
+      value: 'USER_M'
+    },
+    {
+      label: '普通用户',
+      value: 'USER'
+    }
+  ])
 
   const addUserFormRules = ref({
     name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
@@ -313,7 +313,9 @@
     email: [
       { required: true, message: '请输入邮箱', trigger: 'blur' },
       { validator: validateEmail, trigger: 'blur' }
-    ]
+    ],
+    role: [{ required: true, message: '请选择角色', trigger: 'change' }],
+    approver: [{ required: true, message: '请选择审批人', trigger: 'change' }]
   })
 
   const handleEdit = row => {

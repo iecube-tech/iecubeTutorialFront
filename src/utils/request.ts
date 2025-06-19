@@ -31,6 +31,10 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse) => {
+     // 检查header Token-Status，如果为 EXPIRATION, NEAR_EXPIRATION，则刷新token
+    if (response.headers["token-status"] === "EXPIRATION" || response.headers["token-status"] === "NEAR_EXPIRATION") {
+      useUserStoreHook().refreshUserToken();
+    }
 
     // 检查配置的响应类型是否为二进制类型（'blob' 或 'arraybuffer'）, 如果是，直接返回响应对象
     if (

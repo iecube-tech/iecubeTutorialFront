@@ -53,14 +53,13 @@ export const checkPhoneIsRegisterUser = (phone: string) => {
   })
 }
 
-// 获取新的token
-export const refreshToken = () => {
-  // 发送一个post请求，请求的url为'/auth/refresh'，请求的参数为refreshToken为'token'
+  // 刷新token
+export const apiRefreshToken = () => {
   return request({
     url: '/auth/refresh',
     method: 'post',
-    params: {
-      refreshToken: 'token'
+    data: {
+      refreshToken: localStorage.getItem('refreshToken')
     }
   })
 }

@@ -45,7 +45,7 @@
       <el-form-item label="状态" class="w-220px">
         <el-select v-model="filterForm.status" placeholder="请选择状态" clearable>
           <el-option
-            v-for="item in statusOptions"
+            v-for="item in applyStatus"
             :key="item.value"
             :label="item.label"
             :value="item.value"
@@ -71,12 +71,12 @@
 
     <div>
       <el-table :data="filteredTableData" class="mb-8" @selection-change="handleSelectionChange">
-        <el-table-column prop="applicationNo" label="申请编号" width="180" />
+        <el-table-column prop="id" label="申请编号" width="180" />
         <el-table-column prop="parentOrg" label="父组织" width="150" />
         <el-table-column prop="childOrg" label="子组织" width="150" />
         <el-table-column prop="amount" label="金额" width="120" align="right">
           <template #default="{ row }">
-            <span class="text-red-400 font-bold">{{ row.amount.toLocaleString() }} RMB</span>
+            <!-- <span class="text-red-400 font-bold">{{ row.amount.toLocaleString() }} RMB</span> -->
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="120" align="center">
@@ -132,7 +132,7 @@
             {{ currentRow.childOrg }}
           </el-descriptions-item>
           <el-descriptions-item label="申请金额">
-            {{ currentRow.amount.toLocaleString() }}RMB
+            <!-- {{ currentRow.amount.toLocaleString() }}RMB -->
           </el-descriptions-item>
           <el-descriptions-item label="当前状态">
             <el-tag :type="getStatusConfig(currentRow.status).type">
@@ -213,18 +213,26 @@
 <script setup>
   import { Time , Checkmark, WarningAlt} from '@vicons/carbon'
   import { CountTo } from 'vue3-count-to'
+  
+  import {applyStatus, getApplyStatusZn} from '@/utils/cnMap'
+  
+  import {getMyApproves} from '@/api/apply'
   const cardIconSize = ref(24);
-
-  // 状态配置
-  const statusOptions = [
-    { label: '已批准', value: 'approved', type: 'success' },
-    { label: '待批准', value: 'pending', type: 'warning' },
-    { label: '已拒绝', value: 'rejected', type: 'danger' }
-  ]
 
   // 响应式数据
   const loading = ref(false)
   const tableData = ref([])
+  
+  const initTableData = () => {
+    getMyApproves().then(res => {
+      if(res.state == 200){
+        tableData.value = res.data
+      }
+    })
+  }
+  
+  initTableData();
+  
   const selectedRows = ref([])
   const currentPage = ref(1)
   const pageSize = ref(10)
@@ -296,136 +304,8 @@
   // 方法
   const getStatusConfig = statusValue => {
     return (
-      statusOptions.find(option => option.value === statusValue) || { label: '未知', type: 'info' }
+      applyStatus.find(option => option.value === statusValue) || { label: '未知', type: 'info' }
     )
-  }
-
-  const loadData = async () => {
-    loading.value = true
-    try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      tableData.value = [
-        {
-          id: 1,
-          applicationNo: 'APP202401001',
-          parentOrg: '总公司',
-          childOrg: '华北分公司',
-          amount: 150000,
-          status: 'approved',
-          submitTime: '2024-01-15 14:30:25',
-          applicant: '李小明',
-          reason: '需要资金支持华北分公司的市场扩张计划'
-        },
-        {
-          id: 2,
-          applicationNo: 'APP202401002',
-          parentOrg: '总公司',
-          childOrg: '华南分公司',
-          amount: 280000,
-          status: 'pending',
-          submitTime: '2024-01-16 09:15:42',
-          applicant: '王小红',
-          reason: '华南分公司设备升级改造项目资金申请'
-        },
-        {
-          id: 3,
-          applicationNo: 'APP202401003',
-          parentOrg: '华北分公司',
-          childOrg: '北京办事处',
-          amount: 95000,
-          status: 'rejected',
-          submitTime: '2024-01-17 16:22:18',
-          applicant: '张三',
-          reason: '办公室装修费用申请'
-        },
-        {
-          id: 4,
-          applicationNo: 'APP202401004',
-          parentOrg: '华南分公司',
-          childOrg: '广州办事处',
-          amount: 320000,
-          status: 'pending',
-          submitTime: '2024-01-18 11:45:33',
-          applicant: '李四',
-          reason: '广州办事处新业务拓展资金需求'
-        },
-        {
-          id: 5,
-          applicationNo: 'APP202401005',
-          parentOrg: '总公司',
-          childOrg: '华东分公司',
-          amount: 180000,
-          status: 'pending',
-          submitTime: '2024-01-19 13:20:07',
-          applicant: '刘经理',
-          reason: '华东分公司人员培训和技术升级费用'
-        },
-        {
-          id: 6,
-          applicationNo: 'APP202401006',
-          parentOrg: '华东分公司',
-          childOrg: '上海办事处',
-          amount: 210000,
-          status: 'approved',
-          submitTime: '2024-01-20 10:35:51',
-          applicant: '赵主任',
-          reason: '上海办事处市场推广活动经费'
-        },
-        {
-          id: 7,
-          applicationNo: 'APP202401007',
-          parentOrg: '总公司',
-          childOrg: '西南分公司',
-          amount: 160000,
-          status: 'pending',
-          submitTime: '2024-01-21 15:22:33',
-          applicant: '陈总监',
-          reason: '西南分公司办公设备采购申请'
-        },
-        {
-          id: 8,
-          applicationNo: 'APP202401008',
-          parentOrg: '华北分公司',
-          childOrg: '天津办事处',
-          amount: 85000,
-          status: 'pending',
-          submitTime: '2024-01-22 09:45:12',
-          applicant: '孙经理',
-          reason: '天津办事处客户接待和商务活动费用'
-        },
-        {
-          id: 7,
-          applicationNo: 'APP202401007',
-          parentOrg: '总公司',
-          childOrg: '西南分公司',
-          amount: 160000,
-          status: 'pending',
-          submitTime: '2024-01-21 15:22:33',
-          applicant: '陈总监',
-          reason: '西南分公司办公设备采购申请'
-        },
-        {
-          id: 8,
-          applicationNo: 'APP202401008',
-          parentOrg: '华北分公司',
-          childOrg: '天津办事处',
-          amount: 85000,
-          status: 'pending',
-          submitTime: '2024-01-22 09:45:12',
-          applicant: '孙经理',
-          reason: '天津办事处客户接待和商务活动费用'
-        }
-      ]
-
-      total.value = tableData.value.length
-      calculateStatistics()
-    } catch (error) {
-      ElMessage.error('加载数据失败')
-    } finally {
-      loading.value = false
-    }
   }
 
   const calculateStatistics = () => {
@@ -600,7 +480,6 @@
 
   // 生命周期
   onMounted(() => {
-    loadData()
   })
 </script>
 

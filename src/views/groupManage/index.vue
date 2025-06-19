@@ -365,19 +365,10 @@
         if (subGroupFormData.value.id != '') {
           // handleSubGroupClose()
         } else {
-          // let req = {
-          //   approver: subGroupFormData.value.approver,
-          //   orgTop: subGroupFormData.value.orgTop,
-          //   name: subGroupFormData.value.name,
-          //   type: subGroupFormData.value.type,
-          //   limit: subGroupFormData.value.limit,
-          //   giftPoints: subGroupFormData.value.giftPoints,
-          //   reWriteGiftPoints: subGroupFormData.value.reWriteGiftPoints,
-          //   uuserQoList: subGroupFormData.value.uuserQoList
-          // }
-          await createSecondGroup(toRaw(subGroupFormData.value))
+          let req = toRaw(subGroupFormData.value)
+          delete req.id
+          await createSecondGroup(req)
             .then(res => {
-              console.log(res)
               ElMessage.success('新增成功')
             })
             .catch(err => {

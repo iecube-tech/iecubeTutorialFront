@@ -76,3 +76,11 @@ export const getAmountDetail = (secondGroupId: any) => {
     method: 'get',
   })
 }
+
+// 查询一二级部门树
+export const getDeptTree = (params: any) => {
+  return request({
+    url: '/sm/o/org/list',
+    method: 'get',
+  })
+}
