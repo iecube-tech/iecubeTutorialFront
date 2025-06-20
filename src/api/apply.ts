@@ -17,3 +17,21 @@ export const getMyApproves = (params: any) => {
   })
 }
 
+// 通过
+export const pass = (data: any) => {
+  return request({
+    url: '/sm/o/approval/approve',
+    method: 'post',
+    data: data
+  })
+}
+
+// 拒绝
+export const reject = (data: any) => {
+  return request({
+    url: '/sm/o/approval/reject',
+    method: 'post',
+    data: data
+  })
+}
+

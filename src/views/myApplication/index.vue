@@ -6,7 +6,7 @@
         <div class="flex flex-row gap-4 w-[400px]">
           <el-select v-model="searchForm.statsus" placeholder="状态筛选" clearable>
             <el-option
-              v-for="status in statusOptions"
+              v-for="status in applyStatus"
               :key="status.value"
               :label="status.label"
               :value="status.value"
@@ -23,100 +23,86 @@
     </div>
 
     <div>
-      <el-table :data="tableData">
-        <el-table-column prop="id" label="申请编号" />
-        <el-table-column prop="approvalType" label="审批类型" >
-          <template #default={row}>
-            <el-tag :type="getApplyTypeZn(row.approvalType).type">{{getApplyTypeZn(row.approvalType).label}}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="parentGroup" label="父组织" />
-        <el-table-column prop="subGroup" label="子组织" />
-        <el-table-column prop="amount" label="金额" width="120" align="right">
+      <el-table :data="tableData" align="center">
+        <el-table-column prop="id" label="申请编号" width="100" />
+        <el-table-column prop="approvalType" label="审批类型" align="center">
           <template #default="{ row }">
-            <!-- <span class="text-red-400 font-bold">{{ row.amount.toLocaleString() }} RMB</span> -->
+            <el-tag :type="getApplyTypeZn(row.approvalType).type">
+              {{ getApplyTypeZn(row.approvalType).label }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="120" align="center">
+        <el-table-column prop="createTime" label="提交时间" width="180">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
+            {{ moment(row.createTime).format('YYYY-MM-DD HH:mm:ss') }}
           </template>
         </el-table-column>
-        <el-table-column prop="submitTime" label="提交时间" width="180" />
-        <el-table-column prop="approver" label="审批人" />
+        <el-table-column prop="status" label="状态" align="center">
+          <template #default="{ row }">
+            <el-tag :type="getApplyStatusZn(row.status).type">
+              {{ getApplyStatusZn(row.status).label }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="approverPhone" label="审批人">
+          <template #default="{ row }">
+            {{ approverName(row.approverPhone) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="remark" label="审批意见">
+          <template #default="{ row }">
+            {{getRemark(row)}}
+          </template>
+        </el-table-column>
+
         <el-table-column label="操作" fixed="right" width="180">
           <template #default="{ row }">
-            <el-button type="primary" link icon="View" @click="handleView(row)">查看</el-button>
+            <el-button type="primary" link icon="View" @click="handleShowDetail(row)">
+              查看
+            </el-button>
             <el-button type="primary" link icon="Delete" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
 
-    <el-dialog v-model="detailDialogVisible" title="审批详情" width="60%" destroy-on-close>
-      <div class="detail-content" v-if="currentRow">
-        <el-descriptions :column="2" border label-width="120px">
-          <el-descriptions-item label="申请编号">
-            {{ currentRow.applicationNo }}
-          </el-descriptions-item>
-          <el-descriptions-item label="提交时间">
-            {{ currentRow.submitTime }}
-          </el-descriptions-item>
-          <el-descriptions-item label="申请金额">
-            <!-- <span class="text-red-400 font-bold">{{ currentRow.amount.toLocaleString() }}RMB</span> -->
-          </el-descriptions-item>
-          <el-descriptions-item label="申请人">
-            {{ currentRow.applicant || '无' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="父组织">
-            {{ currentRow.parentOrg }}
-          </el-descriptions-item>
-          <el-descriptions-item label="当前状态">
-            <el-tag :type="getStatusType(currentRow.status)">
-              {{ getStatusLabel(currentRow.status) }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="子组织">
-            {{ currentRow.childOrg }}
-          </el-descriptions-item>
-
-          <el-descriptions-item label="申请理由">
-            {{ currentRow.reason || '无' }}
-          </el-descriptions-item>
-        </el-descriptions>
-      </div>
-    </el-dialog>
-
+    <applyDetailDialog ref="applyDetailDialogRef" :appoverList="appoverList"/>
     <rechangeDialog ref="rechangeDialogRef" />
   </div>
 </template>
 
 <script setup lang="ts">
+  import moment from 'moment'
   import { getMyApplies } from '@/api/apply'
-  import {getApplyTypeZn} from '@/utils/cnMap'
+  import { applyStatus, getApplyTypeZn, getApplyStatusZn } from '@/utils/cnMap'
+  import { getRemark } from '@/utils/applyFuns'
 
   import rechangeDialog from './rechangeDialog.vue'
+  import applyDetailDialog from './applyDetailDialog.vue'
+  
+  import { getApproverList } from '@/api/dept'
   const searchForm = reactive({
     statsus: '',
     text: ''
   })
 
-  const statusOptions = ref([
-    { label: '已批准', value: 'approved', type: 'success' },
-    { label: '待批准', value: 'pending', type: 'info' },
-    { label: '已拒绝', value: 'rejected', type: 'danger' }
-  ])
-
-  const getStatusLabel = status => {
-    const item = statusOptions.value.find(item => item.value === status)
-    return item ? item.label : status
+  // 审批人列表
+  const appoverList = ref([])
+  function initAppoverList() {
+    getApproverList().then(res => {
+      if (res.state == 200) {
+        appoverList.value = res.data || []
+      }
+    })
   }
 
-  const getStatusType = status => {
-    const item = statusOptions.value.find(item => item.value === status)
-    return item ? item.type : status
-  }
+  initAppoverList()
 
+  const approverName = phone => {
+    let name = appoverList.value.find(item => item.phone == phone)
+    return name ? name.name : phone
+  }
+  
   const tableData = ref([])
 
   const initTableData = () => {
@@ -133,13 +119,10 @@
   }
 
   initTableData()
-
-  const detailDialogVisible = ref(false)
-  const currentRow = ref(null)
-
-  function handleView(row) {
-    currentRow.value = row
-    detailDialogVisible.value = true
+  
+  const applyDetailDialogRef = ref(null)
+  function handleShowDetail(row) {
+    applyDetailDialogRef.value.open(row)
   }
 
   function handleDelete(row) {
@@ -153,4 +136,8 @@
   }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+  :deep(.el-tag){
+    width: 80px
+  }
+</style>

@@ -4,7 +4,7 @@
 
 export const getGroupTypeZn = (en: string) => {
   const ar = [
-    { en: 'ORGANIZATION', label: '组织', type: 'success' },
+    { en: 'ORGANIZATION', label: '组织', type: 'primary' },
     { en: 'INDIVIDUAL', label: '个人', type: 'info' }
   ]
   let item = ar.find(item => item.en === en)
@@ -36,5 +36,27 @@ export const applyStatus = [
 
 export const getApplyStatusZn = (value: string) => {
   let item = applyStatus.find(item => item.value === value)
+  return item
+}
+
+export const manageUserRoles = [
+  { value: 'ADMIN', label: '管理员', type: 'primary' },
+  { value: 'OPERATOR', label: '运营', type: 'warning' },
+  { value: 'SUPER', label: '超级管理员', type: 'success' }
+]
+
+export const getRoleZn = (value: string) => {
+  let item = manageUserRoles.find(item => item.value === value)
+  return item
+}
+
+
+export const userStatus = [
+  { label: '已启用', value: 'ENABLED', type: 'success' },
+  { label: '已禁用', value: 'DISABLED', type: 'danger' }
+]
+
+export const getUserStatusZn = (value: string) => {
+  let item = userStatus.find(item => item.value === value)
   return item
 }

@@ -237,6 +237,7 @@
 
   function getApprover() {
     getApproverList().then(res => {
+      console.log('approvers', res)
       approvers.value = res.data || []
     })
   }
@@ -246,11 +247,11 @@
    // 展开二级组织查看详情
   const handleExpandChange = (row: any, expandedRows: any) => {
     getConsumedDetail(row.id).then(res => {
-      row.consumed = res.data.consumeTotal || 0
+      row.consumed = res.data?.consumeTotal || 0
     })
     
     getAmountDetail(row.id).then(res => {
-      row.remainPoint = res.data.amount || 0
+      row.remainPoint = res.data?.amount || 0
     })
   }
 

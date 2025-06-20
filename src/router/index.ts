@@ -154,6 +154,27 @@ export const constantRoutes: RouteRecordRaw[] = [
   },
   {
     path: '/',
+    name: 'superUser',
+    component: Layout,
+    redirect: '/superUserManage',
+    meta: {
+      roles: ['admin']
+    },
+    children: [
+      {
+        component: () => import('@/views/superUserManage/index.vue'),
+        path: '/superUserManage',
+        name: 'superUserManage',
+        meta: {
+          title: '用户管理',
+          icon: 'document',
+          keepAlive: true
+        }
+      }
+    ]
+  },
+  {
+    path: '/',
     name: 'configuration',
     component: Layout,
     redirect: '/configurationManage',

@@ -145,6 +145,7 @@
   const tagsViewStore = useTagsViewStore()
   const userStore = useUserStore()
   const userInfoFirstName = computed(() => {
+    let userInfo = userStore.getUserInfo()
     if(userStore.getUserInfo() && userStore.getUserInfo().name){
       return userStore.getUserInfo().name.substring(0, 1)
     }else {

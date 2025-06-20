@@ -9,6 +9,8 @@ import NProgress from "@/utils/nprogress";
 import router from "@/router";
 import { constantRoutes } from "@/router";
 import { usePermissionStore, useUserStore } from "@/store";
+import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
+
 
 export function setupPermission() {
   // 白名单路由
@@ -16,7 +18,7 @@ export function setupPermission() {
 
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
-    const hasToken = localStorage.getItem('token');
+    const hasToken = localStorage.getItem(TOKEN_KEY);
 
     if (hasToken) {
       if (to.path === "/login") {

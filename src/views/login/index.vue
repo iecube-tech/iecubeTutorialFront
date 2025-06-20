@@ -127,7 +127,7 @@
 
           <p class="mb-2">
             <span v-if="time > 0">{{ time }} 秒后可重新获取验证码</span>
-            <span v-else class="cursor-pointer text-blue-500">重新获取验证码</span>
+            <span v-else class="cursor-pointer text-blue-500" @click="reSendCode">重新获取验证码</span>
           </p>
 
           <el-button
@@ -190,6 +190,7 @@
   const userStore = useUserStore()
 
   import { login, getVerifCode, checkPhoneIsRegisterUser } from '@/api/login'
+  import { TOKEN_KEY, TOKEN_REFRESH_KEY } from "@/enums/CacheEnum";
 
   // 手机登录相关
   const step = ref(1)
@@ -227,13 +228,22 @@
   // 发送验证码
   const sendCode = phone => {
     return new Promise((resolve, reject) => {
-      getVerifCode(phone).then(res => {
+      getVerifCode(phone).then(async res => {
         if (res.state == 200) {
+          setTimeout(_ =>{
+            codeInputs.value[0].focus()
+          }, 1000)
           resolve(true)
         }
       })
     })
   }
+  
+  const reSendCode = async () => {
+    await sendCode(phone.value)
+    startTime()
+  }
+
 
   /** 登录表单提交 */
   function doLogin() {
@@ -246,8 +256,8 @@
       .then(res => {
         if (res.state == 200) {
           let { accessToken, refreshToken, user } = res.data
-          localStorage.setItem('token', accessToken)
-          localStorage.setItem('refreshToken', refreshToken)
+          localStorage.setItem(TOKEN_KEY, accessToken)
+          localStorage.setItem(TOKEN_REFRESH_KEY, refreshToken)
           userStore.setUserInfo(user)
         }
         const { path, queryParams } = parseRedirect()
@@ -354,7 +364,7 @@
       if (time.value === 0) {
         clearInterval(nInterval.value)
       }
-    }, 1000)
+    }, 1000)   
   }
 
   // 计算属性
