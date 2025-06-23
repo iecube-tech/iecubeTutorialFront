@@ -38,11 +38,9 @@
       </div>
     </div>
 
-    <el-form :model="filterForm" inline>
-      <el-form-item label="申请编号" class="w-220px">
-        <el-input v-model="filterForm.applicationNo" placeholder="请输入申请编号" clearable />
-      </el-form-item>
-      <el-form-item label="状态" class="w-220px">
+    <div class="flex justify-between items-center mb-4">
+      <div></div>
+      <div  class="w220px">
         <el-select v-model="filterForm.status" placeholder="请选择状态" clearable>
           <el-option
             v-for="item in applyStatus"
@@ -51,23 +49,8 @@
             :value="item.value"
           />
         </el-select>
-      </el-form-item>
-
-      <el-form-item>
-        <el-button type="primary" @click="handleSearch">
-          <el-icon>
-            <Search />
-          </el-icon>
-          查询
-        </el-button>
-        <el-button @click="handleReset">
-          <el-icon>
-            <Refresh />
-          </el-icon>
-          重置
-        </el-button>
-      </el-form-item>
-    </el-form>
+      </div>
+    </div>
 
     <div>
       <el-table :data="filteredTableData" class="mb-8">
@@ -98,7 +81,7 @@
         </el-table-column>
         <el-table-column prop="remark" label="审批意见">
           <template #default="{ row }">
-            {{getRemark(row)}}
+            {{ getRemark(row) }}
           </template>
         </el-table-column>
 
@@ -136,7 +119,7 @@
   import { CountTo } from 'vue3-count-to'
 
   import { applyStatus, getApplyTypeZn, getApplyStatusZn } from '@/utils/cnMap'
-    import { getRemark } from '@/utils/applyFuns'
+  import { getRemark } from '@/utils/applyFuns'
 
   import { getMyApproves, pass, reject } from '@/api/apply'
   import approveDialog from './approveDialog.vue'
@@ -155,16 +138,25 @@
         tmp.forEach(item => {
           let contentJson = JSON.parse(item.content)
           item = Object.assign(item, contentJson)
+          
+          if(item.status == 'PENDING'){
+            statistics.value.pending++
+          }else if(item.status == 'APPROVED'){
+            statistics.value.approved++
+          }else if(item.status == 'REJECTED'){
+            statistics.value.rejected++
+          }
+          
         })
         tableData.value = tmp
-        console.log(tmp)
+        
+        
+        // console.log(tmp)
       }
     })
   }
 
   initTableData()
-
-
 
   const selectedRows = ref([])
   const currentPage = ref(1)
@@ -190,28 +182,26 @@
     let data = tableData.value
 
     // 根据筛选条件过滤数据
-    if (filterForm.value.applicationNo) {
-      data = data.filter(item =>
-        item.applicationNo.toLowerCase().includes(filterForm.value.applicationNo.toLowerCase())
-      )
-    }
+    // if (filterForm.value.applicationNo) {
+    //   data = data.filter(item =>
+    //     item.applicationNo.toLowerCase().includes(filterForm.value.applicationNo.toLowerCase())
+    //   )
+    // }
 
     if (filterForm.value.status) {
       data = data.filter(item => item.status === filterForm.value.status)
     }
 
-    if (filterForm.value.dateRange && filterForm.value.dateRange.length === 2) {
-      const [startDate, endDate] = filterForm.value.dateRange
-      data = data.filter(item => {
-        const submitDate = item.submitTime.split(' ')[0]
-        return submitDate >= startDate && submitDate <= endDate
-      })
-    }
+    // if (filterForm.value.dateRange && filterForm.value.dateRange.length === 2) {
+    //   const [startDate, endDate] = filterForm.value.dateRange
+    //   data = data.filter(item => {
+    //     const submitDate = item.submitTime.split(' ')[0]
+    //     return submitDate >= startDate && submitDate <= endDate
+    //   })
+    // }
 
     return data
   })
-
-
 
   const handleSearch = () => {
     // currentPage.value = 1
@@ -233,43 +223,42 @@
   }
 
   const handleApprove = async row => {
-    
-      ElMessageBox.confirm('确定要通过这个申请吗？', '确认操作', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then( ()=>{
-        let req = {
-          id: row.id,
-          remark: "同意"
+    ElMessageBox.confirm('确定要通过这个申请吗？', '确认操作', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      let req = {
+        id: row.id,
+        remark: '同意'
+      }
+      pass(req).then(res => {
+        if (res.state == 200) {
+          initTableData()
+          ElMessage.success('审批通过')
         }
-        pass(req).then(res => {
-          if (res.state == 200){
-            initTableData()
-            ElMessage.success('审批通过')
-          }
-        })
       })
+    })
   }
 
   const handleReject = async row => {
-      await ElMessageBox.prompt('请输入拒绝理由', '拒绝申请', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPattern: /.+/,
-        inputErrorMessage: '请输入拒绝理由'
-      }).then(({value})  =>{
-        let req = {
-          id: row.id,
-          remark: value
+    await ElMessageBox.prompt('请输入拒绝理由', '拒绝申请', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputPattern: /.+/,
+      inputErrorMessage: '请输入拒绝理由'
+    }).then(({ value }) => {
+      let req = {
+        id: row.id,
+        remark: value
+      }
+      reject(req).then(res => {
+        if (res.state == 200) {
+          initTableData()
+          ElMessage.success('审批拒绝')
         }
-        reject(req).then(res => {
-          if (res.state == 200){
-            initTableData()
-            ElMessage.success('审批拒绝')
-          }
-        })
       })
+    })
   }
 </script>
 

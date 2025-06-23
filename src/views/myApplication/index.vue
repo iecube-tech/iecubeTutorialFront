@@ -3,8 +3,8 @@
     <div class="mb-4">
       <div class="flex justify-between items-start gap-4">
         <el-button type="primary" icon="Plus" @click="openRechargeDialog">申请积分充值</el-button>
-        <div class="flex flex-row gap-4 w-[400px]">
-          <el-select v-model="searchForm.statsus" placeholder="状态筛选" clearable>
+        <div class="flex flex-row gap-4 w-[220px]">
+          <el-select v-model="filterForm.status" placeholder="状态筛选" clearable>
             <el-option
               v-for="status in applyStatus"
               :key="status.value"
@@ -12,18 +12,18 @@
               :value="status.value"
             />
           </el-select>
-          <el-input
-            v-model="searchForm.text"
+         <!--  <el-input
+            v-model="filterForm.text"
             placeholder="搜索内容"
             clearable
             suffix-icon="Search"
-          />
+          /> -->
         </div>
       </div>
     </div>
 
     <div>
-      <el-table :data="tableData" align="center">
+      <el-table :data="filteredTableData" align="center">
         <el-table-column prop="id" label="申请编号" width="100" />
         <el-table-column prop="approvalType" label="审批类型" align="center">
           <template #default="{ row }">
@@ -81,8 +81,8 @@
   import applyDetailDialog from './applyDetailDialog.vue'
   
   import { getApproverList } from '@/api/dept'
-  const searchForm = reactive({
-    statsus: '',
+  const filterForm = ref({
+    status: '',
     text: ''
   })
 
@@ -119,6 +119,19 @@
   }
 
   initTableData()
+  
+    // 计算属性
+  const filteredTableData = computed(() => {
+    let data = tableData.value
+    
+    console.log(filterForm.value.status)
+
+    if (filterForm.value.status) {
+      data = data.filter(item => item.status === filterForm.value.status)
+    }
+
+    return data
+  })
   
   const applyDetailDialogRef = ref(null)
   function handleShowDetail(row) {
