@@ -7,35 +7,35 @@ export const getGroupTypeZn = (en: string) => {
     { en: 'ORGANIZATION', label: '组织', type: 'primary' },
     { en: 'INDIVIDUAL', label: '个人', type: 'info' }
   ]
-  let item = ar.find(item => item.en === en)
+  let item = ar.find(_ => _.en === en)
   return item
 }
 
 export const getGroupStatusZn = (en: string) => {
   const ar = [{ en: 'ENABLED', label: '已启用', type: 'success' }]
-  let item = ar.find(item => item.en === en)
+  let item = ar.find(_ => _.en === en)
   return item
 }
 
 export const getApplyTypeZn = (en: string) => {
   const ar = [
-    { label: '添加用户', en: 'ACCOUNT_ADD', type: 'info' },
+    { label: '添加用户', en: 'ACCOUNT_ADD', type: 'warning' },
     { label: '添加组织', en: 'ORG_SEC_ADD', type: 'success' },
-    { label: '定价变更', en: 'PRICE_CHANGE', type: 'warning' },
+    { label: '定价变更', en: 'PRICE_CHANGE', type: 'danger' },
     { label: '充值', en: 'RECHARGE', type: 'primary' }
   ]
-  let item = ar.find(item => item.en === en)
+  let item = ar.find(_ => _.en === en)
   return item
 }
 
 export const applyStatus = [
-  { label: '待审核', value: 'PENDING', type: 'info' },
+  { label: '待审核', value: 'PENDING', type: 'warning' },
   { label: '已通过', value: 'APPROVED', type: 'success' },
   { label: '已拒绝', value: 'REJECTED', type: 'danger' }
 ]
 
 export const getApplyStatusZn = (value: string) => {
-  let item = applyStatus.find(item => item.value === value)
+  let item = applyStatus.find(_ => _.value === value)
   return item
 }
 
@@ -46,10 +46,9 @@ export const manageUserRoles = [
 ]
 
 export const getRoleZn = (value: string) => {
-  let item = manageUserRoles.find(item => item.value === value)
+  let item = manageUserRoles.find(_ => _.value === value)
   return item
 }
-
 
 export const userStatus = [
   { label: '已启用', value: 'ENABLED', type: 'success' },
@@ -57,6 +56,23 @@ export const userStatus = [
 ]
 
 export const getUserStatusZn = (value: string) => {
-  let item = userStatus.find(item => item.value === value)
+  let item = userStatus.find(_ => _.value === value)
+  return item
+}
+
+// 客户端角色映射
+export const clientRoles = [
+  {
+    value: 'USER',
+    label: '普通用户'
+  },
+  {
+    value: 'USER_M',
+    label: '组织管理员'
+  }
+]
+
+export const getClientRoleZn = (value: string) => {
+  let item = clientRoles.find(_ => _.value === value)
   return item
 }

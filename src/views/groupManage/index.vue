@@ -32,7 +32,7 @@
                 <el-icon class="mr-2">
                   <Edit @click.stop="updateGroup(data)" />
                 </el-icon>
-                 <el-icon @click.stop="removeGroup(node, data)">
+                <el-icon @click.stop="removeGroup(node, data)">
                   <Delete />
                 </el-icon>
               </span>
@@ -59,7 +59,7 @@
           <Icon size="20">
             <Add></Add>
           </Icon>
-          新建子组织
+          申请新建子组织
         </el-button>
         <el-input
           v-model="searchText"
@@ -71,8 +71,9 @@
       </div>
       <div class="flex-1 w-full">
         <el-table
-          ref="tableRef"
           v-if="refreshTable"
+          row-key="id"
+          ref="tableRef"
           :max-height="maxHeight"
           :data="filterTableData"
           @expand-change="handleExpandChange"
@@ -117,10 +118,10 @@
               <el-button link type="primary" icon="Document" @click="openBillPage(scope.row)">
                 账单
               </el-button>
-             
-              <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">
+
+              <!--  <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">
                 修改
-              </el-button>
+              </el-button> -->
               <!--<el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">
                 删除
               </el-button>
@@ -145,7 +146,12 @@
       </template>
     </el-dialog>
 
-    <el-dialog :title="subGroupDialog.title" v-model="subGroupDialog.open" width="600px" append-to-body>
+    <el-dialog
+      :title="subGroupDialog.title"
+      v-model="subGroupDialog.open"
+      width="600px"
+      append-to-body
+    >
       <el-form
         ref="subGroupFormRef"
         :model="subGroupFormData"
@@ -202,7 +208,7 @@
       </template>
     </el-dialog>
 
-    <rechangeDialog ref="rechangeDialogRef"/>
+    <rechangeDialog ref="rechangeDialogRef" />
   </div>
 </template>
 
@@ -239,19 +245,18 @@
 
   function getApprover() {
     getApproverList().then(res => {
-      console.log('approvers', res)
       approvers.value = res.data || []
     })
   }
 
   getApprover()
-  
-   // 展开二级组织查看详情
+
+  // 展开二级组织查看详情
   const handleExpandChange = (row: any, expandedRows: any) => {
     getConsumedDetail(row.id).then(res => {
       row.consumed = res.data?.consumeTotal || 0
     })
-    
+
     getAmountDetail(row.id).then(res => {
       row.remainPoint = res.data?.amount || 0
     })
@@ -261,12 +266,6 @@
   const currentGroupId = ref('')
   const currentGroupName = ref('')
   const searchText = ref('')
-
-  const filterTableData = computed(() =>
-    subGroupList.value.filter(
-      data => !searchText.value || data.name.toLowerCase().includes(searchText.value.toLowerCase())
-    )
-  )
 
   const tableRef = ref(null)
   const maxHeight = ref(400)
@@ -283,9 +282,9 @@
   const subGroupDialog = ref({
     title: '',
     type: 'add',
-    open: false,
+    open: false
   })
-  
+
   const subGroupFormRef = ref(null)
   const refreshTable = ref(true)
   const subGroupFormData = ref({
@@ -342,27 +341,26 @@
 
   /** 取消按钮 */
   function handleSubGroupClose() {
-    subGroupDialog.value.open = false
     resetSubGroupForm()
-    subGroupFormRef.value.resetFields()
     subGroupFormRef.value.clearValidate()
+    subGroupFormRef.value.resetFields()
+    subGroupDialog.value.open = false
   }
 
   function AddSubGroup(row) {
     subGroupDialog.value.title = '新建子组织'
     subGroupDialog.value.type = 'add'
     subGroupDialog.value.open = true
-    
+
     subGroupFormData.value.orgTop = currentGroupId.value
   }
 
   /** 修改按钮操作 */
   function handleEdit(row) {
     let tmpRow = JSON.parse(JSON.stringify(row))
-    console.log('tmpRow', tmpRow)
     subGroupFormData.value.id = tmpRow.id
     subGroupFormData.value.name = tmpRow.name
-    
+
     subGroupDialog.value.title = '修改子组织'
     subGroupDialog.value.type = 'edit'
     subGroupDialog.value.open = true
@@ -423,6 +421,16 @@
     })
   }
 
+  const filterTableData = computed(() => {
+    let tmp = subGroupList.value
+    
+    if (searchText.value) {
+      tmp = subGroupList.value.filter( data => data.name.toLowerCase().includes(searchText.value.toLowerCase()) )
+    }
+    // console.log(tmp)
+    return tmp
+  })
+
   const treeRef = ref(null)
   const filterText = ref('') // 树形控件过滤
   const defaultProps = {
@@ -449,15 +457,15 @@
     ElMessageBox.confirm(`确认删除 ${node.data.name} ?`)
       .then(function () {
         deleteFirstGroup(node.data).then(res => {
-          if(res.state == 200){
+          if (res.state == 200) {
             ElMessage.success('删除成功')
           }
-          if(node.data.id == currentGroupId.value){
+          if (node.data.id == currentGroupId.value) {
             currentGroupId.value = ''
             currentGroupName.value = ''
           }
-        
-          getFirstGroupTree();
+
+          getFirstGroupTree()
         })
       })
       .catch(() => {})
@@ -499,7 +507,7 @@
         if (groupFormData.value.id != '') {
           // 更新
           await updateFirstGroup(groupFormData.value).then(res => {
-            if(groupFormData.value.id == currentGroupId.value){
+            if (groupFormData.value.id == currentGroupId.value) {
               currentGroupName.value = groupFormData.value.name
             }
           })

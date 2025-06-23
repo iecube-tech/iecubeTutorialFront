@@ -129,9 +129,20 @@
 
   // 响应式数据
   const loading = ref(false)
+  
+    // 统计数据
+  const statistics = ref({
+    pending: 0,
+    approved: 0,
+    rejected: 0
+  })
+  
 
   const tableData = ref([])
   const initTableData = () => {
+    statistics.value.pending = 0
+    statistics.value.approved = 0
+    statistics.value.rejected = 0
     getMyApproves().then(res => {
       if (res.state == 200) {
         let tmp = res.data || []
@@ -167,12 +178,7 @@
     dateRange: []
   })
 
-  // 统计数据
-  const statistics = ref({
-    pending: 0,
-    approved: 0,
-    rejected: 0
-  })
+
 
   // 计算属性
   const filteredTableData = computed(() => {

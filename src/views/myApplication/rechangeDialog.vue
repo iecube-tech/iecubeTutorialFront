@@ -183,13 +183,14 @@
 
   const disabled = ref(false)
 
-  const disabledOpen = (groupId, oSecId) => {
+  const disabledOpen = async (groupId, oSecId) => {
     rechargeForm.value.firstGroupId = groupId
     rechargeForm.value.oSecId = oSecId
     disabled.value = true
     rechargeVisible.value = true
     getFirstGroup()
     getSecondGroup()
+    await nextTick()
     rechargeFormRef.value!.clearValidate()
   }
 

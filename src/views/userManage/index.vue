@@ -43,16 +43,16 @@
             </Icon>
             添加新用户
           </el-button>
-          <el-button type="primary" @click="addExsistUser" :disabled="currentNode.id == ''">
+          <!--   <el-button type="primary" @click="addExsistUser" :disabled="currentNode.id == ''">
             <Icon size="20">
               <Link />
             </Icon>
             关联已有用户
-          </el-button>
+          </el-button> -->
         </div>
         <div>
           <el-input
-            v-model="filterText"
+            v-model="filterTableText"
             placeholder="请输入用户名"
             clearable
             suffix-icon="Search"
@@ -61,19 +61,30 @@
       </div>
 
       <div class="flex-1 w-full">
-        <el-table :data="tableData">
+        <el-table :data="filterTableData" show-overflow-tooltip>
           <el-table-column prop="name" label="姓名" />
-          <el-table-column prop="role" label="角色" />
+          <el-table-column prop="role" label="角色">
+            <template #default="{ row }">
+              {{ getClientRoleZn(row.role).label }}
+            </template>
+          </el-table-column>
           <el-table-column prop="phone" label="电话" />
           <el-table-column prop="email" label="邮箱" />
-          <el-table-column prop="gouprs" label="组织" />
-          <el-table-column prop="time" label="更新时间" width="200" />
-          <el-table-column prop="operation" label="操作" width="160">
+          
+          <!-- <el-table-column prop="osecName" label="组织" /> -->
+           
+          <!-- <el-table-column prop="lastOperateTime" label="更新时间" width="200">
+            <template #default="{ row }">
+              {{ moment(row.lastOperateTime).format('YYYY-MM-DD HH:mm:ss') }}
+            </template>
+          </el-table-column> -->
+          
+          <!-- <el-table-column prop="operation" label="操作" width="160">
             <template #default="scope">
               <el-button type="primary" link @click="handleEdit(scope.row)">修改</el-button>
               <el-button type="primary" link @click="handleDelete(scope.row)">删除</el-button>
             </template>
-          </el-table-column>
+          </el-table-column> -->
         </el-table>
       </div>
     </div>
@@ -174,12 +185,16 @@
   import { Add, Link } from '@vicons/carbon'
   import { validateEmail, validatePhone } from '@/utils/validate'
 
-  import { addSecondUser } from '@/api/user'
+  import { addSecondUser, getSecondUser } from '@/api/user'
   import { getDeptTree, getApproverList } from '@/api/dept'
 
-  // left content
-  const filterText = ref('')
+  import { getClientRoleZn } from '@/utils/cnMap'
 
+  import moment from 'moment'
+
+  // left content
+  const treeRef = ref(null)
+  const filterText = ref('')
   const defaultProps = ref({
     children: 'osecList',
     label: 'name'
@@ -187,8 +202,11 @@
 
   const filterNode = (value: string, data: any) => {
     if (!value) return true
-    return data.label.includes(value)
+    return data.name.includes(value)
   }
+  watch(filterText, val => {
+    treeRef.value!.filter(val)
+  })
 
   const handleNodeClick = (nodeData, node, tree, event) => {
     if (node.level == 1) {
@@ -203,6 +221,12 @@
       currentNode.value.id = rawData.id
       currentNode.value.name = rawData.name
       currentNode.value.parentName = parentNodeData.name
+
+      getSecondUser(currentNode.value.id).then(res => {
+        if (res.state == 200) {
+          tableData.value = res.data
+        }
+      })
     }
   }
 
@@ -217,6 +241,18 @@
   initDeptTreeData()
 
   // right content
+  const filterTableText = ref('')
+
+  const filterTableData = computed(() => {
+    let tmp = tableData.value
+
+    if (filterTableText.value) {
+      tmp = tableData.value.filter(data =>
+        data.name.toLowerCase().includes(filterTableText.value.toLowerCase())
+      )
+    }
+    return tmp
+  })
 
   const currentNode = ref({
     id: '',
@@ -235,7 +271,7 @@
         if (addUserForm.value.id == '') {
           let user = toRaw(addUserForm.value)
           delete user.id
-          addSecondUser({ 
+          addSecondUser({
             approver: addUserForm.value.approver,
             users: [user],
             oSecId: currentNode.value.id
@@ -325,8 +361,7 @@
   }
 
   const handleDelete = row => {
-    console.log(ElMessage)
-    ElMessageBox.confirm('确定删除该用户吗？', '提示', {
+    ElMessageBox.confirm(`确定删除该用户 [${row.name}] 吗？`, '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'

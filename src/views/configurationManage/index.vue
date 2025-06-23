@@ -29,14 +29,14 @@
       <el-input-number v-model="rmb" style="width: 200px"></el-input-number>
       <span>&nbsp;&nbsp;天</span>
 
-      <div class="subject-title text-bold">
+      <!-- <div class="subject-title text-bold">
         <Icon>
           <Gift />
         </Icon>
         首次注册赠送积分
       </div>
       <el-input-number v-model="rmb" style="width: 200px"></el-input-number>
-      <span>&nbsp;&nbsp;个</span>
+      <span>&nbsp;&nbsp;个</span> -->
 
       <div class="subject-title text-bold">
         <el-icon>

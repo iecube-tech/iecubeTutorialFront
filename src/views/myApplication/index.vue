@@ -114,7 +114,7 @@
           item = Object.assign(item, contentJson)
         })
         tableData.value = tmp
-        console.log(tmp)
+        // console.log(tmp)
       }
     })
   }
@@ -125,8 +125,6 @@
   const filteredTableData = computed(() => {
     let data = tableData.value
     
-    console.log(filterForm.value.status)
-
     if (filterForm.value.status) {
       data = data.filter(item => item.status === filterForm.value.status)
     }
