@@ -7,9 +7,9 @@
     class="recharge-dialog"
   >
     <el-form ref="rechargeFormRef" :model="rechargeForm" :rules="rechargeRules" label-width="100px">
-      <el-form-item label="父组织" prop="parentGrouptId">
+      <el-form-item label="父组织" prop="firstGroupId">
         <el-select
-          v-model="rechargeForm.parentGrouptId"
+          v-model="rechargeForm.firstGroupId"
           placeholder="请选择父组织"
           clearable
           filterable
@@ -21,45 +21,48 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item label="子组织" prop="subGroupId">
+      <el-form-item label="子组织" prop="oSecId">
         <el-select
-          v-model="rechargeForm.subGroupId"
+          v-model="rechargeForm.oSecId"
           placeholder="请选择子组织"
           clearable
           filterable
           class="w-full"
-          :disabled="!rechargeForm.parentGrouptId || disabled"
+          :disabled="!rechargeForm.firstGroupId || disabled"
         >
           <el-option v-for="org in secondGroup" :key="org.id" :label="org.name" :value="org.id" />
         </el-select>
       </el-form-item>
 
-      <el-form-item label="充值金额" prop="amountCents">
-        <div class="w400px flex items-center gap-2">
-          <el-input-number
-            v-model="rechargeForm.amountCents"
-            :min="0"
-            :max="100000"
-            :step="100"
-            :precision="0"
-            placeholder="请输入充值金额"
-            controls-position="right"
-            class="flex-1"
-          />
-          <span class="ml-2">单位：元</span>
+      <el-form-item label="充值金额" prop="rmb">
+        <div class="w-full flex justify-between items-center">
+          <div class="flex-1">
+            <el-input-number
+              v-model="rechargeForm.rmb"
+              :min="1"
+              :max="100000"
+              :step="100"
+              :precision="0"
+              placeholder="请输入充值金额"
+              style="width: 100%"
+            />
+          </div>
+          <span class="w80px text-right">单位：元</span>
         </div>
       </el-form-item>
+      <el-form-item label="换算积分">
+        <el-input v-model="rmb2Point" readonly />
+      </el-form-item>
 
-      <el-form-item label="备注" prop="remarks">
-        <el-input
-          v-model="rechargeForm.remarks"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入备注信息（选填）"
-          maxlength="200"
-          show-word-limit
-          class="w-full"
-        />
+      <el-form-item label="审批人" prop="approver">
+        <el-select v-model="rechargeForm.approver" placeholder="请选择审批人">
+          <el-option
+            v-for="item in approverOptions"
+            :key="item.phone"
+            :label="item.name"
+            :value="item.phone"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
 
@@ -74,54 +77,63 @@
   </el-dialog>
 </template>
 <script setup lang="ts">
-  import { getFirstGroupList, getSecondGroupList } from '@/api/dept'
+  import { getFirstGroupList, getSecondGroupList, getApproverList } from '@/api/dept'
+  import { rmb2point, inChange } from '@/api/change'
 
   // 充值相关数据
   const rechargeVisible = ref(false)
   const rechargeFormRef = ref(null)
 
+  const rmb2Point = ref(0)
+
   // 充值表单数据
   const rechargeForm = ref({
-    parentGrouptId: '',
-    subGroupId: '',
-    amountCents: 0,
-    remarks: ''
+    firstGroupId: '',
+    oSecId: '',
+    rmb: 1,
+    approver: ''
   })
 
   // 表单验证规则
   const rechargeRules = {
-    parentGrouptId: [{ required: true, message: '请选择父组织', trigger: 'change' }],
-    subGroupId: [{ required: true, message: '请选择子组织', trigger: 'change' }],
-    amountCents: [
-      { required: true, message: '请输入充值积分数量', trigger: 'blur' },
+    firstGroupId: [{ required: true, message: '请选择父组织', trigger: 'change' }],
+    oSecId: [{ required: true, message: '请选择子组织', trigger: 'change' }],
+    rmb: [
+      { required: true, message: '请输入充值金额', trigger: 'blur' },
       {
         type: 'number',
-        min: 0,
+        min: 1,
         max: 100000,
-        message: '充值积分数量必须在0-100000之间',
+        message: '充值金额必须在0-100000之间',
         trigger: ['blur', 'change']
       }
-    ]
+    ],
+    approver: [{ required: true, message: '请选择审批人', trigger: 'change' }]
   }
+
+  const approverOptions = ref([])
+
+  const initApproverList = async () => {
+    getApproverList().then(res => {
+      if (res.state == 200) {
+        approverOptions.value = res.data
+      }
+    })
+  }
+  initApproverList()
 
   // 组织数据
   const firstGroup = ref([])
 
   const secondGroup = ref([])
 
-
   const isFormValid = computed(() => {
-    return (
-      rechargeForm.value.parentGrouptId &&
-      rechargeForm.value.subGroupId &&
-      rechargeForm.value.amountCents &&
-      rechargeForm.value.amountCents > 0
-    )
+    return rechargeForm.value.firstGroupId && rechargeForm.value.oSecId && rechargeForm.value.rmb
   })
 
   // 方法
   const handleChangeFirstGroup = () => {
-    rechargeForm.value.subGroupId = ''
+    rechargeForm.value.oSecId = ''
     getSecondGroup()
   }
 
@@ -131,29 +143,31 @@
   }
 
   const handleConfirmRecharge = async () => {
-    if (!rechargeFormRef.value) return
-
-    try {
-      await rechargeFormRef.value.validate()
-
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      ElMessage.success('积分充值成功！')
-      rechargeVisible.value = false
-      resetRechargeForm()
-    } catch (error) {
-      console.error('表单验证失败:', error)
-    } finally {
-    }
+    rechargeFormRef.value.validate(async valid => {
+      if (valid) {
+        let req = {
+          "approver": rechargeForm.value.approver,
+          "rmb": rechargeForm.value.rmb,
+          "pointsComputed": rmb2Point.value,
+          "oSecId": rechargeForm.value.oSecId
+        }
+        inChange(req).then(res=>{
+          if(res.state == 200){
+            ElMessage.success("充值成功")
+            rechargeVisible.value = false
+            resetRechargeForm()
+          }
+        })
+      }
+    })
   }
 
   const resetRechargeForm = () => {
     rechargeForm.value = {
-      parentGrouptId: '',
-      subGroupId: '',
-      amountCents: 0,
-      remarks: ''
+      firstGroupId: '',
+      oSecId: '',
+      rmb: 1,
+      approver: ''
     }
     rechargeFormRef.value!.resetFields()
     rechargeFormRef.value!.clearValidate()
@@ -167,17 +181,17 @@
 
   const disabled = ref(false)
 
-  const disabledOpen = (groupId, subGroupId) => {
-    rechargeForm.value.parentGrouptId = groupId
-    rechargeForm.value.subGroupId = subGroupId
+  const disabledOpen = (groupId, oSecId) => {
+    rechargeForm.value.firstGroupId = groupId
+    rechargeForm.value.oSecId = oSecId
     disabled.value = true
     rechargeVisible.value = true
     getFirstGroup()
     getSecondGroup()
   }
-  
-    // 一级部门
-  const getFirstGroup = ()=> {
+
+  // 一级部门
+  const getFirstGroup = () => {
     getFirstGroupList().then(res => {
       firstGroup.value = res.data || []
     })
@@ -185,11 +199,19 @@
 
   // 二级部门
   const getSecondGroup = () => {
-    let firstGroupId = rechargeForm.value.parentGrouptId
+    let firstGroupId = rechargeForm.value.firstGroupId
     getSecondGroupList(firstGroupId).then(res => {
       secondGroup.value = res.data || []
     })
   }
+
+  watchEffect(() => {
+    rmb2point(rechargeForm.value.rmb).then(res => {
+      if (res.state == 200) {
+        rmb2Point.value = res.data
+      }
+    })
+  })
 
   defineExpose({
     open,
