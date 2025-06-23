@@ -48,6 +48,103 @@
       </el-descriptions-item>
     </el-descriptions>
 
+    <el-descriptions
+      v-if="currentRow && currentRow.approvalType == 'ACCOUNT_ADD'"
+      :column="2"
+      border
+      label-width="120px"
+    >
+      <el-descriptions-item label="申请编号">
+        {{ currentRow.id }}
+      </el-descriptions-item>
+      <el-descriptions-item label="提交时间">
+        {{ moment(currentRow.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+      </el-descriptions-item>
+      <el-descriptions-item label="申请类型">
+        <el-tag :type="getApplyTypeZn(currentRow.approvalType).type">
+          {{ getApplyTypeZn(currentRow.approvalType).label }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="申请人">
+        {{ currentRow.creator.name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="组织类型">
+        <el-tag :type="getGroupTypeZn(currentRow.orgSec.type).type">
+          {{ getGroupTypeZn(currentRow.orgSec.type).label }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="当前状态">
+        <el-tag :type="getApplyStatusZn(currentRow.status).type">
+          {{ getApplyStatusZn(currentRow.status).label }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="父组织">
+        {{ currentRow.orgTop.name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="添加数量">
+        {{ currentRow.addUUserQo.users.length }}
+      </el-descriptions-item>
+      <el-descriptions-item label="子组织">
+        {{ currentRow.orgSec.name }}
+      </el-descriptions-item>
+
+      <el-descriptions-item label="添加用户">
+        {{ JSON.stringify(currentRow.addUUserQo.users) }}
+      </el-descriptions-item>
+
+      <el-descriptions-item label="审批意见" v-if="remarkVisible(currentRow)">
+        {{ getRemark(currentRow) }}
+      </el-descriptions-item>
+    </el-descriptions>
+    
+    
+    <el-descriptions
+      v-if="currentRow && currentRow.approvalType == 'RECHARGE'"
+      :column="2"
+      border
+      label-width="120px"
+    >
+      <el-descriptions-item label="申请编号">
+        {{ currentRow.id }}
+      </el-descriptions-item>
+      <el-descriptions-item label="提交时间">
+        {{ moment(currentRow.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+      </el-descriptions-item>
+      <el-descriptions-item label="申请类型">
+        <el-tag :type="getApplyTypeZn(currentRow.approvalType).type">
+          {{ getApplyTypeZn(currentRow.approvalType).label }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="申请人">
+        {{ currentRow.creator.name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="组织类型">
+        <el-tag :type="getGroupTypeZn(currentRow.orgSec.type).type">
+          {{ getGroupTypeZn(currentRow.orgSec.type).label }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="当前状态">
+        <el-tag :type="getApplyStatusZn(currentRow.status).type">
+          {{ getApplyStatusZn(currentRow.status).label }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="父组织">
+        {{ currentRow.orgTop.name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="充值金额">
+        <span class="text-red-400 font-bold">{{ currentRow.rechargeQo.rmb }} 元 </span>
+      </el-descriptions-item>
+      <el-descriptions-item label="子组织">
+        {{ currentRow.orgSec.name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="充值积分">
+        <span class="text-red-400 font-bold">{{ currentRow.rechargeQo.pointsComputed }}</span>
+      </el-descriptions-item>
+      <el-descriptions-item label="审批意见" v-if="remarkVisible(currentRow)">
+        {{ getRemark(currentRow) }}
+      </el-descriptions-item>
+    </el-descriptions>
+
     <!-- 审批操作区域 -->
     <div class="approval-actions" v-if="currentRow.status === 'PENDING'">
       <el-divider content-position="left">审批操作</el-divider>
@@ -73,7 +170,7 @@
 <script setup lang="ts">
   import moment from 'moment'
   import { getGroupTypeZn, getApplyStatusZn, getApplyTypeZn } from '@/utils/cnMap'
-   import { getRemark, remarkVisible } from '@/utils/applyFuns'
+  import { getRemark, remarkVisible } from '@/utils/applyFuns'
   import { pass, reject } from '@/api/apply'
 
   const visible = ref(false)
@@ -114,7 +211,7 @@
   defineExpose({
     open: open
   })
-  
+
   const emit = defineEmits(['refresh'])
 </script>
 

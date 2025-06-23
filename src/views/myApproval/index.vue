@@ -146,11 +146,8 @@
           }else if(item.status == 'REJECTED'){
             statistics.value.rejected++
           }
-          
         })
         tableData.value = tmp
-        
-        
         // console.log(tmp)
       }
     })

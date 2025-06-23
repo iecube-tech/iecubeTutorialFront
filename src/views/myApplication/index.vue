@@ -114,6 +114,7 @@
           item = Object.assign(item, contentJson)
         })
         tableData.value = tmp
+        console.log(tmp)
       }
     })
   }
