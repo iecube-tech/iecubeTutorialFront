@@ -67,7 +67,7 @@
     </div>
 
     <applyDetailDialog ref="applyDetailDialogRef" :appoverList="appoverList"/>
-    <rechangeDialog ref="rechangeDialogRef" />
+    <rechangeDialog ref="rechangeDialogRef" @refresh="initTableData" />
   </div>
 </template>
 

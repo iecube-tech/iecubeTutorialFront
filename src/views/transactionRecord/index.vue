@@ -1,25 +1,7 @@
 <template>
   <div class="transcation-record-container select-none">
-    <!-- 标题 -->
-    <div class="mb-4">
+    <div class="flex justify-between align-center mb-8">
       <span class="text-bold font-bold text-2xl">消费明细</span>
-    </div>
-
-    <!-- 余额提醒 -->
-    <div class="flex justify-between items-center mb-8">
-      <div class="w-3/4">
-        <el-alert type="error" :closable="false" show-icon>
-          <template #title>
-            <span>账号余额不足，请&nbsp;</span>
-            <contact-us placement="top">
-              <template #default>
-                <span class="text-blue-500 cursor-pointer">联系我们</span>
-              </template>
-            </contact-us>
-            <span>&nbsp;充值！</span>
-          </template>
-        </el-alert>
-      </div>
       <contact-us placement="left">
         <template #default>
           <el-button type="primary">立即充值</el-button>
@@ -27,9 +9,22 @@
       </contact-us>
     </div>
 
-    <!-- 统计卡片 -->
     <div class="mb-8">
-      <div class="grid grid-cols-4 gap-4">
+      <el-alert type="error" :closable="false" show-icon>
+        <template #title>
+          <span>账号余额不足，请&nbsp;</span>
+          <contact-us placement="top">
+            <template #default>
+              <span class="text-blue-500 cursor-pointer">联系我们</span>
+            </template>
+          </contact-us>
+          <span>&nbsp;充值！</span>
+        </template>
+      </el-alert>
+    </div>
+
+    <el-row :gutter="20" class="mb-8">
+      <el-col :span="6">
         <div class="stat-card currentUsers">
           <div class="">
             <Icon :size="cardIconSize">
@@ -41,7 +36,8 @@
             <div class="stat-label">当前使用人数</div>
           </div>
         </div>
-
+      </el-col>
+      <el-col :span="6">
         <div class="stat-card balance">
           <div class="">
             <Icon :size="cardIconSize">
@@ -53,7 +49,8 @@
             <div class="stat-label">账户余额</div>
           </div>
         </div>
-
+      </el-col>
+      <el-col :span="6">
         <div class="stat-card consumed">
           <div class="">
             <Icon :size="cardIconSize">
@@ -65,9 +62,10 @@
             <div class="stat-label">消耗额度</div>
           </div>
         </div>
-
+      </el-col>
+      <el-col :span="6">
         <div class="stat-card expiring">
-          <div class="stat-icon-expiring">
+          <div class="">
             <Icon :size="cardIconSize">
               <Time />
             </Icon>
@@ -77,10 +75,9 @@
             <div class="stat-label">即将过期积分</div>
           </div>
         </div>
-      </div>
-    </div>
+      </el-col>
+    </el-row>
 
-    <!-- 月度消费列表 -->
     <div class="monthly-consumption">
       <el-card>
         <template #header>
@@ -128,7 +125,6 @@
   import { User, Wallet, Purchase, Time, Renew } from '@vicons/carbon'
   import { Icon } from '@vicons/utils'
   import { CountTo } from 'vue3-count-to'
-  import { duration } from 'moment'
 
   const cardIconSize = ref(28)
 

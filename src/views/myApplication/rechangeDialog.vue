@@ -138,8 +138,8 @@
   }
 
   const handleCancelRecharge = () => {
-    rechargeVisible.value = false
     resetRechargeForm()
+    rechargeVisible.value = false
   }
 
   const handleConfirmRecharge = async () => {
@@ -153,9 +153,10 @@
         }
         inChange(req).then(res=>{
           if(res.state == 200){
-            ElMessage.success("充值成功")
             rechargeVisible.value = false
             resetRechargeForm()
+            ElMessage.success("充值成功")
+            emit('refresh')
           }
         })
       }
@@ -169,14 +170,15 @@
       rmb: 1,
       approver: ''
     }
-    rechargeFormRef.value!.resetFields()
     rechargeFormRef.value!.clearValidate()
+    rechargeFormRef.value!.resetFields()
   }
 
   // 打开充值弹框的方法
   const open = () => {
     rechargeVisible.value = true
     getFirstGroup()
+    rechargeFormRef.value!.clearValidate()
   }
 
   const disabled = ref(false)
@@ -188,6 +190,7 @@
     rechargeVisible.value = true
     getFirstGroup()
     getSecondGroup()
+    rechargeFormRef.value!.clearValidate()
   }
 
   // 一级部门
@@ -217,6 +220,8 @@
     open,
     disabledOpen
   })
+  
+  const emit = defineEmits(['refresh'])
 </script>
 
 <style lang="scss" scoped></style>

@@ -82,7 +82,10 @@ service.interceptors.response.use(
 
     if (message) {
       console.log(message)
-      // ElMessage.error("系统出错");
+      ElMessage.error({
+        grouping: true,
+        message: "系统报错"
+      });
     }
     return Promise.reject(error.message)
   }

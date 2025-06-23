@@ -117,12 +117,14 @@
               <el-button link type="primary" icon="Document" @click="openBillPage(scope.row)">
                 账单
               </el-button>
+             
               <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">
                 修改
               </el-button>
-              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">
+              <!--<el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">
                 删除
               </el-button>
+              -->
             </template>
           </el-table-column>
         </el-table>
@@ -173,7 +175,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="人数上限" prop="limit">
+        <el-form-item label="人数上限" prop="limit" v-if="subGroupDialog.type === 'add'">
           <el-input-number
             style="width: 100%"
             :max="100"
@@ -182,7 +184,7 @@
             placeholder="请输入人数上限"
           />
         </el-form-item>
-        <el-form-item label="赠送积分" prop="giftPoints">
+        <el-form-item label="赠送积分" prop="giftPoints" v-if="subGroupDialog.type === 'add'">
           <el-input-number
             style="width: 100%"
             :max="100"
@@ -200,7 +202,7 @@
       </template>
     </el-dialog>
 
-    <rechangeDialog ref="rechangeDialogRef" />
+    <rechangeDialog ref="rechangeDialogRef"/>
   </div>
 </template>
 
@@ -348,14 +350,21 @@
 
   function AddSubGroup(row) {
     subGroupDialog.value.title = '新建子组织'
+    subGroupDialog.value.type = 'add'
     subGroupDialog.value.open = true
+    
     subGroupFormData.value.orgTop = currentGroupId.value
   }
 
   /** 修改按钮操作 */
   function handleEdit(row) {
-    subGroupFormData.value = JSON.parse(JSON.stringify(row))
+    let tmpRow = JSON.parse(JSON.stringify(row))
+    console.log('tmpRow', tmpRow)
+    subGroupFormData.value.id = tmpRow.id
+    subGroupFormData.value.name = tmpRow.name
+    
     subGroupDialog.value.title = '修改子组织'
+    subGroupDialog.value.type = 'edit'
     subGroupDialog.value.open = true
   }
 
