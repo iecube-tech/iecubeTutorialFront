@@ -1,5 +1,5 @@
 <template>
-  <section class="app-main" :style="{ minHeight: minHeight }">
+  <section class="app-main">
     <router-view>
       <template #default="{ Component, route }">
         <transition enter-active-class="animate__animated animate__fadeIn" mode="out-in">
@@ -17,14 +17,14 @@ import { useSettingsStore, useTagsViewStore } from "@/store";
 import variables from "@/styles/variables.module.scss";
 
 const cachedViews = computed(() => useTagsViewStore().cachedViews); // 缓存页面集合
-const minHeight = computed(() => {
+/* const minHeight = computed(() => {
   // console.log(useSettingsStore().tagsView)
   if (useSettingsStore().tagsView) {
     return `calc(100vh - ${variables["navbar-height"]} - ${variables["tags-view-height"]})`;
   } else {
     return `calc(100vh - ${variables["navbar-height"]})`;
   }
-});
+}); */
 </script>
 
 <style lang="scss" scoped>
@@ -34,6 +34,6 @@ const minHeight = computed(() => {
   position: relative;
   // background-color: var(--el-bg-color-page);
   background-color: var(--bg-color);
-  padding: 15px;
+  padding: 12px;
 }
 </style>

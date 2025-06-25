@@ -211,9 +211,9 @@
   }
 
   // 下一步按钮
-  const handleNext = () => {
-    step.value++
-  }
+  // const handleNext = () => {
+  //   step.value++
+  // }
 
   // 用户协议
   const handleAgreementClick = () => {
@@ -296,7 +296,7 @@
         return
       }
       await sendCode(phone.value)
-      handleNext()
+      step.value = 2
       startTime()
     } else {
       ElMessageBox({

@@ -2,9 +2,9 @@
   <div class="wh-full flex flex-col overflow-hidden" :class="classObj">
 
     <NavBar></NavBar>
-    <div class="w-full flex">
+    <div class="w-full flex" style="height: calc(100% - 50px);">
       <Sidebar class="sidebar-container" v-show="isOpenSidebar" />
-      <AppMain class="flex-1" />
+      <AppMain class="flex-1" style="height: 100%; overflow-y: auto;"/>
     </div>
 
     <!-- <Sidebar class="sidebar-container" /> 

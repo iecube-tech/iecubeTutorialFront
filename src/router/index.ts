@@ -116,7 +116,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/groupManage',
     meta: {
-      roles: ['admin']
+      roles: ['admin', 'operator']
     },
     children: [
       {
@@ -137,7 +137,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/userManage',
     meta: {
-      roles: ['admin']
+      roles: ['admin', 'operator']
     },
     children: [
       {
@@ -166,7 +166,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: '/superUserManage',
         name: 'superUserManage',
         meta: {
-          title: '用户管理',
+          title: '后端用户',
           icon: 'document',
           keepAlive: true
         }

@@ -30,7 +30,7 @@
   const layout = computed(() => settingsStore.layout)
 
   const filterRoutes = computed(() => {
-    let role = 'user'
+    let role = 'operator'
     if(userStore.getUserInfo() && userStore.getUserInfo().role){
       role = userStore.getUserInfo().role.toLowerCase()
     }
