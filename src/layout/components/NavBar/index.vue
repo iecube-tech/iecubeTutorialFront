@@ -9,7 +9,7 @@
       <breadcrumb />
     </div> -->
 
-    <!-- 导航栏右侧 -->
+    <!-- 导航栏左侧 -->
     <div class="flex flex-row justify-center items-center space-x-2 ml-4" @click="goHome">
       <img :src="logo" class="logo-image w30px h30px" />
       <span class="logo-title text-20px font-bold text-zeng">

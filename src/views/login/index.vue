@@ -127,7 +127,9 @@
 
           <p class="mb-2">
             <span v-if="time > 0">{{ time }} 秒后可重新获取验证码</span>
-            <span v-else class="cursor-pointer text-blue-500" @click="reSendCode">重新获取验证码</span>
+            <span v-else class="cursor-pointer text-blue-500" @click="reSendCode">
+              重新获取验证码
+            </span>
           </p>
 
           <el-button
@@ -159,16 +161,19 @@
           </div>
           <div class="flex-1 mt-6 px-2">
             <div
-              class="h-[70px] border-1 rounded-md mb-2 p-[10px] flex justify-center items-center border-wrapper"
-              v-for="item in 2"
-              :key="item"
+              class="cursor-pointer h-[70px] border-1 rounded-md mb-2 p-[10px] flex justify-center items-center border-wrapper"
+              v-for="(item, k) in groupList"
+              :key="k"
+              @click="handleGroupClick(item)"
             >
-              <div class="group-wrapper">曾</div>
+              <div class="group-wrapper">
+                {{ item.orgTop.name.charAt(0) }}
+              </div>
               <div class="flex-1">
-                <div class="group-name">曾益慧创</div>
+                <div class="group-name">{{ item.name }}</div>
                 <div class="usesr-name">朱晓曦</div>
               </div>
-              <el-icon class="cursor-pointer text-xl icon-font">
+              <el-icon class="text-xl icon-font">
                 <ArrowRightBold />
               </el-icon>
             </div>
@@ -189,13 +194,15 @@
   const route = useRoute()
   const userStore = useUserStore()
 
-  import { login, getVerifCode, checkPhoneIsRegisterUser } from '@/api/login'
-  import { TOKEN_KEY, TOKEN_REFRESH_KEY } from "@/enums/CacheEnum";
+  import { login, getVerifCode, reLogin } from '@/api/login'
+  import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
 
   // 手机登录相关
   const step = ref(1)
   const phone = ref('')
   const agreed = ref(false)
+
+  const groupList = ref([])
 
   const handlePhoneInput = event => {
     phone.value = phone.value.replace(/\D/g, '')
@@ -209,11 +216,6 @@
   const handleBack = () => {
     step.value--
   }
-
-  // 下一步按钮
-  // const handleNext = () => {
-  //   step.value++
-  // }
 
   // 用户协议
   const handleAgreementClick = () => {
@@ -230,7 +232,7 @@
     return new Promise((resolve, reject) => {
       getVerifCode(phone).then(async res => {
         if (res.state == 200) {
-          setTimeout(_ =>{
+          setTimeout(_ => {
             codeInputs.value[0].focus()
           }, 1000)
           resolve(true)
@@ -238,35 +240,58 @@
       })
     })
   }
-  
+
   const reSendCode = async () => {
     await sendCode(phone.value)
     startTime()
   }
 
-
   /** 登录表单提交 */
   function doLogin() {
     let req = {
       phone: phone.value,
-      code: fullCode.value,
+      code: fullCode.value
     }
 
     login(req)
       .then(res => {
         if (res.state == 200) {
-          let { accessToken, refreshToken, user } = res.data
-          localStorage.setItem(TOKEN_KEY, accessToken)
-          localStorage.setItem(TOKEN_REFRESH_KEY, refreshToken)
-          userStore.setUserInfo(user)
+          let { login, user, orgSec, accessToken, refreshToken } = res.data
+          userStore.setLogin(login)
+          if (login === true) {
+            localStorage.setItem(TOKEN_KEY, accessToken)
+            localStorage.setItem(TOKEN_REFRESH_KEY, refreshToken)
+            user.orgSec = orgSec
+            userStore.setUserInfo(user)
+            const { path, queryParams } = parseRedirect()
+            router.push({ path: path, query: queryParams })
+          } else {
+            let { accessToken, orgSecList } = res.data
+            groupList.value = orgSecList
+            localStorage.setItem(TOKEN_KEY, accessToken)
+            step.value = 3
+          }
         }
-        const { path, queryParams } = parseRedirect()
-        router.push({ path: path, query: queryParams })
       })
       .catch(() => {})
       .finally(() => {
         // loading.value = false;
       })
+  }
+
+  function handleGroupClick(group) {
+    reLogin(group.id).then(res => {
+      if (res.state == 200) {
+        let { login, user, orgSec, accessToken, refreshToken } = res.data
+        userStore.setLogin(login)
+        localStorage.setItem(TOKEN_KEY, accessToken)
+        localStorage.setItem(TOKEN_REFRESH_KEY, refreshToken)
+        user.orgSec = orgSec
+        userStore.setUserInfo(user)
+        const { path, queryParams } = parseRedirect()
+        router.push({ path: path, query: queryParams })
+      }
+    })
   }
 
   /** 解析 redirect 字符串 为 path 和  queryParams */
@@ -364,7 +389,7 @@
       if (time.value === 0) {
         clearInterval(nInterval.value)
       }
-    }, 1000)   
+    }, 1000)
   }
 
   // 计算属性

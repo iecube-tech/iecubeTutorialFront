@@ -5,28 +5,11 @@ export const Layout = () => import('@/layout/index.vue')
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
-  // {
-  //   path: "/redirect",
-  //   component: Layout,
-  //   meta: { hidden: true },
-  //   children: [
-  //     {
-  //       path: "/redirect/:path(.*)",
-  //       component: () => import("@/views/redirect/index.vue"),
-  //     },
-  //   ],
-  // },
-
   {
     path: '/login',
     component: () => import('@/views/login/index.vue'),
     meta: { hidden: true }
   },
-  // {
-  //   path: '/login1',
-  //   component: () => import('@/views/login/index1.vue'),
-  //   meta: { hidden: true }
-  // },
   {
     path: '/terms',
     component: () => import('@/views/login/terms.vue'),
@@ -37,11 +20,11 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/login/signupPage.vue'),
     meta: { hidden: true }
   },
-  {
-    path: '/applyBetaCode',
-    component: () => import('@/views/login/applyBetaCode.vue'),
-    meta: { hidden: true }
-  },
+  // {
+  //   path: '/applyBetaCode',
+  //   component: () => import('@/views/login/applyBetaCode.vue'),
+  //   meta: { hidden: true }
+  // },
   {
     path: '/',
     name: '/',
@@ -85,11 +68,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/transactionRecord/index.vue'),
         meta: { hidden: true }
       }
-      // {
-      //   path: "/userManage",
-      //   component: () => import("@/views/userManage/index.vue"),
-      //   meta: { hidden: true },
-      // }
     ]
   },
   {
@@ -110,183 +88,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       }
     ]
   },
-  {
-    path: '/',
-    name: 'group',
-    component: Layout,
-    redirect: '/groupManage',
-    meta: {
-      roles: ['admin', 'operator']
-    },
-    children: [
-      {
-        component: () => import('@/views/groupManage/index.vue'),
-        path: '/groupManage',
-        name: 'groupManage',
-        meta: {
-          title: '组织管理',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'user',
-    component: Layout,
-    redirect: '/userManage',
-    meta: {
-      roles: ['admin', 'operator']
-    },
-    children: [
-      {
-        component: () => import('@/views/userManage/index.vue'),
-        path: '/userManage',
-        name: 'userManage',
-        meta: {
-          title: '用户管理',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'superUser',
-    component: Layout,
-    redirect: '/superUserManage',
-    meta: {
-      roles: ['admin']
-    },
-    children: [
-      {
-        component: () => import('@/views/superUserManage/index.vue'),
-        path: '/superUserManage',
-        name: 'superUserManage',
-        meta: {
-          title: '后端用户',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'configuration',
-    component: Layout,
-    redirect: '/configurationManage',
-    meta: {
-      roles: ['admin']
-    },
-    children: [
-      {
-        component: () => import('@/views/configurationManage/index.vue'),
-        path: '/configurationManage',
-        name: 'configurationManage',
-        meta: {
-          title: '配置管理',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'application',
-    component: Layout,
-    redirect: '/myApplication',
-    meta: {
-      roles: ['admin']
-    },
-    children: [
-      {
-        component: () => import('@/views/myApplication/index.vue'),
-        path: '/myApplication',
-        name: 'myApplication',
-        meta: {
-          title: '我的申请',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'approval',
-    component: Layout,
-    redirect: '/myApproval',
-    meta: {
-      roles: ['admin']
-    },
-    children: [
-      {
-        component: () => import('@/views/myApproval/index.vue'),
-        path: '/myApproval',
-        name: 'myApproval',
-        meta: {
-          title: '我的审批',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  }
-  // 外部链接
-  // {
-  //   path: "/external-link",
-  //   component: Layout,
-  //   children: [ {
-  //       component: () => import("@/views/external-link/index.vue"),
-  //       path: "https://www.cnblogs.com/haoxianrui/",
-  //       meta: { title: "外部链接", icon: "link" },
-  //     },
-  //   ],
-  // },
-  // 多级嵌套路由
-  /* {
-         path: '/nested',
-         component: Layout,
-         redirect: '/nested/level1/level2',
-         name: 'Nested',
-         meta: {title: '多级菜单', icon: 'nested'},
-         children: [
-             {
-                 path: 'level1',
-                 component: () => import('@/views/nested/level1/index.vue'),
-                 name: 'Level1',
-                 meta: {title: '菜单一级'},
-                 redirect: '/nested/level1/level2',
-                 children: [
-                     {
-                         path: 'level2',
-                         component: () => import('@/views/nested/level1/level2/index.vue'),
-                         name: 'Level2',
-                         meta: {title: '菜单二级'},
-                         redirect: '/nested/level1/level2/level3',
-                         children: [
-                             {
-                                 path: 'level3-1',
-                                 component: () => import('@/views/nested/level1/level2/level3/index1.vue'),
-                                 name: 'Level3-1',
-                                 meta: {title: '菜单三级-1'}
-                             },
-                             {
-                                 path: 'level3-2',
-                                 component: () => import('@/views/nested/level1/level2/level3/index2.vue'),
-                                 name: 'Level3-2',
-                                 meta: {title: '菜单三级-2'}
-                             }
-                         ]
-                     }
-                 ]
-             },
-         ]
-     }*/
+
 ]
 
 /**

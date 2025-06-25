@@ -1,96 +1,17 @@
 <template>
   <div class="flex">
-    <!-- <template v-if="!isMobile">
-      
-      <div class="nav-action-item" @click="toggle">
-        <svg-icon
-          :icon-class="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"
-        />
-      </div>
-
-     
-      <el-tooltip
-        :content="$t('sizeSelect.tooltip')"
-        effect="dark"
-        placement="bottom"
-      >
-        <size-select class="nav-action-item" />
-      </el-tooltip>
-
-      
-      <lang-select class="nav-action-item" />
-
-      
-      <el-dropdown class="message nav-action-item" trigger="click">
-        <el-badge is-dot>
-          <div class="flex-center h100% p10px">
-            <i-ep-bell />
-          </div>
-        </el-badge>
-        <template #dropdown>
-          <div class="px-5 py-2">
-            <el-tabs v-model="activeTab">
-              <el-tab-pane
-                v-for="(label, key) in MessageTypeLabels"
-                :label="label"
-                :name="key"
-                :key="key"
-              >
-                <div
-                  class="w-[380px] py-2"
-                  v-for="message in getFilteredMessages(key)"
-                  :key="message.id"
-                >
-                  <el-link type="primary">
-                    <el-text class="w-350px" size="default" truncated>
-                      {{ message.title }}
-                    </el-text>
-                  </el-link>
-                </div>
-              </el-tab-pane>
-            </el-tabs>
-            <el-divider />
-            <div class="flex-x-between">
-              <el-link type="primary" :underline="false">
-                <span class="text-xs">查看更多</span>
-                <el-icon class="text-xs"><ArrowRight /></el-icon>
-              </el-link>
-              <el-link type="primary" :underline="false">
-                <span class="text-xs">全部已读</span>
-              </el-link>
-            </div>
-          </div>
-        </template>
-</el-dropdown>
-</template> -->
-    <div class="flex items-center">
+    <div class="flex items-center hello-tip">
+      <span class="mr-16px">{{ firstGroup.name }}</span>
+      <span class="mr-16px">{{ secondGroup.name }}</span>
       <span class="text-ms mr-10px text-blod">{{ userInfoFirstName }}老师, 你好 !</span>
     </div>
 
-    <!-- 用户头像 -->
     <el-dropdown class="nav-action-item" trigger="click" @command="handleCommand">
       <div class="flex-center h100% p10px">
-        <!-- <img
-          :src="userStore.user.avatar + '?imageView2/1/w/80/h/80'"
-          class="rounded-full mr-10px w24px h24px"
-        /> -->
-        <!-- 固定一个头像 -->
         <img :src="userImg" class="rounded-full mr-10px w24px h24px" />
       </div>
       <template #dropdown>
         <el-dropdown-menu>
-          <!--  <a
-            target="_blank"
-            href="https://gitee.com/youlaiorg/vue3-element-admin"
-          >
-            <el-dropdown-item>{{ $t("navbar.gitee") }}</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://juejin.cn/post/7228990409909108793">
-            <el-dropdown-item>{{ $t("navbar.document") }}</el-dropdown-item>
-          </a> 
-          <el-dropdown-item divided @click="logout">
-            {{ $t("navbar.logout") }}
-          </el-dropdown-item>-->
           <el-dropdown-item command="transactionRecord">消费明细</el-dropdown-item>
 
           <el-dropdown-item>
@@ -101,16 +22,17 @@
             <el-popover placement="left" width="300">
               <template #default>
                 <div
-                  class="account-wrapper"
-                  v-for="item in 2"
-                  :key="item"
+                  class="cursor-pointer account-wrapper"
+                  v-for="(item, k) in groupList"
+                  :key="k"
+                  @click="handleGroupClick(item)"
                 >
-                  <div class="group-wrapper">曾</div>
+                  <div class="group-wrapper">{{ item.orgTop.name.charAt(0) }}</div>
                   <div class="flex-1">
-                    <div class="group-name">曾益慧创</div>
-                    <div class="usesr-name">朱晓曦</div>
+                    <div class="group-name">{{ item.name }}</div>
+                    <div class="usesr-name">{{ userInfo.name }}</div>
                   </div>
-                  <el-icon class="cursor-pointer text-xl icon-font">
+                  <el-icon class="text-xl icon-font">
                     <ArrowRightBold />
                   </el-icon>
                 </div>
@@ -138,19 +60,33 @@
   import defaultSettings from '@/settings'
   import { DeviceEnum } from '@/enums/DeviceEnum'
   import { MessageTypeEnum, MessageTypeLabels } from '@/enums/MessageTypeEnum'
+  import { getOrgList, reLogin } from '@/api/login'
 
   import userImg from '@/assets/images/userImg.png'
+  import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
 
   const appStore = useAppStore()
   const tagsViewStore = useTagsViewStore()
   const userStore = useUserStore()
+  const userInfo = ref(null)
+  userInfo.value = userStore.getUserInfo()
+
+  const firstGroup = computed(() => {
+    return userInfo.value.orgSec.orgTop
+  })
+
+  const secondGroup = computed(() => {
+    return userInfo.value.orgSec
+  })
+
   const userInfoFirstName = computed(() => {
-    let userInfo = userStore.getUserInfo()
-    if(userStore.getUserInfo() && userStore.getUserInfo().name){
-      return userStore.getUserInfo().name.substring(0, 1)
-    }else {
-      return ''
+    let firstName = ''
+    try {
+      firstName = userInfo.value.name.charAt(0)
+    } catch (e) {
+      firstName = ''
     }
+    return firstName
   })
 
   const settingStore = useSettingsStore()
@@ -158,50 +94,30 @@
   const route = useRoute()
   const router = useRouter()
 
-  const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE)
+  const groupList = ref([])
 
-  const { isFullscreen, toggle } = useFullscreen()
+  function getGroupList() {
+    getOrgList().then(res => {
+      if (res.state == 200) {
+        groupList.value = res.data
+      }
+    })
+  }
 
-  const activeTab = ref(MessageTypeEnum.MESSAGE)
+  getGroupList()
 
-  const messages = ref([
-    {
-      id: 1,
-      title: '系统升级通知：服务器将于今晚12点进行升级维护，请提前保存工作内容。',
-      type: MessageTypeEnum.MESSAGE
-    },
-    {
-      id: 2,
-      title: '新功能发布：我们的应用程序现在支持多语言功能。',
-      type: MessageTypeEnum.MESSAGE
-    },
-    {
-      id: 3,
-      title: '重要提醒：请定期更改您的密码以保证账户安全。',
-      type: MessageTypeEnum.MESSAGE
-    },
-    {
-      id: 4,
-      title: '通知：您有一条未读的系统消息，请及时查看。',
-      type: MessageTypeEnum.NOTICE
-    },
-    {
-      id: 5,
-      title: '新订单通知：您有一笔新的订单需要处理。',
-      type: MessageTypeEnum.NOTICE
-    },
-    {
-      id: 6,
-      title: '审核提醒：您的审核请求已被批准。',
-      type: MessageTypeEnum.NOTICE
-    },
-    { id: 7, title: '待办事项：完成用户权限设置。', type: MessageTypeEnum.TODO },
-    { id: 8, title: '待办事项：更新产品列表。', type: MessageTypeEnum.TODO },
-    { id: 9, title: '待办事项：备份数据库。', type: MessageTypeEnum.TODO }
-  ])
-
-  const getFilteredMessages = (type: MessageTypeEnum) => {
-    return messages.value.filter(message => message.type === type)
+  function handleGroupClick(group) {
+    reLogin(group.id).then(res => {
+      if (res.state == 200) {
+        let { login, user, orgSec, accessToken, refreshToken } = res.data
+        userStore.setLogin(login)
+        localStorage.setItem(TOKEN_KEY, accessToken)
+        localStorage.setItem(TOKEN_REFRESH_KEY, refreshToken)
+        user.orgSec = orgSec
+        userStore.setUserInfo(user)
+        userInfo.value = user
+      }
+    })
   }
 
   /* 注销 */
@@ -222,12 +138,11 @@
         })
     })
   }
-  
-  
+
   // 处理命令
   const handleCommand = (command: string) => {
     if (command === 'transactionRecord') {
-      let path = router.resolve({'path': '/transactionRecord'})
+      let path = router.resolve({ path: '/transactionRecord' })
       window.open(path.href, '_blank')
     }
   }
@@ -268,22 +183,22 @@
   // 切换账号样式
   .account-wrapper {
     @apply h-[60px] mb-2 p-[10px] flex justify-center items-center rounded-md;
-    border-bottom: .5px solid var(--border-color);
+    border-bottom: 0.5px solid var(--border-color);
   }
-  
+
   .account-wrapper:hover {
     background: rgb(0 0 0 / 10%);
   }
-  
+
   .dark .account-wrapper:hover {
     background: rgb(255 255 255 / 20%);
   }
-  
-  .account-wrapper:last-of-type{
-    margin-bottom: 0 ;
-    border-bottom: none  ;
+
+  .account-wrapper:last-of-type {
+    margin-bottom: 0;
+    border-bottom: none;
   }
-  
+
   .group-wrapper {
     background: linear-gradient(to right, #3578fe, #6095ff);
     width: 30px;
@@ -306,4 +221,9 @@
   .user-name {
     font-size: 12px;
   }
+
+  /* .hello-tip {
+    font-family: '楷体';
+    font-size: 20px;
+  } */
 </style>

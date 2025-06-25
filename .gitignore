@@ -5,6 +5,7 @@ dist-ssr
 *.local
 .history
 test.rest
+testClient.rest
 
 # Editor directories and files
 .idea

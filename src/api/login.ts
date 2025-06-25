@@ -21,7 +21,7 @@ export const registerUser = (data: any) => {
 // 用户登录
 export const login = (data: any) => {
   return request({
-    url: '/auth/login',
+    url: 'su/auth/login',
     method: 'post',
     data: data
   })
@@ -38,7 +38,7 @@ export const userLogout = () => {
 // 发送验证码
 export const getVerifCode = (phone: any) => {
   return request({
-    url: '/auth/login',
+    url: '/su/auth/login',
     method: 'get',
     params: { phone }
   })
@@ -61,5 +61,23 @@ export const apiRefreshToken = () => {
     data: {
       refreshToken: localStorage.getItem('refreshToken')
     }
+  })
+}
+
+export const reLogin = (orgSecId: string) => {
+  return request({
+    url: '/su/auth/relogin',
+    method: 'post',
+    params: {
+      orgSecId
+    }
+  })
+}
+
+
+export const getOrgList = () => {
+  return request({
+    url: '/su/auth/orgs',
+    method: 'get'
   })
 }

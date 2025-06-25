@@ -18,15 +18,21 @@ export function setupPermission() {
 
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
-    const hasToken = localStorage.getItem(TOKEN_KEY);
+    // const hasToken = localStorage.getItem(TOKEN_KEY);
+    const userStore = useUserStore();
+    const hasLogin = userStore.getLogin();
 
-    if (hasToken) {
+    if (hasLogin) {
       if (to.path === "/login") {
         // 如果已登录，跳转到首页
         next({ path: "/" });
         NProgress.done();
       } else {
-
+        
+        console.log(to.matched.length)
+        if(to.matched.length === 0){
+          next(from.name ? { name: from.name } : "/404");
+        }
         next();
         // const userStore = useUserStore();
         // const hasRoles =
