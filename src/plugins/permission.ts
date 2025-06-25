@@ -26,7 +26,9 @@ export function setupPermission() {
         next({ path: "/" });
         NProgress.done();
       } else {
-
+        if (to.matched.length === 0) {
+          next(from.name ? { name: from.name } : "/404");
+        }
         next();
         // const userStore = useUserStore();
         // const hasRoles =

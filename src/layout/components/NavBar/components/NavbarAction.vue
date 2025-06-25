@@ -91,7 +91,7 @@
           <el-dropdown-item divided @click="logout">
             {{ $t("navbar.logout") }}
           </el-dropdown-item>-->
-          <el-dropdown-item command="transactionRecord">消费明细</el-dropdown-item>
+          <!-- <el-dropdown-item command="transactionRecord">消费明细</el-dropdown-item>
 
           <el-dropdown-item>
             <contact-us></contact-us>
@@ -117,8 +117,8 @@
               </template>
               <template #reference>账号切换</template>
             </el-popover>
-          </el-dropdown-item>
-          <el-dropdown-item @click="logout" divided>
+          </el-dropdown-item> -->
+          <el-dropdown-item @click="logout">
             {{ $t('navbar.logout') }}
           </el-dropdown-item>
         </el-dropdown-menu>

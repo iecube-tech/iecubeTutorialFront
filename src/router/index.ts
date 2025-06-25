@@ -22,17 +22,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/login/index.vue'),
     meta: { hidden: true }
   },
-  // {
-  //   path: '/login1',
-  //   component: () => import('@/views/login/index1.vue'),
-  //   meta: { hidden: true }
-  // },
   {
     path: '/terms',
     component: () => import('@/views/login/terms.vue'),
     meta: { hidden: true }
   },
-  {
+  /* {
     path: '/signup',
     component: () => import('@/views/login/signupPage.vue'),
     meta: { hidden: true }
@@ -41,7 +36,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: '/applyBetaCode',
     component: () => import('@/views/login/applyBetaCode.vue'),
     meta: { hidden: true }
-  },
+  }, */
   {
     path: '/',
     name: '/',
@@ -75,16 +70,16 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/error-page/404.vue'),
         meta: { hidden: true }
       },
-      {
-        path: '/showDigitalPlan',
-        component: () => import('@/views/digitalPlan/showDigitalPlan.vue'),
-        meta: { hidden: true }
-      },
-      {
-        path: '/transactionRecord',
-        component: () => import('@/views/transactionRecord/index.vue'),
-        meta: { hidden: true }
-      }
+      // {
+      //   path: '/showDigitalPlan',
+      //   component: () => import('@/views/digitalPlan/showDigitalPlan.vue'),
+      //   meta: { hidden: true }
+      // },
+      // {
+      //   path: '/transactionRecord',
+      //   component: () => import('@/views/transactionRecord/index.vue'),
+      //   meta: { hidden: true }
+      // }
       // {
       //   path: "/userManage",
       //   component: () => import("@/views/userManage/index.vue"),
@@ -92,31 +87,31 @@ export const constantRoutes: RouteRecordRaw[] = [
       // }
     ]
   },
-  {
-    path: '/',
-    name: 'learn',
-    component: Layout,
-    redirect: '/digitalPlan', // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
-    children: [
-      {
-        component: () => import('@/views/digitalPlan/index.vue'),
-        path: '/digitalPlan',
-        name: 'digitalPlan',
-        meta: {
-          title: '数字教案',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
+  // {
+  //   path: '/',
+  //   name: 'learn',
+  //   component: Layout,
+  //   redirect: '/digitalPlan', // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
+  //   children: [
+  //     {
+  //       component: () => import('@/views/digitalPlan/index.vue'),
+  //       path: '/digitalPlan',
+  //       name: 'digitalPlan',
+  //       meta: {
+  //         title: '数字教案',
+  //         icon: 'document',
+  //         keepAlive: true
+  //       }
+  //     }
+  //   ]
+  // },
   {
     path: '/',
     name: 'group',
     component: Layout,
     redirect: '/groupManage',
     meta: {
-      roles: ['admin', 'operator']
+      roles: ['admin', 'operator','super']
     },
     children: [
       {
@@ -137,7 +132,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/userManage',
     meta: {
-      roles: ['admin', 'operator']
+      roles: ['admin', 'operator','super']
     },
     children: [
       {
@@ -158,7 +153,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/superUserManage',
     meta: {
-      roles: ['admin']
+      roles: ['super']
     },
     children: [
       {
@@ -166,7 +161,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: '/superUserManage',
         name: 'superUserManage',
         meta: {
-          title: '后端用户',
+          title: '管理用户',
           icon: 'document',
           keepAlive: true
         }
@@ -179,7 +174,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/configurationManage',
     meta: {
-      roles: ['admin']
+      roles: ['admin', 'operator','super']
     },
     children: [
       {
@@ -200,7 +195,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/myApplication',
     meta: {
-      roles: ['admin']
+      roles: ['admin', 'operator','super']
     },
     children: [
       {
@@ -221,7 +216,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/myApproval',
     meta: {
-      roles: ['admin']
+      roles: ['admin', 'super']
     },
     children: [
       {

@@ -47,12 +47,12 @@
               </span>
             </span>
           </div>
-          <div class="flex flex-col justify-center items-center text-sm">
+         <!--  <div class="flex flex-col justify-center items-center text-sm">
             <el-divider>没有账号?</el-divider>
             <span style="color: #3370ff" class="cursor-pointer" @click="handleRegister">
               立即注册
             </span>
-          </div>
+          </div> -->
         </main>
 
         <!-- step two -->
