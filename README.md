@@ -1,5 +1,5 @@
 ## 项目简介
-
+Iecube Tutorial Client 客户端
 Iecube Tutorial 是基于 Vue3 + Vite5+ TypeScript5 + Element-Plus + Pinia 等主流技术栈构建
 
 
