@@ -86,7 +86,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             path: "/digitalPlan",
             name: "digitalPlan",
             meta: {
-              title: "数字教案",
+              title: "交互讲义",
               icon: "document",
               keepAlive: true,
             },

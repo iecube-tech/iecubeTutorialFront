@@ -4,30 +4,21 @@
     <el-card class="login-card">
       <div class="text-center relative">
         <h2 class="mb-3 text-2xl font-bold">{{ defaultSettings.title }}</h2>
-        <el-tag class="ml-2 absolute-rt">{{ defaultSettings.version }}</el-tag>
+        <!-- <el-tag class="ml-2 absolute-rt">{{ defaultSettings.version }}</el-tag> -->
         <subTitle></subTitle>
       </div>
 
       <el-form ref="loginFormRef" :model="loginData" :rules="loginRules" class="login-form ml-[50px]">
-        <el-form-item prop="phone" label="手机号">
-          <el-input ref="phone" v-model="loginData.phone" placeholder="请输入11位手机号" name="phone" />
+        <el-form-item prop="name" label="账  号">
+          <el-input ref="name" v-model="loginData.name" placeholder="请输入账号名" name="name" />
         </el-form-item>
-        <el-form-item prop="captchaCode" label="验证码">
-          <el-input ref="captchaCode" v-model="loginData.captchaCode" placeholder="请输入验证码" name="captchaCode"
-            style="width: 170px; margin-right: 10px" />
-          <el-button :disabled="n > 0" type="primary" style="width: calc(100% - 180px)" @click="handleSendCode">
+        <el-form-item prop="password" label="密  码">
+          <el-input ref="password" v-model="loginData.password" placeholder="请输入密码" type="password" name="password" />
+         <!--  <el-button :disabled="n > 0" type="primary" style="width: calc(100% - 180px)" @click="handleSendCode">
             发送验证码
             <span v-show="n > 0"> ({{ n }})</span>
-          </el-button>
+          </el-button> -->
         </el-form-item>
-        <el-form-item prop="betaCode" label="内测码">
-          <el-input ref="betaCode" v-model="loginData.betaCode" placeholder="请输入内测码" name="betaCode"
-            style="width: 170px; margin-right: 10px" />
-          <el-button type="primary" link style="width: 100px" @click="handleApplyBetaCode">马上申请</el-button>
-        </el-form-item>
-        <div class="flex justify-end mb-4">
-          <el-button type="primary" link @click="handleRegister">没有账号，立即注册</el-button>
-        </div>
 
         <el-button :loading="loading" type="primary" size="large" class="w-full" @click.prevent="handleLoginSubmit">
           {{ $t("login.login") }}
@@ -37,17 +28,19 @@
     </el-card>
 
     <!-- ICP备案 -->
-    <div class="icp-info" v-show="icpVisible">
+    <!-- <div class="icp-info" v-show="icpVisible">
       <p>
         Copyright © 2025 - 2099 IECube Tutorial All Rights Reserved. IECUBE
         北京曾益慧创科技有限公司 版权所有
       </p>
       <p>京ICP备xxx号-x</p>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script setup lang="ts">
+import { SHA256 } from 'crypto-js';
+
 import subTitle from "./subTitle.vue";
 
 // 外部库和依赖
@@ -90,17 +83,21 @@ const captchaBase64 = ref();
 const loginFormRef = ref<FormInstance>();
 
 const loginData = ref({
-  // phone: "18011111111",
-  // captchaCode: "899999",
-  // betaCode: "iF-mfs",
-  phone: "",
-  captchaCode: "",
-  betaCode: "",
+  name: "",
+  password: "",
+  // betaCode: "",
 });
 
 const loginRules = computed(() => {
   return {
-    phone: [
+    name:[
+      { required: true, message: "请输入账号名", trigger: ["blur", "change"] },
+    ],
+    password: [
+      { required: true, message: "请输入密码", trigger: ["blur", "change"] },
+      { min: 6, message: "密码长度不能少于6位", trigger: ["blur", "change"] },
+    ],
+    /* phone: [
       { required: true, message: "请输入手机号", trigger: ["blur", "change"] },
       { pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号", trigger: ["blur", "change"] },
     ],
@@ -109,7 +106,7 @@ const loginRules = computed(() => {
     ],
     betaCode: [
       { required: true, message: "请输入内测码", trigger: ["blur", "change"] },
-    ],
+    ], */
   };
 });
 
@@ -120,9 +117,8 @@ function handleLoginSubmit() {
       loading.value = true;
 
       let req = {
-        "phone": loginData.value.phone,
-        "verifyCode": loginData.value.captchaCode,
-        "invitationCode": loginData.value.betaCode,
+        "account": loginData.value.name,
+        "password": SHA256(loginData.value.password).toString(),
       }
       login(req)
         .then(res => {

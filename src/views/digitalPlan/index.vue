@@ -4,7 +4,7 @@
       <el-tab-pane>
         <template #label>
           <svg-icon icon-class="client" class="mr-2" />
-          动态讲义
+          交互讲义
         </template>
         <p class="mt-0 mb-2" style="display: flow-root;">
           <span class="font-bold float-left">基础信息</span>
@@ -131,7 +131,7 @@
         </div>
       </el-tab-pane>
 
-      <el-tab-pane label="习题生成" disabled>
+      <!-- <el-tab-pane label="习题生成" disabled>
         <template #label>
           <svg-icon icon-class="document" class="mr-2" />
           习题生成
@@ -142,7 +142,7 @@
           <svg-icon icon-class="system" class="mr-2" />
           实验设计
         </template>
-      </el-tab-pane>
+      </el-tab-pane> -->
     </el-tabs>
   </div>
 </template>

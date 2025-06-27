@@ -64,7 +64,7 @@
 </el-dropdown>
 </template> -->
     <div class="flex items-center">
-      <span class="text-ms mr-10px">{{ userInfoFirstName }}老师, 你好 !</span>
+      <span class="text-ms mr-10px">评审专家, 你好 !</span>
     </div>
 
     <!-- 用户头像 -->
@@ -122,7 +122,7 @@ import userImg from "@/assets/images/userImg.png";
 const appStore = useAppStore();
 const tagsViewStore = useTagsViewStore();
 const userStore = useUserStore();
-const userInfoFirstName = computed(() => userStore.getUserInfo().name.substring(0, 1));
+// const userInfoFirstName = computed(() => userStore.getUserInfo().name.substring(0, 1));
 
 const settingStore = useSettingsStore();
 

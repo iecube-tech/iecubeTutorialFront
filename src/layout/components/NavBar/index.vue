@@ -10,13 +10,17 @@
     </div> -->
 
     <!-- 导航栏右侧 -->
-    <div class="flex flex-row justify-center items-center space-x-2 ml-4" @click="goHome">
-      <img :src="logo" class="logo-image w30px h30px" />
-      <span class="logo-title text-20px font-bold" style="color: #339498">
+    <div
+      class="flex flex-row justify-center items-center space-x-2 ml-4"
+      @click="goHome"
+    >
+      <div class="logo-image"></div>
+      <img :src="logo" class="h40px" />
+      <img :src="logo_text" class="h40px" />
+      <!-- <span class="logo-title text-20px font-bold" style="color: #339498">
         {{ defaultSettings.title }}
-      </span>
+      </span> -->
     </div>
-
 
     <!-- 导航栏右侧 -->
     <NavbarAction />
@@ -26,17 +30,16 @@
 <script setup lang="ts">
 import { useAppStore } from "@/store";
 import logo from "@/assets/logo.svg";
+import logo_text from "@/assets/logo_text.svg";
 import defaultSettings from "@/settings";
 
 import route from "@/router";
-
 
 const appStore = useAppStore();
 
 function toggleSideBar() {
   appStore.toggleSidebar();
 }
-
 
 function goHome() {
   route.push({ path: "/dashboard" });
@@ -50,4 +53,8 @@ function goHome() {
   height: $navbar-height;
   background: var(--el-bg-color);
 }
+
+
+.st0{fill:#122E66;}
+
 </style>
