@@ -33,7 +33,7 @@
               class="w-full mb-4"
               size="large"
               :disabled="phone.length !== 11"
-              @click="nextStepTwo"
+              @click="debouncedNextStepTwo"
             >
               下一步
             </el-button>
@@ -127,7 +127,7 @@
 
           <p class="mb-2">
             <span v-if="time > 0">{{ time }} 秒后可重新获取验证码</span>
-            <span v-else class="cursor-pointer text-blue-500" @click="reSendCode">
+            <span v-else class="cursor-pointer text-blue-500" @click="debouncedResendCode">
               重新获取验证码
             </span>
           </p>
@@ -196,6 +196,7 @@
 
   import { login, getVerifCode, reLogin } from '@/api/login'
   import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
+  import { debounce } from 'lodash';
 
   // 手机登录相关
   const step = ref(1)
@@ -245,6 +246,8 @@
     await sendCode(phone.value)
     startTime()
   }
+  
+  const debouncedResendCode = debounce(reSendCode, 500)
 
   /** 登录表单提交 */
   function doLogin() {
@@ -358,6 +361,8 @@
         .catch(err => {})
     }
   }
+  
+  const debouncedNextStepTwo = debounce(nextStepTwo, 500)
 
   // 验证码相关
   const emit = defineEmits(['complete', 'change', 'resend', 'focus', 'blur', 'error'])
