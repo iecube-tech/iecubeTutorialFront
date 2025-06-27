@@ -63,9 +63,9 @@
         </template>
 </el-dropdown>
 </template> -->
-    <div class="flex items-center">
+    <!-- <div class="flex items-center">
       <span class="text-ms mr-10px">评审专家, 你好 !</span>
-    </div>
+    </div> -->
 
     <!-- 用户头像 -->
     <el-dropdown class="nav-action-item" trigger="click">
