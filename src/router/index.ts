@@ -111,7 +111,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/groupManage',
     meta: {
-      roles: ['admin', 'operator','super']
+      roles: ['admin', 'operator']
     },
     children: [
       {
@@ -132,7 +132,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/userManage',
     meta: {
-      roles: ['admin', 'operator','super']
+      roles: ['admin', 'operator']
     },
     children: [
       {
@@ -174,7 +174,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/configurationManage',
     meta: {
-      roles: ['admin', 'operator','super']
+      roles: ['admin', 'operator']
     },
     children: [
       {
@@ -195,7 +195,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/myApplication',
     meta: {
-      roles: ['admin', 'operator','super']
+      roles: ['admin', 'operator']
     },
     children: [
       {
@@ -216,7 +216,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/myApproval',
     meta: {
-      roles: ['admin', 'super']
+      roles: ['admin']
     },
     children: [
       {

@@ -60,7 +60,7 @@
             <el-button type="primary" link icon="View" @click="handleShowDetail(row)">
               查看
             </el-button>
-            <el-button type="primary" link icon="Delete" @click="handleDelete(row)">删除</el-button>
+            <!-- <el-button type="primary" link icon="Delete" @click="handleDelete(row)">删除</el-button> -->
           </template>
         </el-table-column>
       </el-table>

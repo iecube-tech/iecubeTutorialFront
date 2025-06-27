@@ -10,7 +10,7 @@
     <div class="flex-1 flex flex-col justify-center items-center">
       <el-card class="login-card">
         <!-- step one -->
-        <main v-show="step === 1" class="wh-full flex flex-col justify-between">
+        <main v-if="step === 1" class="wh-full flex flex-col justify-between">
           <div>
             <div class="step-title">欢迎使用 {{ defaultSettings.title }}</div>
             <div class="mb-4 text-sm">
@@ -56,7 +56,7 @@
         </main>
 
         <!-- step two -->
-        <main v-show="step === 2" class="wh-full relative">
+        <main v-if="step === 2" class="wh-full relative">
           <!-- 返回按钮 -->
           <el-button link class="back-button" @click="handleBack">
             <el-icon>
@@ -142,7 +142,7 @@
         </main>
 
         <!-- step three -->
-        <main v-show="step === 3" class="wh-full flex flex-col relative">
+        <main v-if="step === 3" class="wh-full flex flex-col relative">
           <!-- 返回按钮 -->
           <div>
             <el-button link class="back-button" @click="handleBack">
