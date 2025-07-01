@@ -57,8 +57,13 @@ service.interceptors.response.use(
   },
   (error: any) => {
     const { status, message } = error
+    if(status === ResultEnum.UNAUTHORIZED){
+      useUserStoreHook().resetToken()
+      return
+    }
+    
     // 异常处理
-    if (status === ResultEnum.TOKEN_INVALID || status === ResultEnum.UNAUTHORIZED) {
+    if (status === ResultEnum.TOKEN_INVALID) {
       f = true
       if (f) {
         ElMessageBox.confirm('您的会话已过期，请重新登录', '提示', {
