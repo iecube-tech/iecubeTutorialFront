@@ -61,6 +61,9 @@ export const useUserStore = defineStore('user', () => {
   function resetToken() {
     return new Promise<void>(resolve => {
       localStorage.setItem('token', '')
+      localStorage.setItem('refreshToken', '')
+      localStorage.removeItem('userInfo')
+      localStorage.removeItem('login')
       resetRouter()
       resolve()
     })
