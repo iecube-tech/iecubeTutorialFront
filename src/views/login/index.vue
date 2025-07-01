@@ -47,12 +47,12 @@
               </span>
             </span>
           </div>
-          <div class="flex flex-col justify-center items-center text-sm">
+          <!-- <div class="flex flex-col justify-center items-center text-sm">
             <el-divider>没有账号?</el-divider>
             <span style="color: #3370ff" class="cursor-pointer" @click="handleRegister">
               立即注册
             </span>
-          </div>
+          </div> -->
         </main>
 
         <!-- step two -->
@@ -171,7 +171,7 @@
               </div>
               <div class="flex-1">
                 <div class="group-name">{{ item.name }}</div>
-                <div class="usesr-name">朱晓曦</div>
+                <div class="usesr-name">{{ userInfo.name }}</div>
               </div>
               <el-icon class="text-xl icon-font">
                 <ArrowRightBold />
@@ -197,6 +197,9 @@
   import { login, getVerifCode, reLogin } from '@/api/login'
   import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
   import { debounce } from 'lodash';
+  
+  const userInfo = ref(null)
+  // userInfo.value = userStore.getUserInfo()
 
   // 手机登录相关
   const step = ref(1)
@@ -260,12 +263,15 @@
       .then(res => {
         if (res.state == 200) {
           let { login, user, orgSec, accessToken, refreshToken } = res.data
+          userStore.setUserInfo(user)
+          userInfo.value = user
           userStore.setLogin(login)
           if (login === true) {
             localStorage.setItem(TOKEN_KEY, accessToken)
             localStorage.setItem(TOKEN_REFRESH_KEY, refreshToken)
             user.orgSec = orgSec
             userStore.setUserInfo(user)
+            userInfo.value = user
             const { path, queryParams } = parseRedirect()
             router.push({ path: path, query: queryParams })
           } else {
@@ -291,6 +297,7 @@
         localStorage.setItem(TOKEN_REFRESH_KEY, refreshToken)
         user.orgSec = orgSec
         userStore.setUserInfo(user)
+        userInfo.value = user
         const { path, queryParams } = parseRedirect()
         router.push({ path: path, query: queryParams })
       }

@@ -16,7 +16,9 @@ export const useUserStore = defineStore('user', () => {
   }
 
   function getLogin() {
-    return localStorage.getItem('login')
+    let loginStr = localStorage.getItem('login')
+    let login = loginStr == 'true'
+    return login
   }
 
   function setUserInfo(userInfo: any) {

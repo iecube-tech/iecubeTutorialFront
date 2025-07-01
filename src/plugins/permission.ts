@@ -14,14 +14,13 @@ import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
 
 export function setupPermission() {
   // 白名单路由
-  const whiteList = ["/login", "/terms", "/signup", "/applyBetaCode"];
+  const whiteList = ["/login", "/terms"] //, "/signup", "/applyBetaCode"];
 
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
     // const hasToken = localStorage.getItem(TOKEN_KEY);
     const userStore = useUserStore();
     const hasLogin = userStore.getLogin();
-
     if (hasLogin) {
       if (to.path === "/login") {
         // 如果已登录，跳转到首页
@@ -29,7 +28,6 @@ export function setupPermission() {
         NProgress.done();
       } else {
         
-        console.log(to.matched.length)
         if(to.matched.length === 0){
           next(from.name ? { name: from.name } : "/404");
         }
@@ -72,7 +70,6 @@ export function setupPermission() {
       }
     } else {
       // 未登录
-      // console.log(to.path);
       if (whiteList.includes(to.path)) {
         next(); // 在白名单，直接进入
       } else {

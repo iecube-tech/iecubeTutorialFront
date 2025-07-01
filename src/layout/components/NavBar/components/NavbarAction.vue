@@ -116,6 +116,7 @@
         user.orgSec = orgSec
         userStore.setUserInfo(user)
         userInfo.value = user
+        window.location.reload(true);
       }
     })
   }

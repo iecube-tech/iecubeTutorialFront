@@ -81,3 +81,10 @@ export const getOrgList = () => {
     method: 'get'
   })
 }
+
+export const getUserColleague = () => {
+  return request({
+    url: '/su/auth/colleague',
+    method: 'get'
+  })
+}

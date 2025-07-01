@@ -228,7 +228,7 @@
 
         <p class="mt-0 mb-4 font-bold text-bold">历史记录</p>
         <div class="p-4">
-          <el-table :data="tableData" style="width: 100%" show-overflow-tooltip>
+          <el-table :data="paginatedData" style="width: 100%" show-overflow-tooltip>
             <!-- <el-table-column prop="name" label="文件名称" /> -->
             <el-table-column prop="title" label="课程名称" />
             <el-table-column prop="knowledgePoint" label="知识点" />
@@ -280,6 +280,16 @@
               </template>
             </el-table-column>
           </el-table>
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[10, 20, 50, 100]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="tableData.length"
+            class="mt-2"
+          />
         </div>
       </el-tab-pane>
 
@@ -349,6 +359,26 @@
   }
 
   const tableData = ref([])
+  
+  // 分页参数
+  const currentPage = ref(1)
+  const pageSize = ref(10);
+  
+  const paginatedData = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return tableData.value.slice(start, end);
+  });
+  
+  const handleSizeChange = (newSize) => {
+    currentPage.value = 1;
+    pageSize.value = newSize;
+  };
+
+  const handleCurrentChange = (newPage) => {
+    currentPage.value = newPage;
+  };
+  
 
   const getStateCn = state => {
     let statusZn = ''
