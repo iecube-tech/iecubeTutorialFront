@@ -2,7 +2,9 @@
   <div class="app-container">
     <div class="mb-4">
       <div class="flex justify-between items-start gap-4">
-        <el-button type="primary" icon="Plus" @click="openRechargeDialog">申请积分充值</el-button>
+        <div>
+          <!--  <el-button type="primary" icon="Plus" @click="openRechargeDialog">申请积分充值</el-button> -->
+        </div>
         <div class="flex flex-row gap-4 w-[220px]">
           <el-select v-model="filterForm.status" placeholder="状态筛选" clearable>
             <el-option
@@ -67,7 +69,7 @@
     </div>
 
     <applyDetailDialog ref="applyDetailDialogRef" :appoverList="appoverList"/>
-    <rechangeDialog ref="rechangeDialogRef" @refresh="initTableData" />
+    <!-- <rechangeDialog ref="rechangeDialogRef" @refresh="initTableData" /> -->
   </div>
 </template>
 

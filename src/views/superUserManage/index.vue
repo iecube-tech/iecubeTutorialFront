@@ -21,6 +21,14 @@
     <div>
       <el-table :data="tableData">
         <el-table-column prop="name" label="姓名" />
+        <el-table-column prop="phone" label="电话" />
+        <el-table-column prop="role" label="角色">
+          <template #default="{ row }">
+            <el-tag :type="getRoleZn(row.role).type">
+              {{ getRoleZn(row.role).label }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态">
           <template #default="{ row }">
             <el-tag :type="getUserStatusZn(row.status).type">
@@ -28,14 +36,6 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="role" label="角色" width="180">
-          <template #default="{ row }">
-            <el-tag :type="getRoleZn(row.role).type">
-              {{ getRoleZn(row.role).label }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="phone" label="电话" width="180" />
         <el-table-column label="操作">
           <template #default="{ row }">
             <el-button

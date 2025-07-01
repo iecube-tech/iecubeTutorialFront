@@ -27,16 +27,6 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/login/terms.vue'),
     meta: { hidden: true }
   },
-  /* {
-    path: '/signup',
-    component: () => import('@/views/login/signupPage.vue'),
-    meta: { hidden: true }
-  },
-  {
-    path: '/applyBetaCode',
-    component: () => import('@/views/login/applyBetaCode.vue'),
-    meta: { hidden: true }
-  }, */
   {
     path: '/',
     name: '/',
@@ -70,167 +60,142 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/error-page/404.vue'),
         meta: { hidden: true }
       },
-      // {
-      //   path: '/showDigitalPlan',
-      //   component: () => import('@/views/digitalPlan/showDigitalPlan.vue'),
-      //   meta: { hidden: true }
-      // },
-      // {
-      //   path: '/transactionRecord',
-      //   component: () => import('@/views/transactionRecord/index.vue'),
-      //   meta: { hidden: true }
-      // }
-      // {
-      //   path: "/userManage",
-      //   component: () => import("@/views/userManage/index.vue"),
-      //   meta: { hidden: true },
-      // }
+      {
+        path: '/transactionRecord/:id',
+        component: () => import('@/views/transactionRecord/index.vue'),
+        meta: { hidden: true }
+      },
     ]
   },
-  // {
-  //   path: '/',
-  //   name: 'learn',
-  //   component: Layout,
-  //   redirect: '/digitalPlan', // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
-  //   children: [
-  //     {
-  //       component: () => import('@/views/digitalPlan/index.vue'),
-  //       path: '/digitalPlan',
-  //       name: 'digitalPlan',
-  //       meta: {
-  //         title: '数字教案',
-  //         icon: 'document',
-  //         keepAlive: true
-  //       }
-  //     }
-  //   ]
-  // },
-  {
-    path: '/',
-    name: 'group',
-    component: Layout,
-    redirect: '/groupManage',
-    meta: {
-      roles: ['admin', 'operator']
-    },
-    children: [
-      {
-        component: () => import('@/views/groupManage/index.vue'),
-        path: '/groupManage',
-        name: 'groupManage',
+  
+        {
+        path: '/',
+        name: 'group',
+        component: Layout,
+        redirect: '/groupManage',
         meta: {
-          title: '组织管理',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'user',
-    component: Layout,
-    redirect: '/userManage',
-    meta: {
-      roles: ['admin', 'operator']
-    },
-    children: [
+          roles: ['operator']
+        },
+        children: [
+          {
+            component: () => import('@/views/groupManage/index.vue'),
+            path: '/groupManage',
+            name: 'groupManage',
+            meta: {
+              title: '组织管理',
+              icon: 'document',
+              keepAlive: true
+            }
+          }
+        ]
+      },
       {
-        component: () => import('@/views/userManage/index.vue'),
-        path: '/userManage',
-        name: 'userManage',
+        path: '/',
+        name: 'user',
+        component: Layout,
+        redirect: '/userManage',
         meta: {
-          title: '用户管理',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'superUser',
-    component: Layout,
-    redirect: '/superUserManage',
-    meta: {
-      roles: ['super']
-    },
-    children: [
+          roles: ['operator']
+        },
+        children: [
+          {
+            component: () => import('@/views/userManage/index.vue'),
+            path: '/userManage',
+            name: 'userManage',
+            meta: {
+              title: '用户管理',
+              icon: 'document',
+              keepAlive: true
+            }
+          }
+        ]
+      },
       {
-        component: () => import('@/views/superUserManage/index.vue'),
-        path: '/superUserManage',
-        name: 'superUserManage',
+        path: '/',
+        name: 'superUser',
+        component: Layout,
+        redirect: '/superUserManage',
         meta: {
-          title: '管理用户',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'configuration',
-    component: Layout,
-    redirect: '/configurationManage',
-    meta: {
-      roles: ['admin', 'operator']
-    },
-    children: [
+          roles: ['super']
+        },
+        children: [
+          {
+            component: () => import('@/views/superUserManage/index.vue'),
+            path: '/superUserManage',
+            name: 'superUserManage',
+            meta: {
+              title: '管理用户',
+              icon: 'document',
+              keepAlive: true
+            }
+          }
+        ]
+      },
       {
-        component: () => import('@/views/configurationManage/index.vue'),
-        path: '/configurationManage',
-        name: 'configurationManage',
+        path: '/',
+        name: 'configuration',
+        component: Layout,
+        redirect: '/configurationManage',
         meta: {
-          title: '配置管理',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'application',
-    component: Layout,
-    redirect: '/myApplication',
-    meta: {
-      roles: ['admin', 'operator']
-    },
-    children: [
+          roles: ['admin']
+        },
+        children: [
+          {
+            component: () => import('@/views/configurationManage/index.vue'),
+            path: '/configurationManage',
+            name: 'configurationManage',
+            meta: {
+              title: '配置管理',
+              icon: 'document',
+              keepAlive: true
+            }
+          }
+        ]
+      },
       {
-        component: () => import('@/views/myApplication/index.vue'),
-        path: '/myApplication',
-        name: 'myApplication',
+        path: '/',
+        name: 'application',
+        component: Layout,
+        redirect: '/myApplication',
         meta: {
-          title: '我的申请',
-          icon: 'document',
-          keepAlive: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/',
-    name: 'approval',
-    component: Layout,
-    redirect: '/myApproval',
-    meta: {
-      roles: ['admin']
-    },
-    children: [
+          roles: ['admin', 'operator']
+        },
+        children: [
+          {
+            component: () => import('@/views/myApplication/index.vue'),
+            path: '/myApplication',
+            name: 'myApplication',
+            meta: {
+              title: '我的申请',
+              icon: 'document',
+              keepAlive: true
+            }
+          }
+        ]
+      },
       {
-        component: () => import('@/views/myApproval/index.vue'),
-        path: '/myApproval',
-        name: 'myApproval',
+        path: '/',
+        name: 'approval',
+        component: Layout,
+        redirect: '/myApproval',
         meta: {
-          title: '我的审批',
-          icon: 'document',
-          keepAlive: true
-        }
+          roles: ['admin']
+        },
+        children: [
+          {
+            component: () => import('@/views/myApproval/index.vue'),
+            path: '/myApproval',
+            name: 'myApproval',
+            meta: {
+              title: '我的审批',
+              icon: 'document',
+              keepAlive: true
+            }
+          }
+        ]
       }
-    ]
-  }
+
+  
   // 外部链接
   // {
   //   path: "/external-link",

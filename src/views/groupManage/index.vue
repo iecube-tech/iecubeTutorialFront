@@ -537,7 +537,7 @@
 
   //
   const openBillPage = row => {
-    let path = router.resolve({ path: '/transactionRecord' })
+    let path = router.resolve({ path: `/transactionRecord/${row.id}` })
     window.open(path.href, '_blank')
   }
 </script>

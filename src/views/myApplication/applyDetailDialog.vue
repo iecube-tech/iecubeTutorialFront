@@ -104,7 +104,7 @@
         {{ getRemark(currentRow) }}
       </el-descriptions-item>
     </el-descriptions>
-    
+
     <el-descriptions
       v-if="currentRow && currentRow.approvalType == 'RECHARGE'"
       :column="2"
@@ -139,7 +139,7 @@
         {{ currentRow.orgTop.name }}
       </el-descriptions-item>
       <el-descriptions-item label="充值金额">
-        <span class="text-red-400 font-bold">{{ currentRow.rechargeQo.rmb }} 元 </span>
+        <span class="text-red-400 font-bold">{{ currentRow.rechargeQo.rmb }} 元</span>
       </el-descriptions-item>
       <el-descriptions-item label="子组织">
         {{ currentRow.orgSec.name }}
@@ -149,6 +149,41 @@
       </el-descriptions-item>
       <el-descriptions-item label="审批意见">
         {{ getRemark(currentRow) }}
+      </el-descriptions-item>
+    </el-descriptions>
+
+    <el-descriptions
+      v-if="currentRow && currentRow.approvalType == 'PRICE_CHANGE'"
+      :column="2"
+      border
+      label-width="120px"
+    >
+      <el-descriptions-item label="申请编号">
+        {{ currentRow.id }}
+      </el-descriptions-item>
+      <el-descriptions-item label="提交时间">
+        {{ moment(currentRow.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+      </el-descriptions-item>
+      <el-descriptions-item label="申请类型">
+        <el-tag :type="getApplyTypeZn(currentRow.approvalType).type">
+          {{ getApplyTypeZn(currentRow.approvalType).label }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="审批人">
+        {{ approverName(currentRow.approverPhone) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="一次消耗积分">
+        <span class="text-red-400 font-bold">
+          {{ currentRow.priceChangeQo.howPointsToOneGenerate }} 个
+        </span>
+      </el-descriptions-item>
+      <el-descriptions-item label="兑换一积分">
+        <span class="text-red-400 font-bold">
+          {{ currentRow.priceChangeQo.howRmbToOnePoint }} 元
+        </span>
+      </el-descriptions-item>
+      <el-descriptions-item label="积分过期时间">
+        <span class="text-red-400 font-bold">{{ currentRow.priceChangeQo.expireDays }} 天</span>
       </el-descriptions-item>
     </el-descriptions>
   </el-dialog>

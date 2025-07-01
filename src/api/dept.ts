@@ -84,3 +84,10 @@ export const getDeptTree = (params: any) => {
     method: 'get',
   })
 }
+
+export const getSecondGroupBill = (secondGroupId: any) => {
+  return request({
+    url: `/sm/o/org/points/bill/${secondGroupId}`,
+    method: 'get',
+  })
+}

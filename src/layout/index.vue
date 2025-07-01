@@ -73,7 +73,10 @@ watchEffect(() => {
     appStore.closeSideBar();
   }
 
-  if (["/showDigitalPlan", "/transactionRecord"].includes(route.path)) {
+  if (["/showDigitalPlan"].includes(route.path)) {
+    appStore.closeSideBar();
+  }
+  if(route.path.startsWith("/transactionRecord")) { 
     appStore.closeSideBar();
   }
 });

@@ -144,6 +144,44 @@
         {{ getRemark(currentRow) }}
       </el-descriptions-item>
     </el-descriptions>
+    
+    <el-descriptions
+      v-if="currentRow && currentRow.approvalType == 'PRICE_CHANGE'"
+      :column="2"
+      border
+      label-width="120px"
+    >
+      <el-descriptions-item label="申请编号">
+        {{ currentRow.id }}
+      </el-descriptions-item>
+      <el-descriptions-item label="提交时间">
+        {{ moment(currentRow.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+      </el-descriptions-item>
+      <el-descriptions-item label="申请类型">
+        <el-tag :type="getApplyTypeZn(currentRow.approvalType).type">
+          {{ getApplyTypeZn(currentRow.approvalType).label }}
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="申请人">
+       {{ currentRow.creator.name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="一次消耗积分">
+        <span class="text-red-400 font-bold">
+          {{ currentRow.priceChangeQo.howPointsToOneGenerate }} 个
+        </span>
+      </el-descriptions-item>
+      <el-descriptions-item label="兑换一积分">
+        <span class="text-red-400 font-bold">
+          {{ currentRow.priceChangeQo.howRmbToOnePoint }} 元
+        </span>
+      </el-descriptions-item>
+      <el-descriptions-item label="积分过期时间">
+        <span class="text-red-400 font-bold">{{ currentRow.priceChangeQo.expireDays }} 天</span>
+      </el-descriptions-item>
+      <el-descriptions-item label="审批意见" v-if="remarkVisible(currentRow)">
+        {{ getRemark(currentRow) }}
+      </el-descriptions-item>
+    </el-descriptions>
 
     <!-- 审批操作区域 -->
     <div class="approval-actions" v-if="currentRow.status === 'PENDING'">

@@ -1,42 +1,48 @@
-import {
-  NavigationGuardNext,
-  RouteLocationNormalized,
-  RouteRecordRaw,
-} from "vue-router";
+import { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 
-import NProgress from "@/utils/nprogress";
+import NProgress from '@/utils/nprogress'
 // import { TOKEN_KEY } from "@/enums/CacheEnum";
-import router from "@/router";
-import { constantRoutes } from "@/router";
-import { usePermissionStore, useUserStore } from "@/store";
+import router from '@/router'
+import { constantRoutes } from '@/router'
+import { usePermissionStore, useUserStore } from '@/store'
 import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
-
 
 export function setupPermission() {
   // 白名单路由
-  const whiteList = ["/login", "/terms", "/signup", "/applyBetaCode"];
+  const whiteList = ['/login', '/terms', '/signup', '/applyBetaCode']
 
   router.beforeEach(async (to, from, next) => {
-    NProgress.start();
-    const hasToken = localStorage.getItem(TOKEN_KEY);
+    NProgress.start()
+    const hasToken = localStorage.getItem(TOKEN_KEY)
 
     if (hasToken) {
-      if (to.path === "/login") {
+      if (to.path === '/login') {
         // 如果已登录，跳转到首页
-        next({ path: "/" });
-        NProgress.done();
+        next({ path: '/' })
+        NProgress.done()
       } else {
-        if (to.matched.length === 0) {
-          next(from.name ? { name: from.name } : "/404");
+        // 如果已登录，判断是否有权限
+        const userStore = useUserStore()
+        const usreInfo = userStore.getUserInfo()
+        let role = usreInfo.role.toLowerCase()
+        
+        if (to.meta.roles == undefined) {
+          if (to.matched.length === 0) {
+            next(from.name ? { name: from.name } : '/')
+          }
+          next()
+        } else if (to.meta.roles.includes(role)) {
+          next()
+        } else {
+          next('/')
         }
-        next();
-        // const userStore = useUserStore();
-        // const hasRoles =
-        //   userStore.user.roles && userStore.user.roles.length > 0;
+        /*  const userStore = useUserStore();
+        const hasRoles =
+          userStore.user.roles && userStore.user.roles.length > 0; */
 
         // if (hasRoles) {
-          // 如果未匹配到任何路由，跳转到404页面
-          /* if (to.matched.length === 0) {
+        // 如果未匹配到任何路由，跳转到404页面
+        /* if (to.matched.length === 0) {
             next(from.name ? { name: from.name } : "/404");
           } else {
             // 如果路由参数中有 title，覆盖路由元信息中的 title
@@ -52,63 +58,57 @@ export function setupPermission() {
           try {
             await userStore.getUserInfo(); */
 
-            // 生成路由
-            /* const dynamicRoutes = await permissionStore.generateRoutes();
+        // 生成路由
+        /* const dynamicRoutes = await permissionStore.generateRoutes();
             dynamicRoutes.forEach((route: RouteRecordRaw) =>
               router.addRoute(route)
             ); */
-           /*  next({ ...to, replace: true });
+        /*  next({ ...to, replace: true });
           } catch (error) {
             // 移除 token 并重定向到登录页，携带当前页面路由作为跳转参数
             await userStore.resetToken();
             redirectToLogin(to, next);
             NProgress.done();
           } 
-        }*/
+        } */
       }
     } else {
       // 未登录
       // console.log(to.path);
       if (whiteList.includes(to.path)) {
-        next(); // 在白名单，直接进入
+        next() // 在白名单，直接进入
       } else {
         // 不在白名单，重定向到登录页
-        redirectToLogin(to, next);
-        NProgress.done();
+        redirectToLogin(to, next)
+        NProgress.done()
       }
     }
-  });
+  })
 
   router.afterEach(() => {
-    NProgress.done();
-  });
+    NProgress.done()
+  })
 }
 
 /** 重定向到登录页 */
-function redirectToLogin(
-  to: RouteLocationNormalized,
-  next: NavigationGuardNext
-) {
-  const params = new URLSearchParams(to.query as Record<string, string>);
-  const queryString = params.toString();
-  const redirect = queryString ? `${to.path}?${queryString}` : to.path;
-  next(`/login?redirect=${encodeURIComponent(redirect)}`);
+function redirectToLogin(to: RouteLocationNormalized, next: NavigationGuardNext) {
+  const params = new URLSearchParams(to.query as Record<string, string>)
+  const queryString = params.toString()
+  const redirect = queryString ? `${to.path}?${queryString}` : to.path
+  next(`/login?redirect=${encodeURIComponent(redirect)}`)
 }
 
 /** 判断是否有权限 */
-export function hasAuth(
-  value: string | string[],
-  type: "button" | "role" = "button"
-) {
-  const { roles, perms } = useUserStore().user;
+export function hasAuth(value: string | string[], type: 'button' | 'role' = 'button') {
+  const { roles, perms } = useUserStore().user
 
   // 超级管理员 拥有所有权限
-  if (type === "button" && roles.includes("ROOT")) {
-    return true;
+  if (type === 'button' && roles.includes('ROOT')) {
+    return true
   }
 
-  const auths = type === "button" ? perms : roles;
-  return typeof value === "string"
+  const auths = type === 'button' ? perms : roles
+  return typeof value === 'string'
     ? auths.includes(value)
-    : value.some((perm) => auths.includes(perm));
+    : value.some(perm => auths.includes(perm))
 }
