@@ -9,7 +9,7 @@ import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
 
 export function setupPermission() {
   // 白名单路由
-  const whiteList = ['/login', '/terms', '/signup', '/applyBetaCode']
+  const whiteList = ['/login', '/terms'] //, '/signup', '/applyBetaCode']
 
   router.beforeEach(async (to, from, next) => {
     NProgress.start()
