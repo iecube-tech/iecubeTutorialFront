@@ -64,6 +64,8 @@
 
   import userImg from '@/assets/images/userImg.png'
   import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
+  
+  import { debounce } from 'lodash'
 
   const appStore = useAppStore()
   const tagsViewStore = useTagsViewStore()
@@ -106,7 +108,7 @@
 
   getGroupList()
 
-  function handleGroupClick(group) {
+  function groupClick(group) {
     reLogin(group.id).then(res => {
       if (res.state == 200) {
         let { login, user, orgSec, accessToken, refreshToken } = res.data
@@ -120,6 +122,10 @@
       }
     })
   }
+  
+  const handleGroupClick = debounce(group=> {
+    groupClick(group)
+  }, 500)
 
   /* 注销 */
   function logout() {

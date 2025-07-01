@@ -287,8 +287,8 @@
         // loading.value = false;
       })
   }
-
-  function handleGroupClick(group) {
+  
+  function groupClick(group) {
     reLogin(group.id).then(res => {
       if (res.state == 200) {
         let { login, user, orgSec, accessToken, refreshToken } = res.data
@@ -303,6 +303,10 @@
       }
     })
   }
+  
+  const handleGroupClick = debounce(group => {
+    groupClick(group)
+  }, 500)  
 
   /** 解析 redirect 字符串 为 path 和  queryParams */
   function parseRedirect(): {

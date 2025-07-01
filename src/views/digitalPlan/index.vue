@@ -315,6 +315,7 @@
   import { getPlanList, generatePlan, removePlan } from '@/api/plan'
 
   import { useUserStore } from '@/store'
+  import { debounce } from 'lodash';
 
   const userStore = useUserStore()
 
@@ -482,7 +483,7 @@
   import { Base64 } from 'js-base64'
 
   // 一键生成讲义
-  const handleSubmit = () => {
+  const handleGenerate = () => {
     genForm.value.validate(valid => {
       if (valid) {
         let promptText = ''
@@ -519,6 +520,8 @@
       }
     })
   }
+  
+  const handleSubmit = debounce(handleGenerate, 1000)
 
   const tipMessage = () => {
     ElMessage.success({
