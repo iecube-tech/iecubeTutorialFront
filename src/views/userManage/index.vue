@@ -37,7 +37,7 @@
       </div>
       <div class="flex justify-between items-center mb-4">
         <div>
-          <el-button type="primary" @click="addNewUser" :disabled="currentNode.id == ''">
+          <el-button type="primary" @click="openAddUserDialog" :disabled="currentNode.id == ''">
             <Icon size="20">
               <Add />
             </Icon>
@@ -88,7 +88,7 @@
         </el-table>
       </div>
     </div>
-    <el-dialog :title="addUserTitle" v-model="addUserDialogVisible" width="600px">
+    <el-dialog :title="addUserDialog.title" v-model="addUserDialog.visible" width="600px" :before-close="closeAddUserDialog">
       <el-form
         ref="addUserFormRef"
         :model="addUserForm"
@@ -105,7 +105,7 @@
           <el-input v-model="addUserForm.email" />
         </el-form-item>
         <el-form-item label="角色" prop="role">
-          <el-select v-model="addUserForm.role" placeholder="请选择角色">
+          <el-select v-model="addUserForm.role" placeholder="请选择角色" disabled>
             <el-option
               v-for="item in roleOptions"
               :key="item.value"
@@ -262,13 +262,10 @@
 
   const tableData = ref([])
 
-  const addUserFormRef = ref(null)
-  const addUserDialogVisible = ref(false)
-
   const handleSubmitUser = () => {
     addUserFormRef.value.validate((valid: boolean) => {
       if (valid) {
-        if (addUserForm.value.id == '') {
+        if (addUserDialog.value.type == 'add') {
           let user = toRaw(addUserForm.value)
           delete user.id
           addSecondUser({
@@ -278,7 +275,7 @@
           }).then(res => {
             if (res.state == 200) {
               ElMessage.success('提交审批成功！')
-              addUserDialogVisible.value = false
+              closeAddUserDialog()
             }
           })
         } else {
@@ -290,17 +287,17 @@
 
   const closeAddUserDialog = () => {
     setDefaultValue()
-    addUserDialogVisible.value = false
+    addUserDialog.value.visible = false
   }
 
   const setDefaultValue = () => {
-    addUserForm.value.name = ''
-    addUserForm.value.phone = ''
-    addUserForm.value.email = ''
-    addUserForm.value.role = 'USER'
-    addUserForm.value.approver = ''
-
-    addUserFormRef.value.resetFields()
+    addUserForm.value = {
+      name: '',
+      phone: '',
+      email: '',
+      role: 'USER',
+      approver: ''
+    }
     addUserFormRef.value.clearValidate()
   }
 
@@ -308,9 +305,13 @@
     addUserForm.value.phone = addUserForm.value.phone.replace(/\D/g, '')
   }
 
-  const addUserTitle = ref('添加新用户')
+  const addUserFormRef = ref(null)
+  const addUserDialog = ref({
+    title: '添加新用户',
+    visible: false,
+    type: 'add',
+  })
   const addUserForm = ref({
-    id: '',
     name: '',
     phone: '',
     email: '',
@@ -355,9 +356,11 @@
   })
 
   const handleEdit = row => {
-    addUserTitle.value = '编辑用户'
-    addUserDialogVisible.value = true
+    addUserDialog.value.title = '编辑用户'
+    addUserDialog.value.type = 'edit'
+    addUserDialog.value.visible = true
     addUserForm.value = row
+    addUserFormRef.value.clearValidate()
   }
 
   const handleDelete = row => {
@@ -373,9 +376,11 @@
     })
   }
 
-  const addNewUser = () => {
-    addUserTitle.value = '添加新用户'
-    addUserDialogVisible.value = true
+  const openAddUserDialog = () => {
+    addUserDialog.value.title = '添加新用户'
+    addUserDialog.value.type = 'add'
+    addUserDialog.value.visible = true
+    addUserFormRef.value.clearValidate()
   }
 
   const addExsistUser = () => {
