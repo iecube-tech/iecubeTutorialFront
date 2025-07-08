@@ -1,5 +1,5 @@
 ## 项目简介
-厦门大学需求
+成都职业技术学院
 Iecube Tutorial 是基于 Vue3 + Vite5+ TypeScript5 + Element-Plus + Pinia 等主流技术栈构建
 
 

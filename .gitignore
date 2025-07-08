@@ -13,6 +13,7 @@ dist-ssr
 *.sln
 *.local
 .vscode
+.prettierrc
 
 package-lock.json
 pnpm-lock.yaml

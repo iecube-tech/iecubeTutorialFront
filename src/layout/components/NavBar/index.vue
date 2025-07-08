@@ -54,7 +54,4 @@ function goHome() {
   background: var(--el-bg-color);
 }
 
-
-.st0{fill:#122E66;}
-
 </style>
