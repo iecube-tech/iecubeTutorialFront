@@ -7,6 +7,7 @@ import { setupElIcons } from "./icons";
 import { setupVIcon } from './vicons'
 import { setupPermission } from "./permission";
 // import { setupVxeTable } from "./vxeTable";
+import {setupMakeDown} from './markdown'
 
 export default {
   install(app: App<Element>) {
@@ -23,7 +24,10 @@ export default {
     setupI18n(app);
     // Element-plus图标
     setupElIcons(app);
+    // VIcon 图标
     setupVIcon(app);
+    // 全局注册 markdown
+    setupMakeDown(app);
     // 路由守卫
     setupPermission();
   },

@@ -5,7 +5,7 @@
 import onePage from './onePage'
 import multiPages from './multiPages'
 
-export default function(type, planType, hasCode, codeRequirement) {
+export const genPrompts = function(type, planType, hasCode, codeRequirement) {
     // let type = type === '1' ? '整页形式' : '分页形式'
     let planTypeText = planType === '1' ? '概述性的讲解' : '精细化的讲解' 
     let hasCodeText = hasCode === '1' ? '必须包含' : '必要时包含'
@@ -20,3 +20,7 @@ export default function(type, planType, hasCode, codeRequirement) {
 
     return text;
   }
+  
+export const genOutlinePrompts = function(type, planType, hasCode, codeRequirement) {
+    
+}

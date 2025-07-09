@@ -15,11 +15,11 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/login/terms.vue'),
     meta: { hidden: true }
   },
-  {
-    path: '/signup',
-    component: () => import('@/views/login/signupPage.vue'),
-    meta: { hidden: true }
-  },
+  // {
+  //   path: '/signup',
+  //   component: () => import('@/views/login/signupPage.vue'),
+  //   meta: { hidden: true }
+  // },
   // {
   //   path: '/applyBetaCode',
   //   component: () => import('@/views/login/applyBetaCode.vue'),

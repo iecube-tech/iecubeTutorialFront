@@ -29,7 +29,7 @@ export function setupPermission() {
       } else {
         
         if(to.matched.length === 0){
-          next(from.name ? { name: from.name } : "/404");
+          next(from.name ? { name: from.name } : "/");
         }
         next();
         // const userStore = useUserStore();

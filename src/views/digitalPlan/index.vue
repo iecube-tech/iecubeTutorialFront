@@ -6,9 +6,9 @@
           <svg-icon icon-class="client" class="mr-2" />
           动态讲义
         </template>
-        <p class="mt-0 mb-2" style="display: flow-root">
+        <div class="flow-root mb-2">
           <span class="font-bold text-bold">基础信息</span>
-        </p>
+        </div>
         <el-form
           :model="formData"
           :rules="rules"
@@ -128,7 +128,7 @@
             </div>
           </div>
         </el-form>
-        <p class="mt-0 mb-2 font-bold" v-show="advanceSettingVisible">
+        <div class="mt-0 mb-2 font-bold" v-show="advanceSettingVisible">
           <el-button type="primary" link @click="toggleAdvanceSettingVisible">
             <span class="font-bold text-bold text-base hover:text-zeng">
               <el-icon>
@@ -148,7 +148,7 @@
               <Sort />
             </el-icon>
           </el-button>
-        </p>
+        </div>
         <el-form :model="formData" v-show="advanceSettingVisible">
           <el-form-item label-width="120px" v-show="!promptSettingVisible" label="生成方式:">
             <el-radio-group v-model="formData.type" prop="type">
@@ -221,13 +221,16 @@
               高级设置
             </span>
           </el-button>
-          <el-button type="primary" class="w-[200px]" @click="handleSubmit">一键生成</el-button>
+          <el-button type="primary" class="w-[160px]" @click="handleSubmit">一键生成</el-button>
+          <el-button type="primary" plain class="w-[160px]" @click="handleGenOutline">
+            先看大纲
+          </el-button>
         </div>
 
-        <el-divider class="my-4" />
+        <el-divider style="margin: 16px 0" />
 
-        <p class="mt-0 mb-4 font-bold text-bold">历史记录</p>
-        <div class="p-4">
+        <div class="mt-0 mb-4 font-bold text-bold">历史记录</div>
+        <div class="px-4">
           <el-table :data="paginatedData" style="width: 100%" show-overflow-tooltip>
             <!-- <el-table-column prop="name" label="文件名称" /> -->
             <el-table-column prop="title" label="课程名称" />
@@ -258,8 +261,16 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="operation" label="操作" width="180">
+            <el-table-column prop="operation" label="操作" width="240">
               <template #default="scope">
+                <el-button
+                  type="primary"
+                  :disabled="scope.row.status != 'DONE'"
+                  link
+                  @click="handleShowOutline(scope.row)"
+                >
+                  大纲
+                </el-button>
                 <el-button
                   type="primary"
                   :disabled="scope.row.status != 'DONE'"
@@ -306,16 +317,25 @@
         </template>
       </el-tab-pane>
     </el-tabs>
+    
+    <markdownDialog ref="markdownDialogRef" />
   </div>
 </template>
 
 <script setup lang="ts">
   import moment from 'moment'
   import router from '@/router'
-  import { getPlanList, generatePlan, removePlan } from '@/api/plan'
+
+  import { debounce } from 'lodash'
+  import { Base64 } from 'js-base64'
+  import { UploadFilled, Loading } from '@element-plus/icons-vue'
+  import * as XLSX from 'xlsx'
 
   import { useUserStore } from '@/store'
-  import { debounce } from 'lodash';
+  import { genPrompts, genOutlinePrompts } from './promptGen.js'
+  import { getPlanList, generatePlan, removePlan } from '@/api/plan'
+  
+  import markdownDialog from './markdownDialog.vue'
 
   const userStore = useUserStore()
 
@@ -360,26 +380,25 @@
   }
 
   const tableData = ref([])
-  
+
   // 分页参数
   const currentPage = ref(1)
-  const pageSize = ref(10);
-  
-  const paginatedData = computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value;
-    const end = start + pageSize.value;
-    return tableData.value.slice(start, end);
-  });
-  
-  const handleSizeChange = (newSize) => {
-    currentPage.value = 1;
-    pageSize.value = newSize;
-  };
+  const pageSize = ref(10)
 
-  const handleCurrentChange = (newPage) => {
-    currentPage.value = newPage;
-  };
-  
+  const paginatedData = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value
+    const end = start + pageSize.value
+    return tableData.value.slice(start, end)
+  })
+
+  const handleSizeChange = newSize => {
+    currentPage.value = 1
+    pageSize.value = newSize
+  }
+
+  const handleCurrentChange = newPage => {
+    currentPage.value = newPage
+  }
 
   const getStateCn = state => {
     let statusZn = ''
@@ -407,10 +426,7 @@
     getPlanList()
       .then(res => {
         tableData.value = res.data
-
         for (let i = 0; i < tableData.value.length; i++) {
-          // tableData.value[i].createTime = moment(tableData.value[i].createTime).utc().format('YYYY-MM-DD HH:mm:ss')
-          // tableData.value[i].createTime = moment(tableData.value[i].createTime).utc().format('YYYY-MM-DD HH:mm:ss')
           tableData.value[i].statusZn = getStateCn(tableData.value[i].status)
         }
       })
@@ -432,6 +448,17 @@
   onBeforeUnmount(() => {
     clearInterval(intervalTime.value)
   })
+
+  // TODO:查看大纲 
+  const markdownDialogRef = ref(null)
+  const handleShowOutline = async row => {
+    // console.log(row)
+    // console.log(row.name)
+    let res = await fetch('/a.md')
+    const htmlContent = await res.text()
+    console.log('查看大纲')
+    markdownDialogRef.value.open(htmlContent)
+  }
 
   // 查看讲义
   const handleShowPlan = row => {
@@ -478,10 +505,6 @@
     })
   }
 
-  import genPrompts from './promptGen.js'
-
-  import { Base64 } from 'js-base64'
-
   // 一键生成讲义
   const handleGenerate = () => {
     genForm.value.validate(valid => {
@@ -512,7 +535,7 @@
         })
         Promise.all(promises)
           .then(res => {
-            tipMessage()
+            tipMessage('发送成功！请耐心等待讲义生成完成!')
           })
           .catch(err => {
             getList()
@@ -520,12 +543,56 @@
       }
     })
   }
-  
+
   const handleSubmit = debounce(handleGenerate, 1000)
 
-  const tipMessage = () => {
+  // 生成大纲
+  const handleGenerateOutline = () => {
+    genForm.value.validate(valid => {
+      if (valid) {
+        //let promptText = ''
+        /* if (!promptSettingVisible.value) {
+          promptText = genPrompts(
+            formData.type,
+            formData.planType,
+            formData.hasCode,
+            formData.codeRequirement
+          )
+        } else {
+          promptText = formData.prompt
+        } 
+
+        promptText = Base64.encode(promptText)*/
+
+        let promises = []
+        formData.knowledgePoints.forEach(knowledgePoints => {
+          let promptText = Base64.encode(
+            `生成${formData.title}课程的${knowledgePoints}知识点教学大纲`
+          )
+          let req = {
+            name: formData.name,
+            title: formData.title,
+            knowledgePoints: knowledgePoints,
+            instruction: promptText
+          }
+          promises.push(doCreatePlan(req))
+        })
+        Promise.all(promises)
+          .then(res => {
+            tipMessage('发送成功！请耐心等待大纲生成完成!')
+          })
+          .catch(err => {
+            getList()
+          })
+      }
+    })
+  }
+
+  const handleGenOutline = debounce(handleGenerateOutline, 1000)
+
+  const tipMessage = msg => {
     ElMessage.success({
-      message: '发送成功！请耐心等待讲义生成完成!',
+      message: msg, //,
       duration: 10 * 1000,
       showClose: true,
       customClass: 'el-message el-message--success is-closable myToast',
@@ -545,8 +612,6 @@
   }
 
   // 批量上传
-  import { UploadFilled, Loading } from '@element-plus/icons-vue'
-  import * as XLSX from 'xlsx'
 
   let loading = ref(false)
   const fileName = ref('')
@@ -671,7 +736,7 @@
 <style lang="scss" scoped>
   .digitalPlanContainer {
     :deep(.el-tabs__content) {
-      height: calc(100vh - 130px);
+      height: calc(100vh - 120px);
       overflow-y: auto;
     }
   }

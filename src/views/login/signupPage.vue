@@ -52,7 +52,7 @@
     <el-dialog title="" v-model="isRead" top="50px" width="50%" :modal="false" :show-close="false"
       :close-on-click-modal="false" :close-on-press-escape="false">
       <div class="overflow-y-auto" style="height: calc(100vh - 250px)">
-        <markdown-it class="markdown-body" :source="text" />
+        <MdPreview class="markdown-body" :modelValue="text" />
       </div>
       <div class="mt-4">
         <el-button class="w-full" type="primary" @click="closeRead">
@@ -66,8 +66,6 @@
 <script setup>
 import subTitle from "./subTitle.vue";
 
-import MarkdownIt from "vue3-markdown-it";
-import "markdown-it-highlightjs";
 import router from "@/router";
 
 import defaultSettings from "@/settings";

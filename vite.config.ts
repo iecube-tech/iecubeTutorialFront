@@ -11,6 +11,7 @@ import IconsResolver from "unplugin-icons/resolver";
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import mockDevServerPlugin from "vite-plugin-mock-dev-server";
 
+
 import UnoCSS from "unocss/vite";
 import { resolve } from "path";
 import {
@@ -69,10 +70,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
         },
 
-        '/resource': {
+        /* '/resource': {
           changeOrigin: true,
-          target: 'http://tutorial.iecube.local',
-        }
+          target: env.VITE_APP_RESOURCE_URL,
+        } */
       },
     },
     plugins: [
@@ -81,6 +82,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       vueJsx(),
       // MOCK 服务
       env.VITE_MOCK_DEV_SERVER === "true" ? mockDevServerPlugin() : null,
+      
       UnoCSS({
         hmrTopLevelAwait: false,
       }),

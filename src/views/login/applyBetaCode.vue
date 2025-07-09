@@ -24,7 +24,7 @@
 
 <script setup>
 
-import "markdown-it-highlightjs";
+
 import router from "@/router";
 
 import defaultSettings from "@/settings";
