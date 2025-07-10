@@ -3,7 +3,7 @@
     <div class="btn-tools">
       <div></div>
 
-      <div class="h-full flex items-center gap-2">
+      <div class="h-full flex items-center gap-4">
         <Icon
           title="代码"
           :size="iconSize"
@@ -22,6 +22,16 @@
         >
           <Eye />
         </Icon>
+        <el-divider direction="vertical" class="!mx-0"/>
+        <el-select v-model="currentVersion" class="!w-100px" size="small">
+          <el-option label="最新 V3" value="3"></el-option>
+          <el-option label="历史 V2" value="2"></el-option>
+          <el-option label="历史 V1" value="1"></el-option>
+        </el-select>
+        <span>版本</span>
+        <!-- <Icon title="版本" :size="iconSize" class="btn-icon">
+          <Version />
+        </Icon> -->
         <Icon title="保存" :size="iconSize" class="btn-icon" @click="handleSave">
           <Save />
         </Icon>
@@ -65,8 +75,8 @@
                   </div>
                 </div>
                 <div class="flex items-center justify-end gap-2">
-                  <div class="ask-btn" >
-                    <Icon :class="{'icon-disable': askText == ''}"  @click="handAsk">
+                  <div class="ask-btn">
+                    <Icon :class="{ 'icon-disable': askText == '' }" @click="handAsk">
                       <SendAltFilled />
                     </Icon>
                   </div>
@@ -87,7 +97,6 @@
             :throttle="{ leading: 500, initVal: true }"
           >
             <template #template>
-              {{ loading }}
               <div class="loading-text">{{ loadingText }}</div>
               <el-skeleton-item variant="h1" style="width: 100%" class="mt-4 mb-4" />
               <el-skeleton-item variant="text" style="width: 100%" />
@@ -112,7 +121,7 @@
 </template>
 
 <script setup>
-  import { Download, Save, SendAltFilled } from '@vicons/carbon'
+  import { Download, Save, SendAltFilled, Version } from '@vicons/carbon'
   import { Crosshairs, Eye } from '@vicons/fa'
   import { ClipboardCode20Filled } from '@vicons/fluent'
   import resizePanel from './resizePanel.vue'
@@ -125,6 +134,8 @@
   const iconSize = ref(20)
   const isPreview = ref(false)
   const resizePanelRef = ref(null)
+  
+  const currentVersion = ref(1)
 
   const handlePreview = v => {
     isPreview.value = v
@@ -149,7 +160,7 @@
   relativeFilePath.value = route.query.filePath
   fileName.value = route.query.fileName
   id.value = route.query.id
-  
+
   // 刷新页面
   const handleRefresh = () => {
     startLoading()
@@ -167,8 +178,6 @@
     //   await short()
     // }, 3000)
   }
-
-
 
   // 下载文件
   const handleDownload = () => {
@@ -330,8 +339,7 @@
     iframeDoc.removeEventListener('resize', updateHighlight)
     iframeDoc.addEventListener('click', stopEdit)
   }
-  
-  
+
   const handAsk = () => {
     console.log('send message success: ', askText.value)
   }
@@ -382,8 +390,8 @@
     background-color: rgb(240, 240, 240);
     @apply h24px w24px text-gray-800 flex justify-center items-center bg-buttonface  rounded-full cursor-pointer hover:text-zeng;
   }
-  
-  .icon-disable{
+
+  .icon-disable {
     @apply text-gray-400 cursor-not-allowed opacity-50 pointer-events-none;
   }
 
