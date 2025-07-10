@@ -40,8 +40,12 @@
               class="relative bg-neutral-800 border border-neutral-700 rounded-2xl ring-[4px] focus-within:ring-neutral-500/30 focus-within:border-neutral-600 ring-transparent z-10 w-full group"
             >
               <div class="px-4 pt-3 mb-2">
-                <span class="tag inline-block max-w-150px overflow-hidden text-ellipsis whitespace-nowrap" v-show="hoveredElementTagName !== ''">
-                  {{ hoveredElementTagName }} . {{ hoveredElementText }}
+                <span
+                  class="tag inline-block max-w-150px overflow-hidden text-ellipsis whitespace-nowrap"
+                  v-show="hoveredElementTagName !== ''"
+                >
+                  <span>{{ hoveredElementTagName }}</span>
+                  <span v-show="hoveredElementText !== ''">.{{ hoveredElementText }}</span>
                 </span>
               </div>
               <div class="w-full relative flex items-center justify-between">
@@ -54,15 +58,15 @@
               </div>
               <div class="flex items-center justify-between gap-2 px-4 pb-3">
                 <div class="flex-1 flex items-center justify-start gap-2">
-                  <div class="ask-btn" @click="startEdit">
-                    <Icon>
+                  <div class="ask-btn">
+                    <Icon :class="{ isActive: isEdit }" @click="startEdit">
                       <Crosshairs />
                     </Icon>
                   </div>
                 </div>
                 <div class="flex items-center justify-end gap-2">
-                  <div class="ask-btn">
-                    <Icon>
+                  <div class="ask-btn" >
+                    <Icon :class="{'icon-disable': askText == ''}"  @click="handAsk">
                       <SendAltFilled />
                     </Icon>
                   </div>
@@ -118,9 +122,6 @@
 
   import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
 
-  // 左侧编辑器
-  const askText = ref('')
-
   const iconSize = ref(20)
   const isPreview = ref(false)
   const resizePanelRef = ref(null)
@@ -140,6 +141,21 @@
 
   updateTime()
 
+  const route = useRoute()
+  const relativeFilePath = ref('')
+  const htmlText = ref('')
+  const fileName = ref('')
+  const id = ref(null)
+  relativeFilePath.value = route.query.filePath
+  fileName.value = route.query.fileName
+  id.value = route.query.id
+  
+  // 刷新页面
+  const handleRefresh = () => {
+    startLoading()
+    updateTime()
+  }
+
   const startLoading = () => {
     loading.value = true
   }
@@ -152,27 +168,7 @@
     // }, 3000)
   }
 
-  const route = useRoute()
-  const relativeFilePath = ref('')
-  const htmlText = ref('')
-  const fileName = ref('')
-  const id = ref(null)
-  relativeFilePath.value = route.query.filePath
-  fileName.value = route.query.fileName
-  id.value = route.query.id
 
-  const editorVisible = ref(true)
-  const editorRef = ref(null)
-  let editorInstance = null
-
-  // 打开关闭编辑器
-  const openEditor = () => {
-    editorVisible.value = true
-  }
-
-  const closeEditor = () => {
-    editorVisible.value = false
-  }
 
   // 下载文件
   const handleDownload = () => {
@@ -199,13 +195,9 @@
       */
   }
 
-  // 刷新页面
-  const handleRefresh = () => {
-    startLoading()
-    updateTime()
-  }
-
   // 初始化编辑器
+  const editorRef = ref(null)
+  let editorInstance = null
   const createEditor = text => {
     editorInstance = monaco.editor.create(editorRef.value, {
       value: text,
@@ -236,28 +228,30 @@
 
   init()
 
-  //编辑相关
+  //编辑相关代码
   import { throttle } from 'lodash'
 
   const highlightBoxRef = ref(null)
   const highlightTagRef = ref(null)
   const iframeRef = ref(null)
   const hoveredElement = ref(null)
+  const hoveredElementClone = ref(null)
+  const isEdit = ref(false)
+  const askText = ref('')
 
   const hoveredElementTagName = computed(() => {
-    return hoveredElement.value ? hoveredElement.value.tagName.toLowerCase() : ''
+    return hoveredElementClone.value ? hoveredElementClone.value.tagName.toLowerCase() : ''
   })
 
   const hoveredElementStr = computed(() => {
-    return hoveredElement.value ? hoveredElement.value.outerHTML : ''
+    return hoveredElementClone.value ? hoveredElementClone.value.outerHTML : ''
   })
-  
+
   const hoveredElementText = computed(() => {
-    return hoveredElement.value ? hoveredElement.value.innerText : ''
+    return hoveredElementClone.value ? hoveredElementClone.value.innerText : ''
   })
 
-
-
+  //  鼠标移入元素时，高亮显示元素
   function updateHighlight() {
     if (!hoveredElement.value) return
     let highlightBox = highlightBoxRef.value
@@ -278,6 +272,7 @@
     updateElementTag(hoveredElement.value, left, top, height)
   }
 
+  // 鼠标移入元素时，高亮显示元素
   function updateElementTag(element, left, top, height) {
     let tag = highlightTagRef.value
 
@@ -298,15 +293,21 @@
     tag.style.left = left + 'px'
   }
 
-  // 节流处理鼠标移动
+  // 鼠标移入元素时，高亮显示元素
   const updateHoverElement = e => {
     hoveredElement.value = e.target
     updateHighlight()
   }
 
+  // 节流函数处理鼠标移动
   const throttledUpdate = throttle(updateHoverElement, 50)
 
+  // 开始编辑
   function startEdit() {
+    if (isEdit.value) {
+      return
+    }
+    isEdit.value = true
     hoveredElement.value = null
     const iframeDoc = iframeRef.value.contentDocument
     iframeDoc.addEventListener('mousemove', throttledUpdate)
@@ -315,29 +316,25 @@
     iframeDoc.addEventListener('click', stopEdit)
   }
 
+  // 停止编辑
   function stopEdit() {
-    // console.log(hoveredElement.value)
+    isEdit.value = false
+    hoveredElementClone.value = hoveredElement.value.cloneNode(true)
     const iframeDoc = iframeRef.value.contentDocument
     let tag = highlightTagRef.value
     let highlightBox = highlightBoxRef.value
     tag.style.display = 'none'
     highlightBox.style.display = 'none'
-    // 移除事件监听器
     iframeDoc.removeEventListener('mousemove', throttledUpdate)
     iframeDoc.removeEventListener('scroll', updateHighlight)
     iframeDoc.removeEventListener('resize', updateHighlight)
     iframeDoc.addEventListener('click', stopEdit)
   }
-
-  document.addEventListener('mousemove', e => {
-    if (!hoveredElement.value) {
-      const iframeDoc = iframeRef.value.contentDocument
-      let tag = highlightTagRef.value
-      let highlightBox = highlightBoxRef.value
-      tag.style.display = 'none'
-      highlightBox.style.display = 'none'
-    }
-  })
+  
+  
+  const handAsk = () => {
+    console.log('send message success: ', askText.value)
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -383,7 +380,11 @@
 
   .ask-btn {
     background-color: rgb(240, 240, 240);
-    @apply h24px w24px flex justify-center items-center bg-buttonface  rounded-full cursor-pointer hover:text-zeng;
+    @apply h24px w24px text-gray-800 flex justify-center items-center bg-buttonface  rounded-full cursor-pointer hover:text-zeng;
+  }
+  
+  .icon-disable{
+    @apply text-gray-400 cursor-not-allowed opacity-50 pointer-events-none;
   }
 
   .highlight-box {
@@ -396,7 +397,7 @@
     // background-color: rgba(0, 0, 0, 0.1);
     @apply border-2 border-blue-500 border-dashed;
   }
-  
+
   .tag {
     @apply bg-blue-500 text-white text-sm px-2 py0.5px rounded-md;
   }
