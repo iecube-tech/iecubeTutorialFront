@@ -39,22 +39,22 @@
             <div
               class="relative bg-neutral-800 border border-neutral-700 rounded-2xl ring-[4px] focus-within:ring-neutral-500/30 focus-within:border-neutral-600 ring-transparent z-10 w-full group"
             >
-              <div class="px-4 pt-3">
-                <div
-                  class="border border-neutral-700 rounded-xl p-1.5 pr-3 max-w-max hover:brightness-110 transition-all duration-200 ease-in-out !cursor-pointer !cursor-pointer"
-                ></div>
+              <div class="px-4 pt-3 mb-2">
+                <span class="tag inline-block max-w-150px overflow-hidden text-ellipsis whitespace-nowrap" v-show="hoveredElementTagName !== ''">
+                  {{ hoveredElementTagName }} . {{ hoveredElementText }}
+                </span>
               </div>
               <div class="w-full relative flex items-center justify-between">
                 <el-input
                   type="text"
                   class="ask-text-input"
                   v-model="askText"
-                  placeholder="请输入要替换的内容"
+                  placeholder="请输入你的需求"
                 />
               </div>
               <div class="flex items-center justify-between gap-2 px-4 pb-3">
                 <div class="flex-1 flex items-center justify-start gap-2">
-                  <div class="ask-btn">
+                  <div class="ask-btn" @click="startEdit">
                     <Icon>
                       <Crosshairs />
                     </Icon>
@@ -99,6 +99,8 @@
             loading="lazy"
             @load="stopLoading"
           ></iframe>
+          <div ref="highlightTagRef" class="hightlight-tag"></div>
+          <div ref="highlightBoxRef" class="highlight-box"></div>
         </div>
       </template>
     </resizePanel>
@@ -128,8 +130,6 @@
     resizePanelRef.value.setRightPanelOnly(v)
   }
 
-  const iframeRef = ref(null)
-
   const loading = ref(true)
   const loadingText = ref('正在为您拼命加载页面中.....')
   const t = ref('')
@@ -154,7 +154,7 @@
 
   const route = useRoute()
   const relativeFilePath = ref('')
-  const textValue = ref('')
+  const htmlText = ref('')
   const fileName = ref('')
   const id = ref(null)
   relativeFilePath.value = route.query.filePath
@@ -223,11 +223,9 @@
 
   // 获取讲义文件内容
   const getHtmlFileContent = async () => {
-    console.log(relativeFilePath.value)
     const response = await fetch(relativeFilePath.value)
-    const htmlContent = await response.text()
-    textValue.value = htmlContent
-    createEditor(htmlContent)
+    htmlText.value = await response.text()
+    createEditor(htmlText.value)
   }
 
   // 初始化
@@ -237,6 +235,109 @@
   }
 
   init()
+
+  //编辑相关
+  import { throttle } from 'lodash'
+
+  const highlightBoxRef = ref(null)
+  const highlightTagRef = ref(null)
+  const iframeRef = ref(null)
+  const hoveredElement = ref(null)
+
+  const hoveredElementTagName = computed(() => {
+    return hoveredElement.value ? hoveredElement.value.tagName.toLowerCase() : ''
+  })
+
+  const hoveredElementStr = computed(() => {
+    return hoveredElement.value ? hoveredElement.value.outerHTML : ''
+  })
+  
+  const hoveredElementText = computed(() => {
+    return hoveredElement.value ? hoveredElement.value.innerText : ''
+  })
+
+
+
+  function updateHighlight() {
+    if (!hoveredElement.value) return
+    let highlightBox = highlightBoxRef.value
+
+    const rect = hoveredElement.value.getBoundingClientRect()
+
+    // 更新高亮框
+    let left = rect.left - 2
+    let top = rect.top - 2
+    highlightBox.style.display = 'block'
+    highlightBox.style.left = left + 'px'
+    highlightBox.style.top = top + 'px'
+    highlightBox.style.width = rect.width + 4 + 'px'
+    highlightBox.style.height = rect.height + 4 + 'px'
+    let height = rect.height + 4
+
+    // 更新标签
+    updateElementTag(hoveredElement.value, left, top, height)
+  }
+
+  function updateElementTag(element, left, top, height) {
+    let tag = highlightTagRef.value
+
+    let name = `${element.tagName.toLowerCase()}`
+    // 设置标签内容
+    tag.textContent = name
+
+    // 设置标签位置
+    let newTop = 0
+    if (top - 20 <= 0) {
+      newTop = top + height
+    } else {
+      newTop = top - 20
+    }
+
+    tag.style.display = 'block'
+    tag.style.top = newTop + 'px'
+    tag.style.left = left + 'px'
+  }
+
+  // 节流处理鼠标移动
+  const updateHoverElement = e => {
+    hoveredElement.value = e.target
+    updateHighlight()
+  }
+
+  const throttledUpdate = throttle(updateHoverElement, 50)
+
+  function startEdit() {
+    hoveredElement.value = null
+    const iframeDoc = iframeRef.value.contentDocument
+    iframeDoc.addEventListener('mousemove', throttledUpdate)
+    iframeDoc.addEventListener('scroll', updateHighlight)
+    iframeDoc.addEventListener('resize', updateHighlight)
+    iframeDoc.addEventListener('click', stopEdit)
+  }
+
+  function stopEdit() {
+    // console.log(hoveredElement.value)
+    const iframeDoc = iframeRef.value.contentDocument
+    let tag = highlightTagRef.value
+    let highlightBox = highlightBoxRef.value
+    tag.style.display = 'none'
+    highlightBox.style.display = 'none'
+    // 移除事件监听器
+    iframeDoc.removeEventListener('mousemove', throttledUpdate)
+    iframeDoc.removeEventListener('scroll', updateHighlight)
+    iframeDoc.removeEventListener('resize', updateHighlight)
+    iframeDoc.addEventListener('click', stopEdit)
+  }
+
+  document.addEventListener('mousemove', e => {
+    if (!hoveredElement.value) {
+      const iframeDoc = iframeRef.value.contentDocument
+      let tag = highlightTagRef.value
+      let highlightBox = highlightBoxRef.value
+      tag.style.display = 'none'
+      highlightBox.style.display = 'none'
+    }
+  })
 </script>
 
 <style lang="scss" scoped>
@@ -283,5 +384,28 @@
   .ask-btn {
     background-color: rgb(240, 240, 240);
     @apply h24px w24px flex justify-center items-center bg-buttonface  rounded-full cursor-pointer hover:text-zeng;
+  }
+
+  .highlight-box {
+    display: none;
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    z-index: 9999;
+    pointer-events: none;
+    // background-color: rgba(0, 0, 0, 0.1);
+    @apply border-2 border-blue-500 border-dashed;
+  }
+  
+  .tag {
+    @apply bg-blue-500 text-white text-sm px-2 py0.5px rounded-md;
+  }
+
+  .hightlight-tag {
+    display: none;
+    position: absolute;
+    z-index: 9999;
+    pointer-events: none;
+    @extend .tag;
   }
 </style>
