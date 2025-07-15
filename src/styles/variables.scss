@@ -42,6 +42,10 @@ $box-shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.12); // 暗黑模式阴影颜色
 $nav-text-color-light: #333333;
 $nav-text-color-dark: #FFFFFF;
 
+// 自定义card 背景颜色
+$my-card-bg-light: #FFFFFF;
+$my-card-bg-dark: #2b2c26;
+
 /** 全局SCSS变量 */
 :root {
   --zeng: #{$zeng};
@@ -72,6 +76,8 @@ $nav-text-color-dark: #FFFFFF;
   --el-text-color-regular: #646a73; // 普通文字颜色
   --el-text-color-secondary:  #646a73; // 辅助文字颜色
   --el-text-color-placeholder: #c0c4cc; // 占位文字颜色
+  
+  --my-card-bg: #{$my-card-bg-light}; // 自定义card 背景颜色
 
 }
 
@@ -102,6 +108,8 @@ html.dark {
   --el-text-color-regular: #a4a7b0; // 普通文字颜色
   --el-text-color-secondary: #8a9099; // 辅助文字颜色
   --el-text-color-placeholder: #707070; // 占位文字颜色
+  
+  --my-card-bg: #{$my-card-bg-dark}; // 自定义card 背景颜色
 }
 
 $sidebar-logo-background: var(--sidebar-logo-background); // 侧边栏 Logo 背景色
