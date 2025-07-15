@@ -33,7 +33,14 @@
             <div class="w-full flex justify-between">
               <div class="case-title">{{ caseItem.title }}</div>
               <div v-show="caseItem.tags.length > 0">
-                <el-tag v-for="(tag, k) in caseItem.tags.slice(0,2)" :key="k" size="small" class="mx-1"> {{ tag.name }}</el-tag>
+                <el-tag
+                  v-for="(tag, k) in caseItem.tags.slice(0, 2)"
+                  :key="k"
+                  size="small"
+                  class="mx-1"
+                >
+                  {{ tag.name }}
+                </el-tag>
               </div>
             </div>
             <div class="w-full flex justify-between">
@@ -55,9 +62,15 @@
     </div>
 
     <el-dialog v-model="addCaseDialog.visible" title="新建案例" width="50%">
-      <el-form :model="addCaseDialog.formData" :rules="rules" label-width="100px">
-        <el-form-item label="文件">
+      <el-form
+        ref="addCaseFormRef"
+        :model="addCaseDialog.formData"
+        :rules="rules"
+        label-width="100px"
+      >
+        <el-form-item label="文件" prop="file">
           <el-upload
+            ref="htmlUploadRef"
             :auto-upload="false"
             :before-upload="beforeHtmlUpload"
             :on-change="handleHtmlFileChange"
@@ -75,8 +88,9 @@
             <div class="el-upload__tip">只能上传HTML文件，且不超过5MB</div>
           </el-upload>
         </el-form-item>
-        <el-form-item label="封面">
+        <el-form-item label="封面" prop="cover">
           <el-upload
+            ref="uploadRef"
             :auto-upload="false"
             :before-upload="beforeUpload"
             :on-change="handlePictureChange"
@@ -93,19 +107,19 @@
             </template>
           </el-upload>
         </el-form-item>
-        <el-form-item label="文件名称">
+        <el-form-item label="文件名称" prop="name">
           <el-input v-model="addCaseDialog.formData.name" />
         </el-form-item>
-        <el-form-item label="课程名称">
+        <el-form-item label="课程名称" prop="title">
           <el-input v-model="addCaseDialog.formData.title" />
         </el-form-item>
-        <el-form-item label="知识要点">
+        <el-form-item label="知识要点" prop="knowledgePoint">
           <el-input v-model="addCaseDialog.formData.knowledgePoint" />
         </el-form-item>
-        <el-form-item label="课程大纲">
+        <el-form-item label="课程大纲" prop="outline">
           <el-input v-model="addCaseDialog.formData.outline" />
         </el-form-item>
-        <el-form-item label="标签">
+        <el-form-item label="标签" prop="tags">
           <el-select
             v-model="addCaseDialog.formData.tags"
             placeholder="请选择标签"
@@ -161,8 +175,8 @@
     })
       .then(() => {
         // 从案例列表中删除该案例
-        deleteCase(caseItem.id).then(res=>{
-          if(res.state == 200){
+        deleteCase(caseItem.id).then(res => {
+          if (res.state == 200) {
             initCaseList()
           }
         })
@@ -170,21 +184,40 @@
       .catch(() => {})
   }
 
+  const addCaseFormRef = ref(null)
+  const htmlUploadRef = ref(null)
+  const uploadRef = ref(null)
+
+  const handleSumbitCase = () => {
+    addCaseFormRef.value.validate(valid => {
+      if (valid) {
+        uploadCase(addCaseDialog.value.formData).then(res => {
+          if (res.state == 200) {
+            close()
+            ElMessage.success('上传成功')
+            initCaseList()
+          }
+        })
+      }
+    })
+  }
+
   const handleAdd = () => {
     addCaseDialog.value.visible = true
+    addCaseFormRef.value.clearValidate()
   }
 
   const close = () => {
+    addCaseFormRef.value.clearValidate()
     setDeafaultFormData()
     addCaseDialog.value.visible = false
   }
 
   const addCaseDialog = ref({
     visible: false,
-    fileList: [],
     formData: {
-      file: 0,
-      cover: 0,
+      file: null,
+      cover: null,
       title: '',
       name: '',
       knowledgePoint: '',
@@ -196,9 +229,11 @@
   })
 
   const setDeafaultFormData = () => {
+    htmlUploadRef.value.clearFiles()
+    uploadRef.value.clearFiles()
     addCaseDialog.value.formData = {
-      file: 0,
-      cover: 0,
+      file: null,
+      cover: null,
       title: '',
       name: '',
       knowledgePoint: '',
@@ -209,7 +244,14 @@
     }
   }
 
-  const rules = ref({})
+  const rules = ref({
+    file: [{ required: true, message: '请上传文件', trigger: 'change' }],
+    cover: [{ required: true, message: '请上传封面', trigger: 'change' }],
+    title: [{ required: true, message: '请输入课程名称', trigger: 'blur' }],
+    name: [{ required: true, message: '请输入文件名称', trigger: 'blur' }],
+    knowledgePoint: [{ required: true, message: '请输入知识要点', trigger: 'blur' }],
+    tags: [{ required: true, message: '请选择标签', trigger: 'change' }]
+  })
 
   // HTML文件上传前验证
   const beforeHtmlUpload = file => {
@@ -342,16 +384,6 @@
   }
 
   initTagList()
-
-  const handleSumbitCase = () => {
-    uploadCase(addCaseDialog.value.formData).then(res => {
-      if (res.state == 200) {
-        close()
-        ElMessage.success('上传成功')
-        initCaseList()
-      }
-    })
-  }
 
   const initCaseList = () => {
     filterText.value = ''
