@@ -206,11 +206,15 @@
     monthlyData.value = res
     // console.log(res)
   }
+  
+  onMounted(()=>{
+    initUserColleague()
+    initPoint()
+    initConsumed()
+    initBill()
+  })
 
-  initUserColleague()
-  initPoint()
-  initConsumed()
-  initBill()
+  
 </script>
 
 <style lang="scss" scoped>
