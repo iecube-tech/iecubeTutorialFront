@@ -183,10 +183,6 @@
 
   const stopLoading = async () => {
     loading.value = false
-    // await nextTick()
-    // setTimeout(async () => {
-    //   await short()
-    // }, 3000)
   }
 
   // 下载文件
