@@ -83,7 +83,8 @@
   }
 
   onMounted(() => {
-    leftPanel.value.style.width = '50%'
+    // 初始化左侧面板宽度
+    leftPanel.value.style.width = '30%'
   })
 
   onBeforeUnmount(() => {
@@ -103,6 +104,10 @@
   .panel {
     position: relative;
     overflow: hidden;
+  }
+  
+  .left-panel {
+    
   }
 
   .right-panel {

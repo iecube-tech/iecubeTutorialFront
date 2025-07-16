@@ -88,6 +88,24 @@ export const constantRoutes: RouteRecordRaw[] = [
       }
     ]
   },
+  {
+    path: '/',
+    name: 'case',
+    component: Layout,
+    redirect: '/caseMarket', // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
+    children: [
+      {
+        component: () => import('@/views/caseMarket/index.vue'),
+        path: '/caseMarket',
+        name: 'caseMarket',
+        meta: {
+          title: '案例集',
+          icon: 'document',
+          keepAlive: true
+        }
+      }
+    ]
+  },
 
 ]
 

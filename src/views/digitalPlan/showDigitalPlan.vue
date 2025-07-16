@@ -1,50 +1,11 @@
 <template>
   <div class="plan-container">
-    <div class="btn-tools">
-      <div></div>
-
-      <div class="h-full flex items-center gap-4">
-        <Icon
-          title="代码"
-          :size="iconSize"
-          class="btn-icon"
-          :class="{ isActive: !isPreview }"
-          @click="handlePreview(false)"
-        >
-          <ClipboardCode20Filled />
-        </Icon>
-        <Icon
-          title="预览"
-          :size="iconSize"
-          class="btn-icon"
-          :class="{ isActive: isPreview }"
-          @click="handlePreview(true)"
-        >
-          <Eye />
-        </Icon>
-        <el-divider direction="vertical" class="!mx-0"/>
-        <el-select v-model="currentVersion" class="!w-100px" size="small">
-          <el-option label="最新 V3" value="3"></el-option>
-          <el-option label="历史 V2" value="2"></el-option>
-          <el-option label="历史 V1" value="1"></el-option>
-        </el-select>
-        <span>版本</span>
-        <!-- <Icon title="版本" :size="iconSize" class="btn-icon">
-          <Version />
-        </Icon> -->
-        <Icon title="保存" :size="iconSize" class="btn-icon" @click="handleSave">
-          <Save />
-        </Icon>
-        <Icon title="下载" :size="iconSize" class="btn-icon" @click="handleDownload">
-          <Download />
-        </Icon>
-      </div>
-    </div>
-
     <resizePanel ref="resizePanelRef" class="content-wrapper">
       <template #left-content>
         <div class="wh-full relative flex flex-col bg-neutral-800">
-          <div ref="editorRef" class="h-0 flex-1"></div>
+          <div class="h-0 flex-1 overflow-y-auto">
+            
+          </div>
           <div class="px-3 my-2">
             <div
               class="relative bg-neutral-800 border border-neutral-700 rounded-2xl ring-[4px] focus-within:ring-neutral-500/30 focus-within:border-neutral-600 ring-transparent z-10 w-full group"
@@ -87,7 +48,41 @@
         </div>
       </template>
       <template #right-content>
-        <div class="wh-full relative">
+        <div class="btn-tools h-24px flex justify-between items-center">
+          <div class="h-full flex items-center">
+            <el-select v-model="currentVersion" class="!w-100px mr-2" size="small">
+              <el-option label="最新 V3" value="3"></el-option>
+              <el-option label="历史 V2" value="2"></el-option>
+              <el-option label="历史 V1" value="1"></el-option>
+            </el-select>
+            <span class="hover:text-zeng">版本</span>
+          </div>
+
+          <div class="h-full flex items-center">
+            <el-radio-group v-model="isPreview" class="h-full" size="small">
+              <el-radio-button title="代码" :value="false" class="h-full py-0">
+                <Icon :size="iconSize">
+                  <ClipboardCode20Filled />
+                </Icon>
+              </el-radio-button>
+              <el-radio-button title="预览" :value="true" class="h-full py-0">
+                <Icon :size="iconSize">
+                  <Eye />
+                </Icon>
+              </el-radio-button>
+            </el-radio-group>
+          </div>
+
+          <div class="h-full flex items-center gap-4">
+            <Icon title="保存" :size="iconSize" class="btn-icon" @click="handleSave">
+              <Save />
+            </Icon>
+            <Icon title="下载" :size="iconSize" class="btn-icon" @click="handleDownload">
+              <Download />
+            </Icon>
+          </div>
+        </div>
+        <div class="w-full relative h-[calc(100%-28px)] mt-4px">
           <el-skeleton
             v-if="loading"
             class="wh-full absolute top-0 left-0 z-500"
@@ -106,14 +101,16 @@
             </template>
           </el-skeleton>
           <iframe
+            v-show="isPreview"
             ref="iframeRef"
             class="wh-full absolute top-0 left-0"
             :src="relativeFilePath + `?t=${t}`"
             loading="lazy"
             @load="stopLoading"
           ></iframe>
-          <div ref="highlightTagRef" class="hightlight-tag"></div>
-          <div ref="highlightBoxRef" class="highlight-box"></div>
+          <div ref="highlightTagRef" v-show="isPreview" class="hightlight-tag"></div>
+          <div ref="highlightBoxRef" v-show="isPreview" class="highlight-box"></div>
+          <div ref="editorRef" v-show="!isPreview" class="wh-full absolute top-0 left-0"></div>
         </div>
       </template>
     </resizePanel>
@@ -132,15 +129,15 @@
   import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
 
   const iconSize = ref(20)
-  const isPreview = ref(false)
+  const isPreview = ref(true)
   const resizePanelRef = ref(null)
-  
+
   const currentVersion = ref(1)
 
-  const handlePreview = v => {
-    isPreview.value = v
-    resizePanelRef.value.setRightPanelOnly(v)
-  }
+  // const handlePreview = v => {
+  //   isPreview.value = v
+  //   // resizePanelRef.value.setRightPanelOnly(v)
+  // }
 
   const loading = ref(true)
   const loadingText = ref('正在为您拼命加载页面中.....')
@@ -235,7 +232,9 @@
     getHtmlFileContent()
   }
 
-  init()
+  onMounted(() => {
+     init()
+  })
 
   //编辑相关代码
   import { throttle } from 'lodash'
@@ -343,20 +342,15 @@
   const handAsk = () => {
     console.log('send message success: ', askText.value)
   }
+  
+  
+  
+  
 </script>
 
 <style lang="scss" scoped>
-  $btn-tool-height: 24px;
-
   .plan-container {
-    height: 100%;
-    width: 100%;
-  }
-
-  .btn-tools {
-    height: $btn-tool-height;
-    @apply flex justify-between;
-    padding-right: 8px;
+    @apply h-full w-full;
   }
 
   .loading-text {
@@ -365,7 +359,7 @@
   }
 
   .content-wrapper {
-    height: calc(100% - $btn-tool-height);
+    @apply h-full;
   }
 
   .btn-icon:hover {
@@ -416,5 +410,11 @@
     z-index: 9999;
     pointer-events: none;
     @extend .tag;
+  }
+
+  .btn-tools {
+    :deep(.el-radio-button__inner) {
+      @apply py-0 px-6;
+    }
   }
 </style>

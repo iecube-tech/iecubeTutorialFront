@@ -70,10 +70,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
         },
 
-        /* '/resource': {
+        '/resource': {
           changeOrigin: true,
           target: env.VITE_APP_RESOURCE_URL,
-        } */
+        }
       },
     },
     plugins: [

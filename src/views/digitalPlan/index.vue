@@ -38,6 +38,7 @@
                     <el-input
                       v-model="formData.title"
                       placeholder="请输入课程名称"
+                      @input="debounceFindCaseList"
                       clearable
                     ></el-input>
                   </el-form-item>
@@ -60,6 +61,7 @@
                   >
                     <el-input
                       v-model="formData.knowledgePoints[k]"
+                      @input="debounceFindCaseList"
                       placeholder="请输入知识要点"
                       clearable
                     ></el-input>
@@ -226,6 +228,87 @@
             先看大纲
           </el-button>
         </div>
+        <el-divider style="margin: 16px 0" />
+
+        <div class="mb-2">
+          <span class="font-bold text-bold">相关案例</span>
+        </div>
+
+        <el-row :gutter="10" class="mb-10px" v-if="filterCaseList.length > 0">
+          <el-col :span="6" v-for="caseItem in filterCaseList.slice(0, 4)" :key="caseItem.id">
+            <div class="case-card">
+              <div class="case-image-wrapper">
+                <img
+                  :src="`/resource/${caseItem.cover.filename}`"
+                  alt="案例图片"
+                  class="case-img"
+                />
+              </div>
+              <div class="case-content">
+                <div class="w-full flex justify-between">
+                  <div class="case-title">{{ caseItem.title }}</div>
+                  <div v-show="caseItem.tags.length > 0">
+                    <el-tag
+                      v-for="(tag, k) in caseItem.tags.slice(0, 1)"
+                      :key="k"
+                      size="small"
+                      class="mx-1"
+                    >
+                      {{ tag.name }}
+                    </el-tag>
+                  </div>
+                </div>
+                <div class="w-full flex justify-between">
+                  <div class="case-description">{{ caseItem.knowledgePoint }}</div>
+                </div>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="10" class="mb-10px" v-if="filterCaseList.length > 4">
+          <el-col :span="6" v-for="caseItem in filterCaseList.slice(4, 8)" :key="caseItem.id">
+            <div class="case-card">
+              <div class="case-image-wrapper">
+                <img
+                  :src="`/resource/${caseItem.cover.filename}`"
+                  alt="案例图片"
+                  class="case-img"
+                />
+              </div>
+              <div class="case-content">
+                <div class="w-full flex justify-between">
+                  <div class="case-title">{{ caseItem.title }}</div>
+                  <div v-show="caseItem.tags.length > 0">
+                    <el-tag
+                      v-for="(tag, k) in caseItem.tags.slice(0, 1)"
+                      :key="k"
+                      size="small"
+                      class="mx-1"
+                    >
+                      {{ tag.name }}
+                    </el-tag>
+                  </div>
+                </div>
+                <div class="w-full flex justify-between">
+                  <div class="case-description">{{ caseItem.knowledgePoint }}</div>
+                </div>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+
+        <div class="flex justify-center items-center" v-if="filterCaseList.length > 0">
+          <span class="text-sm text-zeng cursor-pointer" @click="handleMoreCase">更多案例</span>
+        </div>
+
+        <div class="flex justify-center items-center" v-if="filterCaseList.length == 0">
+          <span class="text-sm text-regular">
+            暂无相关案例，可以到
+            <span class="text-sm text-zeng cursor-pointer" @click="handleMoreCase">案例集</span>
+            查看其他案例
+          </span>
+        </div>
 
         <el-divider style="margin: 16px 0" />
 
@@ -317,7 +400,7 @@
         </template>
       </el-tab-pane>
     </el-tabs>
-    
+
     <markdownDialog ref="markdownDialogRef" />
   </div>
 </template>
@@ -334,8 +417,9 @@
   import { useUserStore } from '@/store'
   import { genPrompts, genOutlinePrompts } from './promptGen.js'
   import { getPlanList, generatePlan, removePlan } from '@/api/plan'
-  
+
   import markdownDialog from './markdownDialog.vue'
+  import { findCase } from '@/api/caseApi'
 
   const userStore = useUserStore()
 
@@ -449,7 +533,7 @@
     clearInterval(intervalTime.value)
   })
 
-  // TODO:查看大纲 
+  // TODO:查看大纲
   const markdownDialogRef = ref(null)
   const handleShowOutline = async row => {
     // console.log(row)
@@ -731,6 +815,28 @@
       ElMessage.warning(`最多只能添加${maxPointLength.value}个知识点`)
     }
   }
+
+  // 相关案例
+  const handleMoreCase = () => {
+    router.push('/caseMarket')
+  }
+
+  const caseList = ref([])
+  const filterCaseList = ref([])
+
+  const findCaseList = () => {
+    let req = {
+      title: formData.title,
+      knowledgePoints: formData.knowledgePoints[0]
+    }
+    findCase(req).then(res => {
+      filterCaseList.value = res.data
+    })
+  }
+
+  findCaseList()
+
+  const debounceFindCaseList = debounce(findCaseList, 800)
 </script>
 
 <style lang="scss" scoped>
@@ -739,5 +845,50 @@
       height: calc(100vh - 120px);
       overflow-y: auto;
     }
+  }
+
+  $card-height: 160px;
+
+  .case-card {
+    height: $card-height;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    background-color: var(--my-card-bg);
+    padding: 10px;
+    @apply group rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden;
+
+    &:hover {
+      @apply transform -translate-y-1;
+    }
+  }
+
+  .case-image-wrapper {
+    @apply relative overflow-hidden rounded-xl;
+  }
+
+  .case-img {
+    height: 0;
+    flex: 1;
+    @apply w-full h-full object-cover transition-transform duration-300;
+  }
+
+  .case-content {
+    @apply mt-2 h-60px flex flex-col justify-between items-start;
+  }
+
+  .case-title {
+    color: var(--el-text-color-regular);
+    @apply w-0 flex-1  text-sm overflow-hidden text-ellipsis font-bold whitespace-nowrap line-clamp-1;
+  }
+
+  .case-description {
+    color: var(--el-text-color-secondary);
+    @apply inline-block w-0 flex-1 text-xs overflow-hidden text-ellipsis whitespace-nowrap line-clamp-2 leading-relaxed;
+  }
+
+  .text-regular {
+    color: var(--el-text-color-regular);
   }
 </style>
