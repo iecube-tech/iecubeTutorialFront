@@ -66,7 +66,7 @@
     const currentX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX
     const newWidth = startWidth + (currentX - startX)
 
-    const minWidth = 150
+    const minWidth = 400
     const maxWidth = container.value.offsetWidth - minWidth
 
     if (newWidth >= minWidth && newWidth <= maxWidth) {

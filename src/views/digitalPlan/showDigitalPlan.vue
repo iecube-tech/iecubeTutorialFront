@@ -3,8 +3,20 @@
     <resizePanel ref="resizePanelRef" class="content-wrapper">
       <template #left-content>
         <div class="wh-full relative flex flex-col bg-neutral-800">
-          <div class="h-0 flex-1 overflow-y-auto">
-            
+          <div ref="chatContainerRef" class="chart-container my-scroller">
+            <div
+              v-for="(chatItem, k) in chatHistoryList"
+              :key="k"
+              :class="`chat-${chatItem.role}-container`"
+            >
+              <div v-if="chatItem.role === 'user'" class="chat-user">
+                {{ chatItem.content }}
+              </div>
+
+              <div v-else class="chat-assistant">
+                <MdPreview :modelValue="chatItem.content"></MdPreview>
+              </div>
+            </div>
           </div>
           <div class="px-3 my-2">
             <div
@@ -25,19 +37,24 @@
                   class="ask-text-input"
                   v-model="askText"
                   placeholder="请输入你的需求"
+                  @keydown.enter="handAsk"
                 />
               </div>
               <div class="flex items-center justify-between gap-2 px-4 pb-3">
                 <div class="flex-1 flex items-center justify-start gap-2">
-                  <div class="ask-btn">
-                    <Icon :class="{ isActive: isEdit }" @click="startEdit">
+                  <div class="edit-btn" :class="{ isActive: isEdit }" title="选择右侧页面中的元素">
+                    <Icon @click="startEdit">
                       <Crosshairs />
                     </Icon>
                   </div>
                 </div>
                 <div class="flex items-center justify-end gap-2">
-                  <div class="ask-btn">
-                    <Icon :class="{ 'icon-disable': askText == '' }" @click="handAsk">
+                  <div class="ask-btn" :class="{ 'btn-disable': askText == '' }">
+                    <Icon
+                      class="ask-icon"
+                      :class="{ 'icon-disable': askText == '' }"
+                      @click="handAsk"
+                    >
                       <SendAltFilled />
                     </Icon>
                   </div>
@@ -233,7 +250,7 @@
   }
 
   onMounted(() => {
-     init()
+    init()
   })
 
   //编辑相关代码
@@ -339,16 +356,65 @@
     iframeDoc.addEventListener('click', stopEdit)
   }
 
-  const handAsk = () => {
-    console.log('send message success: ', askText.value)
+  // 左侧 AI 对话框 功能
+  const chatContainerRef = ref(null)
+  let chatHistoryList = ref([])
+
+  const handAsk = async () => {
+    console.log('ask ....')
+    if (!askText.value) {
+      return
+    }
+
+    chatHistoryList.value.push({
+      role: 'user',
+      content: askText.value
+    })
+
+    // 调用 AI 接口
+    const response = {
+      role: 'assistant',
+      content: askText.value
+    }
+
+    chatHistoryList.value.push(response)
+    
+    askText.value = ''
+    hoveredElementClone.value = null;
+
+    await nextTick()
+    scrollRoll()
   }
-  
-  
-  
-  
+
+  const scrollRoll = async () => {
+    await nextTick()
+    if (chatContainerRef.value.scrollHeight > chatContainerRef.value.clientHeight) {
+      chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+    }
+  }
+
+  // 滚动时 可见滚动条  怎么设置
 </script>
 
 <style lang="scss" scoped>
+  .my-scroller {
+    scroll-behavior: smooth;
+  }
+
+  .my-scroller::-webkit-scrollbar {
+    width: 6px; /* 滚动条宽度 */
+    height: 6px;
+  }
+
+  .my-scroller::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.2); /* 轨道背景 */
+  }
+
+  .my-scroller::-webkit-scrollbar-thumb {
+    background-color: #8b8b8b; /* 滑块颜色 */
+    border-radius: 4px; /* 滑块圆角 */
+  }
+
   .plan-container {
     @apply h-full w-full;
   }
@@ -367,10 +433,6 @@
     color: var(--zeng);
   }
 
-  .isActive {
-    color: var(--zeng);
-  }
-
   .ask-text-input {
     :deep(.el-input__wrapper) {
       @apply bg-transparent border-none rounded-none shadow-none;
@@ -380,13 +442,30 @@
     }
   }
 
+  .edit-btn {
+    @apply h24px w24px flex justify-center items-center rounded-full cursor-pointer bg-white text-gray-500;
+  }
+
+  .isActive {
+    background-color: var(--zeng);
+    @apply text-white;
+  }
+
   .ask-btn {
-    background-color: rgb(240, 240, 240);
-    @apply h24px w24px text-gray-800 flex justify-center items-center bg-buttonface  rounded-full cursor-pointer hover:text-zeng;
+    background-color: var(--zeng);
+    @apply h24px w24px flex justify-center items-center rounded-full cursor-pointer;
+  }
+
+  .btn-disable {
+    @apply bg-gray-200 cursor-not-allowed;
+  }
+
+  .ask-icon {
+    @apply text-white;
   }
 
   .icon-disable {
-    @apply text-gray-400 cursor-not-allowed opacity-50 pointer-events-none;
+    @apply pointer-events-none text-gray-400 opacity-50;
   }
 
   .highlight-box {
@@ -416,5 +495,39 @@
     :deep(.el-radio-button__inner) {
       @apply py-0 px-6;
     }
+  }
+
+  // 左侧对话框样式
+  .chart-container {
+    @apply h-0 flex-1 overflow-y-auto overflow-x-hidden p-1 mr-1;
+  }
+
+  .chat-user-container {
+    @apply flex justify-end mb-4;
+  }
+
+  .chat-assistant-container {
+    @apply flex justify-start mb-4;
+  }
+
+  .chat-bg {
+    color: #3f4a54;
+    background-color: #ffffff;
+  }
+
+  .chat-user {
+    @extend .chat-bg;
+    min-width: 0;
+    max-width: 90%;
+    @apply text-sm inline-block rounded-lg py-9px px-16px break-all;
+  }
+
+  .chat-assistant {
+    @extend .my-scroller;
+    @extend .chat-bg;
+    min-width: 0;
+    max-width: 90%;
+    @apply text-sm inline-block rounded-lg px-16px;
+    overflow-x: auto;
   }
 </style>
