@@ -151,11 +151,6 @@
 
   const currentVersion = ref(1)
 
-  // const handlePreview = v => {
-  //   isPreview.value = v
-  //   // resizePanelRef.value.setRightPanelOnly(v)
-  // }
-
   const loading = ref(true)
   const loadingText = ref('正在为您拼命加载页面中.....')
   const t = ref('')
@@ -177,6 +172,7 @@
 
   // 刷新页面
   const handleRefresh = () => {
+    isPreview.value = true
     startLoading()
     updateTime()
   }
@@ -203,10 +199,7 @@
 
   // 保存文件
   const handleSave = () => {
-    /*  
-   closeEditor()
-
-    const content = editorView.state.doc.toString()
+    const content = editorInstance.getValue()
     const base64Content = Base64.encode(content)
     updatePlan({
       id: id.value,
@@ -214,8 +207,7 @@
     }).then(res => {
       ElMessage.success('保存成功')
       handleRefresh()
-    }) 
-      */
+    })
   }
 
   // 初始化编辑器
@@ -378,9 +370,9 @@
     }
 
     chatHistoryList.value.push(response)
-    
+
     askText.value = ''
-    hoveredElementClone.value = null;
+    hoveredElementClone.value = null
 
     await nextTick()
     scrollRoll()
