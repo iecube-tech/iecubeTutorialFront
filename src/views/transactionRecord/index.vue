@@ -160,7 +160,7 @@
       }
     })
   }
-  
+
   const initGroupBill = async () => {
     getSecondGroupBill(oSecId).then(res => {
       if (res.state == 200) {
@@ -169,9 +169,7 @@
       }
     })
   }
-  
-  
-  
+
   const initMonthlyData = obj => {
     let yearData = obj.yearlyData
     let year_keys = Object.keys(yearData)
@@ -192,10 +190,12 @@
     monthlyData.value = res
   }
 
-  initUserColleague()
-  initAmount()
-  initConsumed()
-  initGroupBill()
+  onMounted(() => {
+    initUserColleague()
+    initAmount()
+    initConsumed()
+    initGroupBill()
+  })
 </script>
 
 <style lang="scss" scoped>

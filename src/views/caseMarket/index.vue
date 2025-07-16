@@ -34,7 +34,7 @@
               <div class="case-title">{{ caseItem.title }}</div>
               <div v-show="caseItem.tags.length > 0">
                 <el-tag
-                  v-for="(tag, k) in caseItem.tags.slice(0, 2)"
+                  v-for="(tag, k) in caseItem.tags.slice(0, 1)"
                   :key="k"
                   size="small"
                   class="mx-1"
@@ -124,7 +124,6 @@
             v-model="addCaseDialog.formData.tags"
             placeholder="请选择标签"
             value-key="id"
-            multiple
             clearable
           >
             <el-option v-for="(item, k) in tagList" :key="k" :label="item.name" :value="item" />
