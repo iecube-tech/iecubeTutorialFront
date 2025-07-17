@@ -125,6 +125,7 @@
             placeholder="请选择标签"
             value-key="id"
             clearable
+          
           >
             <el-option v-for="(item, k) in tagList" :key="k" :label="item.name" :value="item" />
           </el-select>
@@ -148,6 +149,7 @@
   import { uploadFile, getTagList, uploadCase, getCaseList, deleteCase } from '@/api/caseApi'
 
   import { Add, Delete, CloudUpload } from '@vicons/carbon'
+  import {cloneDeep} from 'lodash'
 
   const filterText = ref('')
 
@@ -190,7 +192,9 @@
   const handleSumbitCase = () => {
     addCaseFormRef.value.validate(valid => {
       if (valid) {
-        uploadCase(addCaseDialog.value.formData).then(res => {
+        let req = cloneDeep(addCaseDialog.value.formData)
+        req.tags = [ req.tags ]
+        uploadCase(req).then(res => {
           if (res.state == 200) {
             close()
             ElMessage.success('上传成功')
