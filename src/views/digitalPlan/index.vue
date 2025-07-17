@@ -236,7 +236,7 @@
 
         <el-row :gutter="10" class="mb-10px" v-if="filterCaseList.length > 0">
           <el-col :span="6" v-for="caseItem in filterCaseList.slice(0, 4)" :key="caseItem.id">
-            <div class="case-card">
+            <div class="case-card" @click="handleShowCase(caseItem)">
               <div class="case-image-wrapper">
                 <img
                   :src="`/resource/${caseItem.cover.filename}`"
@@ -268,7 +268,7 @@
 
         <el-row :gutter="10" class="mb-10px" v-if="filterCaseList.length > 4">
           <el-col :span="6" v-for="caseItem in filterCaseList.slice(4, 8)" :key="caseItem.id">
-            <div class="case-card">
+            <div class="case-card" @click="handleShowCase(caseItem)">
               <div class="case-image-wrapper">
                 <img
                   :src="`/resource/${caseItem.cover.filename}`"
@@ -543,6 +543,20 @@
     console.log('查看大纲')
     markdownDialogRef.value.open(htmlContent)
   }
+  
+  // 查看案例
+  const handleShowCase = caseItem => {
+    let filePath = `/resource/${caseItem.file.filename}`
+    let openPath = router.resolve({
+      path: '/showDigitalPlan',
+      query: {
+        filePath: filePath,
+        fileName: caseItem.name,
+        id: '',  // 项目id 从案例进入时 id 为空
+      }
+    })
+    window.open(openPath.href, '_blank')
+  }
 
   // 查看讲义
   const handleShowPlan = row => {
@@ -552,7 +566,7 @@
       query: {
         filePath: filePath,
         fileName: row.name,
-        id: row.id
+        id: row.id,
       }
     })
     window.open(openPath.href, '_blank')

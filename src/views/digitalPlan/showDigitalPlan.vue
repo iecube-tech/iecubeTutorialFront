@@ -64,19 +64,36 @@
           </div>
         </div>
       </template>
+
       <template #right-content>
         <div class="btn-tools h-24px flex justify-between items-center">
           <div class="h-full flex items-center">
-            <el-select v-model="currentVersion" class="!w-100px mr-2" size="small">
+            <el-select
+              v-show="!isFromCase"
+              v-model="currentVersion"
+              class="!w-100px mr-2"
+              size="small"
+            >
               <el-option label="最新 V3" value="3"></el-option>
               <el-option label="历史 V2" value="2"></el-option>
               <el-option label="历史 V1" value="1"></el-option>
             </el-select>
-            <span class="hover:text-zeng">版本</span>
+            <span v-show="!isFromCase" class="hover:text-zeng">版本</span>
+
+            <Icon
+              v-show="isFromCase"
+              title="根据案例创建教案"
+              :size="iconSize"
+              class="btn-icon"
+              style="color: var(--zeng)"
+              @click="handleCreateProject"
+            >
+              <CreateNewFolderSharp />
+            </Icon>
           </div>
 
           <div class="h-full flex items-center">
-            <el-radio-group v-model="isPreview" class="h-full" size="small">
+            <el-radio-group v-show="!isFromCase" v-model="isPreview" class="h-full" size="small">
               <el-radio-button title="代码" :value="false" class="h-full py-0">
                 <Icon :size="iconSize">
                   <ClipboardCode20Filled />
@@ -91,7 +108,13 @@
           </div>
 
           <div class="h-full flex items-center gap-4">
-            <Icon title="保存" :size="iconSize" class="btn-icon" @click="handleSave">
+            <Icon
+              v-show="!isFromCase"
+              title="保存"
+              :size="iconSize"
+              class="btn-icon"
+              @click="handleSave"
+            >
               <Save />
             </Icon>
             <Icon title="下载" :size="iconSize" class="btn-icon" @click="handleDownload">
@@ -138,12 +161,15 @@
   import { Download, Save, SendAltFilled, Version } from '@vicons/carbon'
   import { Crosshairs, Eye } from '@vicons/fa'
   import { ClipboardCode20Filled } from '@vicons/fluent'
+  import { CreateNewFolderSharp } from '@vicons/material'
   import resizePanel from './resizePanel.vue'
 
   import { Base64 } from 'js-base64'
   import { updatePlan } from '@/api/plan'
 
   import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
+
+  import router from '@/router'
 
   const iconSize = ref(20)
   const isPreview = ref(true)
@@ -166,9 +192,11 @@
   const htmlText = ref('')
   const fileName = ref('')
   const id = ref(null)
-  relativeFilePath.value = route.query.filePath
-  fileName.value = route.query.fileName
-  id.value = route.query.id
+
+  // 是否从案例跳转过来
+  const isFromCase = computed(() => {
+    return  id.value == ''
+  })
 
   // 刷新页面
   const handleRefresh = () => {
@@ -230,16 +258,6 @@
     htmlText.value = await response.text()
     createEditor(htmlText.value)
   }
-
-  // 初始化
-  const init = () => {
-    startLoading()
-    getHtmlFileContent()
-  }
-
-  onMounted(() => {
-    init()
-  })
 
   //编辑相关代码
   import { throttle } from 'lodash'
@@ -381,7 +399,44 @@
     }
   }
 
-  // 滚动时 可见滚动条  怎么设置
+  // TODO: 生成项目重新更新界面
+  const handleCreateProject = () => {
+    
+    let replaceQuery = Object.assign(route.query, {
+      id: '99999'
+    })
+    router.replace({
+      path: route.path,
+      query: replaceQuery
+    })
+    
+    const newUrl = router.resolve({
+      path: route.path,
+      query: replaceQuery
+    }).href
+
+    window.history.replaceState({}, '', newUrl)
+    
+    initLayout()
+  }
+
+  // 初始化
+  const init = () => {
+    startLoading()
+    getHtmlFileContent()
+    initLayout()
+  }
+
+  const initLayout = () => {
+    relativeFilePath.value = route.query.filePath
+    fileName.value = route.query.fileName
+    id.value = route.query.id
+    resizePanelRef.value.setRightPanelOnly(isFromCase.value)
+  }
+
+  onMounted(() => {
+    init()
+  })
 </script>
 
 <style lang="scss" scoped>
