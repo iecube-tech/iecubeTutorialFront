@@ -79,9 +79,10 @@
               class="!w-100px mr-2"
               size="small"
             >
-              <el-option label="最新 V3" value="3"></el-option>
-              <el-option label="历史 V2" value="2"></el-option>
-              <el-option label="历史 V1" value="1"></el-option>
+              <el-option v-for="(versionItem, k) in versionList" 
+              :key="k" 
+              :label="k == 0 ? `最新 V${versionItem.version}` : `历史 V${versionItem.version}`"
+              :value="versionItem.version"></el-option>
             </el-select>
             <span v-show="!isFromCase" class="hover:text-zeng">版本</span>
 
@@ -172,7 +173,7 @@
   import resizePanel from './resizePanel.vue'
 
   import { Base64 } from 'js-base64'
-  import { updatePlan, createProjectByCaseId } from '@/api/plan'
+  import { updatePlan, createProjectByCaseId, getProjectDetail } from '@/api/plan'
 
   import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
 
@@ -183,6 +184,7 @@
   const resizePanelRef = ref(null)
 
   const currentVersion = ref(1)
+  const versionList = ref([])
 
   const loading = ref(true)
   const loadingText = ref('正在为您拼命加载页面中.....')
@@ -218,7 +220,6 @@
   }
 
   const stopLoading = async () => {
-    console.log('stopLoading ............')
     loading.value = false
   }
 
@@ -487,9 +488,7 @@
     ws.value = new WebSocket(`/ai/html/edit/${id.value}`)
 
     ws.value.onopen = event => {
-      console.log('连接成功')
-      console.log(event)
-      console.log(ws.value)
+      console.log('ws contect success!')
       // intervalN.value = setInterval(_ => {
       //   sendHeart()
       // }, 30000)
@@ -499,7 +498,7 @@
       const data = JSON.parse(event.data)
       switch (data.type) {
         case 'current':
-          handleHistroyChatList(data.current)
+          initHistroyChatList(data.current)
           await nextTick()
           scrollRoll()
           break
@@ -549,7 +548,7 @@
     }
   }
 
-  const handleHistroyChatList = list => {
+  const initHistroyChatList = list => {
     list.forEach(chatItem => {
       let contentObj = JSON.parse(Base64.decode(chatItem.content))
       if (contentObj.type === 'user') {
@@ -558,8 +557,22 @@
         addMessage(contentObj.message)
       }
     })
+  }
 
-    console.log(chatHistoryList.value)
+  const updateProjectDetail = () => {
+    if (!id.value) {
+      return
+    }
+    getProjectDetail(id.value).then(res => {
+      console.log(res)
+      if (res.state == 200) {
+        let list = res.data.projectChildren || []
+        versionList.value = list.reverse()
+        if (list.length > 0) {
+          currentVersion.value = list[0].version
+        }
+      }
+    })
   }
 
   // 初始化
@@ -577,6 +590,8 @@
     id.value = route.query.id
     caseId.value = route.query.caseId
     resizePanelRef.value.setRightPanelOnly(isFromCase.value)
+
+    updateProjectDetail()
   }
 
   onMounted(() => {
