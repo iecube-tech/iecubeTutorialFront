@@ -172,7 +172,7 @@
   import resizePanel from './resizePanel.vue'
 
   import { Base64 } from 'js-base64'
-  import { updatePlan } from '@/api/plan'
+  import { updatePlan, createProjectByCaseId } from '@/api/plan'
 
   import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
 
@@ -198,7 +198,8 @@
   const relativeFilePath = ref('')
   const htmlText = ref('')
   const fileName = ref('')
-  const id = ref(null)
+  const id = ref('')
+  const caseId = ref('')
 
   // 是否从案例跳转过来
   const isFromCase = computed(() => {
@@ -217,6 +218,7 @@
   }
 
   const stopLoading = async () => {
+    console.log('stopLoading ............')
     loading.value = false
   }
 
@@ -260,7 +262,7 @@
   }
 
   // 获取讲义文件内容
-  const getHtmlFileContent = async () => {
+  const initFetchHtml = async () => {
     const response = await fetch(relativeFilePath.value)
     htmlText.value = await response.text()
     createEditor(htmlText.value)
@@ -401,10 +403,12 @@
         content: msg
       })
     } else {
-      chatHistoryList.value.push({
-        role: 'assistant',
-        content: msg
-      })
+      if (msg) {
+        chatHistoryList.value.push({
+          role: 'assistant',
+          content: msg
+        })
+      }
     }
   }
 
@@ -414,6 +418,10 @@
     }
 
     setDefaultThink()
+
+    if (!ws) {
+      return
+    }
 
     ws.value.send(JSON.stringify(consistSendMsg()))
     addMessage(askText.value, true)
@@ -432,24 +440,31 @@
     }
   }
 
-  // TODO: 生成项目重新更新界面
+  // 生成项目重新更新界面
   const handleCreateProject = () => {
-    let replaceQuery = Object.assign(route.query, {
-      id: '99999'
+    createProjectByCaseId(caseId.value).then(res => {
+      if (res.state == 200) {
+        let data = res.data
+        let newFileName = data.projectChildren[0].resource.filename || ''
+        let replaceQuery = Object.assign(route.query, {
+          id: data.project.id,
+          fileName: newFileName
+        })
+        router.replace({
+          path: route.path,
+          query: replaceQuery
+        })
+
+        const newUrl = router.resolve({
+          path: route.path,
+          query: replaceQuery
+        }).href
+
+        window.history.replaceState({}, '', newUrl)
+
+        initLayout()
+      }
     })
-    router.replace({
-      path: route.path,
-      query: replaceQuery
-    })
-
-    const newUrl = router.resolve({
-      path: route.path,
-      query: replaceQuery
-    }).href
-
-    window.history.replaceState({}, '', newUrl)
-
-    initLayout()
   }
 
   // 初始化websocket
@@ -471,11 +486,13 @@
 
     ws.value = new WebSocket(`/ai/html/edit/${id.value}`)
 
-    ws.value.onopen = () => {
-      // console.log('WebSocket connection established.')
-      intervalN.value = setInterval(_ => {
-        sendHeart(ws.value)
-      }, 2000)
+    ws.value.onopen = event => {
+      console.log('连接成功')
+      console.log(event)
+      console.log(ws.value)
+      // intervalN.value = setInterval(_ => {
+      //   sendHeart()
+      // }, 30000)
     }
 
     ws.value.onmessage = async event => {
@@ -483,6 +500,8 @@
       switch (data.type) {
         case 'current':
           handleHistroyChatList(data.current)
+          await nextTick()
+          scrollRoll()
           break
         case 'stream_start':
           thinking.value = true
@@ -498,6 +517,13 @@
         case 'complete':
           thinkingText.value = ''
           addMessage(data.content)
+          await nextTick()
+          scrollRoll()
+          break
+        case 'ai':
+          let contentObj = JSON.parse(Base64.decode(data.content))
+          let newHmtlText = Base64.decode(contentObj.fullCode)
+          updateHtmlTextValue(newHmtlText)
           break
         default:
           break
@@ -505,15 +531,21 @@
     }
   }
 
-  const sendHeart = ws => {
+  // 更新视图和代码内容
+  const updateHtmlTextValue = newHmtlText => {
+    htmlText.value = newHmtlText
+    editorInstance.setValue(newHmtlText)
+  }
+
+  const sendHeart = () => {
+    if (!ws.value) {
+      return
+    }
     let heart = {
       type: 'ping'
     }
-    if (!ws) {
-      return
-    }
-    if (ws.readyState == 1) {
-      ws.send(JSON.stringify(heart))
+    if (ws.value.readyState == 1) {
+      ws.value.send(JSON.stringify(heart))
     }
   }
 
@@ -526,7 +558,7 @@
         addMessage(contentObj.message)
       }
     })
-    
+
     console.log(chatHistoryList.value)
   }
 
@@ -535,7 +567,7 @@
     startLoading()
     initLayout()
 
-    getHtmlFileContent()
+    initFetchHtml()
     initWebSocket()
   }
 
@@ -543,6 +575,7 @@
     relativeFilePath.value = route.query.filePath
     fileName.value = route.query.fileName
     id.value = route.query.id
+    caseId.value = route.query.caseId
     resizePanelRef.value.setRightPanelOnly(isFromCase.value)
   }
 
@@ -682,7 +715,7 @@
     @extend .chat-bg;
     min-width: 0;
     max-width: 90%;
-    @apply text-sm inline-block rounded-lg px-16px;
+    @apply text-sm inline-block rounded-lg px-16px pt-9px;
     overflow-x: auto;
   }
 </style>
