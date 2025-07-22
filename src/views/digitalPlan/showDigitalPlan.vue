@@ -102,7 +102,12 @@
           </div>
 
           <div class="h-full flex items-center">
-            <el-radio-group v-show="!isFromCase" v-model="isPreview" class="h-full" size="small">
+            <el-radio-group
+              v-show="!isFromCase"
+              v-model="isPreview"
+              class="h-full"
+              size="small"
+            >
               <el-radio-button title="代码" :value="false" class="h-full py-0">
                 <Icon :size="iconSize">
                   <ClipboardCode20Filled />
@@ -149,11 +154,10 @@
               <el-skeleton-item variant="text" style="width: 80%" />
             </template>
           </el-skeleton>
-          <!-- :src="relativeFilePath + `?t=${t}`" -->
           <iframe
             v-show="isPreview"
             ref="iframeRef"
-            class="wh-full absolute top-0 left-0"
+            class="wh-full absolute top-0 left-0 z-400"
             src="about:blank"
             :srcdoc="htmlText"
             loading="lazy"
@@ -161,7 +165,7 @@
           ></iframe>
           <div ref="highlightTagRef" v-show="isPreview" class="hightlight-tag"></div>
           <div ref="highlightBoxRef" v-show="isPreview" class="highlight-box"></div>
-          <div ref="editorRef" v-show="!isPreview" class="wh-full absolute top-0 left-0"></div>
+          <div ref="editorRef" v-show="!isPreview" class="wh-full absolute top-0 left-0 z-900"></div>
         </div>
       </template>
     </resizePanel>
@@ -175,6 +179,7 @@
   import { CreateNewFolderSharp } from '@vicons/material'
   import { Base64 } from 'js-base64'
   import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
+  import { throttle, debounce } from 'lodash'
   import router from '@/router'
   import resizePanel from './resizePanel.vue'
   import { updatePlan, createProjectByCaseId, getProjectDetail } from '@/api/plan'
@@ -182,35 +187,25 @@
   const iconSize = ref(20)
   const isPreview = ref(true)
   const resizePanelRef = ref(null)
-  
-  // TODO @deparate loading 
+
   const loading = ref(true)
   const loadingText = ref('正在为您拼命加载页面中.....')
-  const t = ref('')
-
-  const updateTime = () => {
-    t.value = new Date().getTime()
-  }
-
-  updateTime()
-  
-    // 刷新页面
-  const handleRefresh = () => {
-    isPreview.value = true
-    startLoading()
-    updateTime()
-  }
 
   const startLoading = () => {
     loading.value = true
   }
 
   const stopLoading = async () => {
-    loading.value = false
+    // console.log('stop  loading ....')
+    await nextTick()
+    setTimeout(_=>{
+      loading.value = false
+    }, 800)
   }
   
-  // 切换版本
-  const handleCurrentVersionChange = (v) =>{
+  // TODO: 切换版本
+  const handleCurrentVersionChange = v => {
+    startLoading()
     let versionItem = versionList.value.find(_ => _.version == v)
     let newFileName = `/resource/${versionItem.resource.filename}`
     updateURL(id.value, newFileName)
@@ -230,8 +225,8 @@
       }
     })
   }
-  
-   // 下载文件
+
+  // 下载文件
   const handleDownload = () => {
     const link = document.createElement('a')
     link.href = relativeFilePath.value
@@ -239,7 +234,7 @@
     link.click()
   }
 
-  // 保存文件
+  // TODO: 保存文件
   const handleSave = () => {
     const content = editorInstance.getValue()
     const base64Content = Base64.encode(content)
@@ -248,11 +243,9 @@
       htmlContentBase64: base64Content
     }).then(res => {
       ElMessage.success('保存成功')
-      handleRefresh()
     })
   }
-  
-  
+
   // *********************************************************************************
 
   // 核心参数
@@ -284,10 +277,17 @@
       roundedSelection: false,
       scrollBeyondLastLine: false
     })
+
+    editorInstance.onDidChangeModelContent(debounceUpdateHtmlText)
   }
+  
+  const debounceUpdateHtmlText = debounce(event => {
+    console.log('代码改变 >>>>>>>>>>>>>>>>>>>')
+    // startLoading()
+    htmlText.value = editorInstance.getValue()
+  }, 800)
 
   //编辑相关代码
-  import { throttle } from 'lodash'
 
   const highlightBoxRef = ref(null)
   const highlightTagRef = ref(null)
@@ -520,6 +520,7 @@
           let contentObj = JSON.parse(Base64.decode(data.content))
           let newHmtlText = Base64.decode(contentObj.fullCode)
           updateEditValueAndView(newHmtlText)
+          initVersionList()
           break
         default:
           break
@@ -563,8 +564,11 @@
     initCoreParamByRoute()
     updateLayout()
     initVersionList()
-    initFetchHtml(true)
     initWebSocket()
+    await nextTick()
+    setTimeout(_ => {
+      initFetchHtml(true)
+    }, 500)
   }
 
   // 获取讲义文件内容 true: 初始化edit  , 默认false: 更新editor内容
@@ -575,13 +579,16 @@
       initMonacoEditor(htmlText.value)
     } else {
       editorInstance.setValue(htmlText.value)
+      setTimeout(_=>{
+        stopLoading()
+      }, 1000)
     }
   }
 
   // 初始化版本列表
   const currentVersion = ref(1)
   const versionList = ref([])
-  
+
   const initVersionList = () => {
     if (!id.value) {
       return

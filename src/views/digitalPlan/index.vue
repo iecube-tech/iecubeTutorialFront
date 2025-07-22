@@ -505,7 +505,7 @@
     clearInterval(intervalTime.value)
   })
 
-  // TODO:查看大纲
+  // TODO: 查看大纲
   const markdownDialogRef = ref(null)
   const handleShowOutline = async row => {
     // console.log(row)
