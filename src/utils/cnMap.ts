@@ -76,3 +76,16 @@ export const getClientRoleZn = (value: string) => {
   let item = clientRoles.find(_ => _.value === value)
   return item
 }
+
+
+export const projectStatus = [
+  { label: '准备中', value: 'NOTReady', type: 'info' },
+  { label: '生成中', value: 'GENERATING', type: 'warning' },
+  { label: '完成', value: 'DONE', type: 'success' },
+  { label: '失败', value: 'FAILED', type: 'danger' }
+]
+
+export const getProjectStatusZn = (value: string) => {
+  let item = projectStatus.find(_ => _.value === value)
+  return item
+}

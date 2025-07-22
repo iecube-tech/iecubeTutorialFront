@@ -12,9 +12,14 @@
               <div v-if="chatItem.role === 'user'" class="chat-user">
                 {{ chatItem.content }}
               </div>
-
-              <div v-else class="chat-assistant">
+              <div v-if="chatItem.role === 'assistant'" class="chat-assistant">
+                {{ chatItem.content }}
                 <MdPreview :modelValue="chatItem.content"></MdPreview>
+              </div>
+            </div>
+            <div v-if="thinking" class="chart-assistant-container">
+              <div class="chat-assistant">
+                <MdPreview :modelValue="thinkingText"></MdPreview>
               </div>
             </div>
           </div>
@@ -37,7 +42,7 @@
                   class="ask-text-input"
                   v-model="askText"
                   placeholder="请输入你的需求"
-                  @keydown.enter="handAsk"
+                  @keydown.enter="handleAsk"
                 />
               </div>
               <div class="flex items-center justify-between gap-2 px-4 pb-3">
@@ -53,7 +58,7 @@
                     <Icon
                       class="ask-icon"
                       :class="{ 'icon-disable': askText == '' }"
-                      @click="handAsk"
+                      @click="handleAsk"
                     >
                       <SendAltFilled />
                     </Icon>
@@ -140,11 +145,13 @@
               <el-skeleton-item variant="text" style="width: 80%" />
             </template>
           </el-skeleton>
+          <!-- :src="relativeFilePath + `?t=${t}`" -->
           <iframe
             v-show="isPreview"
             ref="iframeRef"
             class="wh-full absolute top-0 left-0"
-            :src="relativeFilePath + `?t=${t}`"
+            src="about:blank"
+            :srcdoc="htmlText"
             loading="lazy"
             @load="stopLoading"
           ></iframe>
@@ -158,7 +165,7 @@
 </template>
 
 <script setup>
-  import { Download, Save, SendAltFilled, Version } from '@vicons/carbon'
+  import { Download, Json, Save, SendAltFilled, Version } from '@vicons/carbon'
   import { Crosshairs, Eye } from '@vicons/fa'
   import { ClipboardCode20Filled } from '@vicons/fluent'
   import { CreateNewFolderSharp } from '@vicons/material'
@@ -195,7 +202,7 @@
 
   // 是否从案例跳转过来
   const isFromCase = computed(() => {
-    return  id.value == ''
+    return id.value == ''
   })
 
   // 刷新页面
@@ -366,24 +373,50 @@
   const chatContainerRef = ref(null)
   let chatHistoryList = ref([])
 
-  const handAsk = async () => {
-    console.log('ask ....')
+  const consistSendMsg = () => {
+    let list = []
+    if (hoveredElementStr.value) {
+      list = [
+        {
+          html: Base64.encode(hoveredElementStr.value)
+        }
+      ]
+    }
+    let msg = {
+      type: 'user',
+      projectId: id.value,
+      message: askText.value,
+      selectedElements: list,
+      fullCode: Base64.encode(editorInstance.getValue()),
+      fileName: fileName.value
+    }
+    return msg
+  }
+
+  // 消息加入历史列表中
+  const addMessage = (msg, isUser) => {
+    if (isUser) {
+      chatHistoryList.value.push({
+        role: 'user',
+        content: msg
+      })
+    } else {
+      chatHistoryList.value.push({
+        role: 'assistant',
+        content: msg
+      })
+    }
+  }
+
+  const handleAsk = async () => {
     if (!askText.value) {
       return
     }
 
-    chatHistoryList.value.push({
-      role: 'user',
-      content: askText.value
-    })
+    setDefaultThink()
 
-    // 调用 AI 接口
-    const response = {
-      role: 'assistant',
-      content: askText.value
-    }
-
-    chatHistoryList.value.push(response)
+    ws.value.send(JSON.stringify(consistSendMsg()))
+    addMessage(askText.value, true)
 
     askText.value = ''
     hoveredElementClone.value = null
@@ -401,7 +434,6 @@
 
   // TODO: 生成项目重新更新界面
   const handleCreateProject = () => {
-    
     let replaceQuery = Object.assign(route.query, {
       id: '99999'
     })
@@ -409,22 +441,102 @@
       path: route.path,
       query: replaceQuery
     })
-    
+
     const newUrl = router.resolve({
       path: route.path,
       query: replaceQuery
     }).href
 
     window.history.replaceState({}, '', newUrl)
-    
+
     initLayout()
+  }
+
+  // 初始化websocket
+  const ws = ref(null)
+
+  const thinking = ref(false)
+  const thinkingText = ref('')
+
+  const setDefaultThink = () => {
+    thinking.value = false
+    thinkingText.value = ''
+  }
+
+  const intervalN = ref(null)
+
+  // 初始化 websocket
+  const initWebSocket = () => {
+    if (isFromCase.value) return
+
+    ws.value = new WebSocket(`/ai/html/edit/${id.value}`)
+
+    ws.value.onopen = () => {
+      // console.log('WebSocket connection established.')
+      intervalN.value = setInterval(_ => {
+        sendHeart(ws.value)
+      }, 2000)
+    }
+
+    ws.value.onmessage = async event => {
+      const data = JSON.parse(event.data)
+      switch (data.type) {
+        case 'current':
+          handleHistroyChatList(data.current)
+          break
+        case 'stream_start':
+          thinking.value = true
+          break
+        case 'stream':
+          thinkingText.value += data.content
+          await nextTick()
+          scrollRoll()
+          break
+        case 'stream_end':
+          thinking.value = false
+          break
+        case 'complete':
+          thinkingText.value = ''
+          addMessage(data.content)
+          break
+        default:
+          break
+      }
+    }
+  }
+
+  const sendHeart = ws => {
+    let heart = {
+      type: 'ping'
+    }
+    if (!ws) {
+      return
+    }
+    if (ws.readyState == 1) {
+      ws.send(JSON.stringify(heart))
+    }
+  }
+
+  const handleHistroyChatList = list => {
+    list.forEach(chatItem => {
+      let contentObj = JSON.parse(Base64.decode(chatItem.content))
+      if (contentObj.type === 'user') {
+        addMessage(contentObj.message, true)
+      } else {
+        addMessage(contentObj.message)
+      }
+    })
+    
+    console.log(chatHistoryList.value)
   }
 
   // 初始化
   const init = () => {
     startLoading()
-    getHtmlFileContent()
     initLayout()
+
+    getHtmlFileContent()
+    initWebSocket()
   }
 
   const initLayout = () => {

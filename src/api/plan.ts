@@ -1,9 +1,12 @@
 import request from '@/utils/request'
+/**
+ * @Date 25025/7/18 update 生成讲义改为生成工程方式接口修改
+ */
 
-// 获取计划列表
+// 获取工程列表
 export function getPlanList() {
   return request({
-    url: '/material/created',
+    url: '/project',
     method: 'get',
   })
 }
@@ -17,10 +20,13 @@ export function generatePlan(data: any) {
   })
 }
 
-export function removePlan(id: number|string) {
+export function removePlan(projectId: number|string) {
   return request({
-    url: `/material/del/${id}`,
+    url: '/project',
     method: 'delete',
+    params: {
+      projectId
+    }
   })
 }
 
@@ -32,3 +38,24 @@ export function updatePlan(data: any) {
   })
 }
 
+
+// 根据案例id生成一个新工程
+export function createProjectByCaseId(collection: any) {
+  return request({
+    url: '/project',
+    method: 'post',
+    params: {
+      collection
+    }
+  })
+}
+
+export function getProjectDetail(projectId : any) {
+  return request({
+    url: '/project/detail',
+    method: 'get',
+    params: {
+      projectId 
+    }
+  })
+}

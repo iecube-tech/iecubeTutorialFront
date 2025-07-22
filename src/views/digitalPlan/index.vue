@@ -316,61 +316,50 @@
         <div class="px-4">
           <el-table :data="paginatedData" style="width: 100%" show-overflow-tooltip>
             <!-- <el-table-column prop="name" label="文件名称" /> -->
-            <el-table-column prop="title" label="课程名称" />
-            <el-table-column prop="knowledgePoint" label="知识点" />
-            <el-table-column prop="createTime" label="生成时间">
-              <template #default="scope">
-                <span v-show="scope.row.status == 'DONE'">
-                  {{ moment(scope.row.resource.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+            <el-table-column prop="project.title" label="课程名称" />
+            <el-table-column prop="project.knowledgePoint" label="知识点" />
+            <el-table-column prop="project.createTime" label="生成时间">
+              <template #default="{ row }">
+                <span v-show="row.project.status == 'DONE'">
+                  {{ moment(row.project.createTime).format('YYYY-MM-DD HH:mm:ss') }}
                 </span>
               </template>
             </el-table-column>
 
-            <el-table-column prop="status" label="当前状态">
-              <template #default="scope">
-                <el-tag
-                  :type="
-                    scope.row.status == 'NOTReady'
-                      ? 'info'
-                      : scope.row.status == 'GENERATING'
-                        ? 'warning'
-                        : scope.row.status == 'DONE'
-                          ? 'success'
-                          : 'danger'
-                  "
-                  class="w-[60px]"
-                >
-                  {{ scope.row.statusZn }}
+            <el-table-column prop="project.status" label="当前状态">
+              <template #default="{ row }">
+                <el-tag :type="getProjectStatusZn(row.project.status).type" class="w-[60px]">
+                  {{ getProjectStatusZn(row.project.status).label }}
                 </el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="operation" label="操作" width="240">
-              <template #default="scope">
+              <template #default="{row}">
                 <el-button
                   type="primary"
-                  :disabled="scope.row.status != 'DONE'"
+                  :disabled="row.project.status != 'DONE'"
                   link
-                  @click="handleShowOutline(scope.row)"
+                  @click="handleShowOutline(row.project.row)"
                 >
                   大纲
                 </el-button>
                 <el-button
                   type="primary"
-                  :disabled="scope.row.status != 'DONE'"
+                  :disabled="row.project.status != 'DONE'"
                   link
-                  @click="handleShowPlan(scope.row)"
+                  @click="handleShowPlan(row)"
                 >
                   查看
                 </el-button>
                 <el-button
                   type="primary"
-                  :disabled="scope.row.status != 'DONE'"
+                  :disabled="row.project.status != 'DONE'"
                   link
-                  @click="handleDownload(scope.row)"
+                  @click="handleDownload(row.project)"
                 >
                   下载
                 </el-button>
-                <el-button type="primary" link @click="handleRemove(scope.row)">删除</el-button>
+                <el-button type="primary" link @click="handleRemove(row.project)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -420,6 +409,8 @@
 
   import markdownDialog from './markdownDialog.vue'
   import { findCase } from '@/api/caseApi'
+
+  import { getProjectStatusZn } from '@/utils/cnMap.js'
 
   const userStore = useUserStore()
 
@@ -472,7 +463,9 @@
   const paginatedData = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value
     const end = start + pageSize.value
-    return tableData.value.slice(start, end)
+    let res = tableData.value.slice(start, end)
+    console.log(res)
+    return res
   })
 
   const handleSizeChange = newSize => {
@@ -484,34 +477,13 @@
     currentPage.value = newPage
   }
 
-  const getStateCn = state => {
-    let statusZn = ''
-    switch (state) {
-      case 'NOTReady':
-        statusZn = '准备中'
-        break
-      case 'GENERATING':
-        statusZn = '生成中'
-        break
-      case 'DONE':
-        statusZn = '完成'
-        break
-      case 'FAILED':
-        statusZn = '失败'
-        break
-      default:
-        statusZn = '-'
-        break
-    }
-    return statusZn
-  }
+
 
   const getList = () => {
     getPlanList()
       .then(res => {
-        tableData.value = res.data
-        for (let i = 0; i < tableData.value.length; i++) {
-          tableData.value[i].statusZn = getStateCn(tableData.value[i].status)
+        if(res.state == 200) {
+          tableData.value = res.data
         }
       })
       .catch(err => {
@@ -543,7 +515,7 @@
     console.log('查看大纲')
     markdownDialogRef.value.open(htmlContent)
   }
-  
+
   // 查看案例
   const handleShowCase = caseItem => {
     let filePath = `/resource/${caseItem.file.filename}`
@@ -552,21 +524,28 @@
       query: {
         filePath: filePath,
         fileName: caseItem.name,
-        id: '',  // 项目id 从案例进入时 id 为空
+        id: '', // 项目id 从案例进入时 id 为空
+        caseId: caseItem.id // 案例id
       }
     })
     window.open(openPath.href, '_blank')
   }
 
-  // 查看讲义
+  // 查看项目 最新版本 讲义
   const handleShowPlan = row => {
-    let filePath = `/resource/${row.resource.filename}`
+    let lastVersion = row.projectChildren.reverse()[0]
+    console.log(lastVersion)
+    console.log(lastVersion.resource.filename)
+    
+    let filePath = `/resource/${lastVersion.resource.filename}`
     let openPath = router.resolve({
       path: '/showDigitalPlan',
       query: {
         filePath: filePath,
-        fileName: row.name,
-        id: row.id,
+        fileName: row.project.name,
+        id: row.project.id,
+        version: lastVersion.version,
+        caseId: ''
       }
     })
     window.open(openPath.href, '_blank')
