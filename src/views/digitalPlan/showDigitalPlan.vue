@@ -78,11 +78,14 @@
               v-model="currentVersion"
               class="!w-100px mr-2"
               size="small"
+              @change="handleCurrentVersionChange"
             >
-              <el-option v-for="(versionItem, k) in versionList" 
-              :key="k" 
-              :label="k == 0 ? `最新 V${versionItem.version}` : `历史 V${versionItem.version}`"
-              :value="versionItem.version"></el-option>
+              <el-option
+                v-for="(versionItem, k) in versionList"
+                :key="k"
+                :label="k == 0 ? `最新 V${versionItem.version}` : `历史 V${versionItem.version}`"
+                :value="versionItem.version"
+              ></el-option>
             </el-select>
             <span v-show="!isFromCase" class="hover:text-zeng">版本</span>
 
@@ -170,22 +173,17 @@
   import { Crosshairs, Eye } from '@vicons/fa'
   import { ClipboardCode20Filled } from '@vicons/fluent'
   import { CreateNewFolderSharp } from '@vicons/material'
-  import resizePanel from './resizePanel.vue'
-
   import { Base64 } from 'js-base64'
-  import { updatePlan, createProjectByCaseId, getProjectDetail } from '@/api/plan'
-
   import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
-
   import router from '@/router'
+  import resizePanel from './resizePanel.vue'
+  import { updatePlan, createProjectByCaseId, getProjectDetail } from '@/api/plan'
 
   const iconSize = ref(20)
   const isPreview = ref(true)
   const resizePanelRef = ref(null)
-
-  const currentVersion = ref(1)
-  const versionList = ref([])
-
+  
+  // TODO @deparate loading 
   const loading = ref(true)
   const loadingText = ref('正在为您拼命加载页面中.....')
   const t = ref('')
@@ -195,20 +193,8 @@
   }
 
   updateTime()
-
-  const route = useRoute()
-  const relativeFilePath = ref('')
-  const htmlText = ref('')
-  const fileName = ref('')
-  const id = ref('')
-  const caseId = ref('')
-
-  // 是否从案例跳转过来
-  const isFromCase = computed(() => {
-    return id.value == ''
-  })
-
-  // 刷新页面
+  
+    // 刷新页面
   const handleRefresh = () => {
     isPreview.value = true
     startLoading()
@@ -222,8 +208,30 @@
   const stopLoading = async () => {
     loading.value = false
   }
+  
+  // 切换版本
+  const handleCurrentVersionChange = (v) =>{
+    let versionItem = versionList.value.find(_ => _.version == v)
+    let newFileName = `/resource/${versionItem.resource.filename}`
+    updateURL(id.value, newFileName)
+    initFetchHtml()
+  }
 
-  // 下载文件
+  // 新建项目
+  const handleCreateProject = () => {
+    createProjectByCaseId(caseId.value).then(res => {
+      if (res.state == 200) {
+        let data = res.data
+        let newId = data.project.id
+        let newFileName = data.projectChildren[0].resource.filename || ''
+        updateURL(newId, newFileName)
+        updateLayout()
+        initVersionList()
+      }
+    })
+  }
+  
+   // 下载文件
   const handleDownload = () => {
     const link = document.createElement('a')
     link.href = relativeFilePath.value
@@ -243,11 +251,27 @@
       handleRefresh()
     })
   }
+  
+  
+  // *********************************************************************************
+
+  // 核心参数
+  const route = useRoute()
+  const relativeFilePath = ref('')
+  const htmlText = ref('')
+  const fileName = ref('')
+  const id = ref('')
+  const caseId = ref('')
+
+  // 是否从案例跳转过来
+  const isFromCase = computed(() => {
+    return id.value == ''
+  })
 
   // 初始化编辑器
   const editorRef = ref(null)
   let editorInstance = null
-  const createEditor = text => {
+  const initMonacoEditor = text => {
     editorInstance = monaco.editor.create(editorRef.value, {
       value: text,
       language: 'html',
@@ -260,13 +284,6 @@
       roundedSelection: false,
       scrollBeyondLastLine: false
     })
-  }
-
-  // 获取讲义文件内容
-  const initFetchHtml = async () => {
-    const response = await fetch(relativeFilePath.value)
-    htmlText.value = await response.text()
-    createEditor(htmlText.value)
   }
 
   //编辑相关代码
@@ -292,7 +309,7 @@
     return hoveredElementClone.value ? hoveredElementClone.value.innerText : ''
   })
 
-  //  鼠标移入元素时，高亮显示元素
+  // 鼠标移入元素时，高亮显示元素
   function updateHighlight() {
     if (!hoveredElement.value) return
     let highlightBox = highlightBoxRef.value
@@ -374,8 +391,11 @@
 
   // 左侧 AI 对话框 功能
   const chatContainerRef = ref(null)
+
+  // 历史会话列表
   let chatHistoryList = ref([])
 
+  // 组合用户提问的请求体
   const consistSendMsg = () => {
     let list = []
     if (hoveredElementStr.value) {
@@ -413,6 +433,7 @@
     }
   }
 
+  // 用户提问
   const handleAsk = async () => {
     if (!askText.value) {
       return
@@ -434,6 +455,7 @@
     scrollRoll()
   }
 
+  // 滚动
   const scrollRoll = async () => {
     await nextTick()
     if (chatContainerRef.value.scrollHeight > chatContainerRef.value.clientHeight) {
@@ -441,44 +463,20 @@
     }
   }
 
-  // 生成项目重新更新界面
-  const handleCreateProject = () => {
-    createProjectByCaseId(caseId.value).then(res => {
-      if (res.state == 200) {
-        let data = res.data
-        let newFileName = data.projectChildren[0].resource.filename || ''
-        let replaceQuery = Object.assign(route.query, {
-          id: data.project.id,
-          fileName: newFileName
-        })
-        router.replace({
-          path: route.path,
-          query: replaceQuery
-        })
-
-        const newUrl = router.resolve({
-          path: route.path,
-          query: replaceQuery
-        }).href
-
-        window.history.replaceState({}, '', newUrl)
-
-        initLayout()
-      }
-    })
-  }
-
   // 初始化websocket
   const ws = ref(null)
 
+  // ai 思考时展示的内容
   const thinking = ref(false)
   const thinkingText = ref('')
 
+  // 设置默认的思考状态
   const setDefaultThink = () => {
     thinking.value = false
     thinkingText.value = ''
   }
 
+  // 定时器
   const intervalN = ref(null)
 
   // 初始化 websocket
@@ -488,7 +486,6 @@
     ws.value = new WebSocket(`/ai/html/edit/${id.value}`)
 
     ws.value.onopen = event => {
-      console.log('ws contect success!')
       // intervalN.value = setInterval(_ => {
       //   sendHeart()
       // }, 30000)
@@ -522,7 +519,7 @@
         case 'ai':
           let contentObj = JSON.parse(Base64.decode(data.content))
           let newHmtlText = Base64.decode(contentObj.fullCode)
-          updateHtmlTextValue(newHmtlText)
+          updateEditValueAndView(newHmtlText)
           break
         default:
           break
@@ -530,8 +527,20 @@
     }
   }
 
-  // 更新视图和代码内容
-  const updateHtmlTextValue = newHmtlText => {
+  // 初始化历史对话列表
+  const initHistroyChatList = list => {
+    list.forEach(chatItem => {
+      let contentObj = JSON.parse(Base64.decode(chatItem.content))
+      if (contentObj.type === 'user') {
+        addMessage(contentObj.message, true)
+      } else {
+        addMessage(contentObj.message)
+      }
+    })
+  }
+
+  // 更新 iframe 和 monaco editor 内容
+  const updateEditValueAndView = newHmtlText => {
     htmlText.value = newHmtlText
     editorInstance.setValue(newHmtlText)
   }
@@ -548,23 +557,36 @@
     }
   }
 
-  const initHistroyChatList = list => {
-    list.forEach(chatItem => {
-      let contentObj = JSON.parse(Base64.decode(chatItem.content))
-      if (contentObj.type === 'user') {
-        addMessage(contentObj.message, true)
-      } else {
-        addMessage(contentObj.message)
-      }
-    })
+  // 初始化
+  const init = async () => {
+    startLoading()
+    initCoreParamByRoute()
+    updateLayout()
+    initVersionList()
+    initFetchHtml(true)
+    initWebSocket()
   }
 
-  const updateProjectDetail = () => {
+  // 获取讲义文件内容 true: 初始化edit  , 默认false: 更新editor内容
+  const initFetchHtml = async (isCreateEdit = false) => {
+    const response = await fetch(relativeFilePath.value)
+    htmlText.value = await response.text()
+    if (isCreateEdit) {
+      initMonacoEditor(htmlText.value)
+    } else {
+      editorInstance.setValue(htmlText.value)
+    }
+  }
+
+  // 初始化版本列表
+  const currentVersion = ref(1)
+  const versionList = ref([])
+  
+  const initVersionList = () => {
     if (!id.value) {
       return
     }
     getProjectDetail(id.value).then(res => {
-      console.log(res)
       if (res.state == 200) {
         let list = res.data.projectChildren || []
         versionList.value = list.reverse()
@@ -575,25 +597,40 @@
     })
   }
 
-  // 初始化
-  const init = () => {
-    startLoading()
-    initLayout()
+  // 更新 url， 参数改变修改核心参数
+  const updateURL = (id, fileName) => {
+    let replaceQuery = Object.assign(route.query, {
+      id: id,
+      fileName: fileName
+    })
+    router.replace({
+      path: route.path,
+      query: replaceQuery
+    })
 
-    initFetchHtml()
-    initWebSocket()
+    const newUrl = router.resolve({
+      path: route.path,
+      query: replaceQuery
+    }).href
+
+    window.history.replaceState({}, '', newUrl)
+    initCoreParamByRoute()
   }
 
-  const initLayout = () => {
+  // 跟新布局 是否显示 ai 对话框, 初始化和创新项目时调用
+  const updateLayout = () => {
+    resizePanelRef.value.setRightPanelOnly(isFromCase.value)
+  }
+
+  // 根据路由初始化核心参数， 更新url 和 初始化时调用
+  const initCoreParamByRoute = () => {
     relativeFilePath.value = route.query.filePath
     fileName.value = route.query.fileName
     id.value = route.query.id
     caseId.value = route.query.caseId
-    resizePanelRef.value.setRightPanelOnly(isFromCase.value)
-
-    updateProjectDetail()
   }
 
+  // 在组件挂载时调用init函数
   onMounted(() => {
     init()
   })
