@@ -223,6 +223,7 @@
         let newId = data.project.id
         let newFileName = data.projectChildren[0].resource.filename || ''
         updateURL(newId, newFileName)
+        initWebSocket()
         updateLayout()
         initVersionList()
       }
@@ -463,8 +464,9 @@
     if (!ws) {
       return
     }
-
-    ws.value.send(JSON.stringify(consistSendMsg()))
+    
+    let sendMsg = consistSendMsg()
+    ws.value.send(JSON.stringify(sendMsg))
     addMessage(askText.value, true)
 
     askText.value = ''
