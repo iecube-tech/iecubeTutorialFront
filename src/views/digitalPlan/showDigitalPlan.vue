@@ -28,13 +28,17 @@
               class="relative bg-neutral-800 border border-neutral-700 rounded-2xl ring-[4px] focus-within:ring-neutral-500/30 focus-within:border-neutral-600 ring-transparent z-10 w-full group"
             >
               <div class="px-4 pt-3 mb-2">
-                <span
-                  class="tag inline-block max-w-150px overflow-hidden text-ellipsis whitespace-nowrap"
-                  v-show="hoveredElementTagName !== ''"
+                <div
+                  v-show="isShowFocusElement"
+                  class="h-24px w-fit bg-blue-500 text-white text-sm rounded-md px-2 pt-2px"
                 >
-                  <span>{{ hoveredElementTagName }}</span>
-                  <span v-show="hoveredElementText !== ''">.{{ hoveredElementText }}</span>
-                </span>
+                  <div class="h-full inline-flex max-w-120px">
+                    <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                      <span>{{ showTagElText }}</span>
+                    </div>
+                  </div>
+                  <el-icon size="14" class="inline-block cursor-pointer" @click="handleDelFocusEl"><CircleClose /></el-icon>
+                </div>
               </div>
               <div class="w-full relative flex items-center justify-between">
                 <el-input
@@ -102,12 +106,7 @@
           </div>
 
           <div class="h-full flex items-center">
-            <el-radio-group
-              v-show="!isFromCase"
-              v-model="isPreview"
-              class="h-full"
-              size="small"
-            >
+            <el-radio-group v-show="!isFromCase" v-model="isPreview" class="h-full" size="small">
               <el-radio-button title="代码" :value="false" class="h-full py-0">
                 <Icon :size="iconSize">
                   <ClipboardCode20Filled />
@@ -165,7 +164,11 @@
           ></iframe>
           <div ref="highlightTagRef" v-show="isPreview" class="hightlight-tag"></div>
           <div ref="highlightBoxRef" v-show="isPreview" class="highlight-box"></div>
-          <div ref="editorRef" v-show="!isPreview" class="wh-full absolute top-0 left-0 z-900"></div>
+          <div
+            ref="editorRef"
+            v-show="!isPreview"
+            class="wh-full absolute top-0 left-0 z-900"
+          ></div>
         </div>
       </template>
     </resizePanel>
@@ -198,11 +201,11 @@
   const stopLoading = async () => {
     // console.log('stop  loading ....')
     await nextTick()
-    setTimeout(_=>{
+    setTimeout(_ => {
       loading.value = false
     }, 800)
   }
-  
+
   // TODO: 切换版本
   const handleCurrentVersionChange = v => {
     startLoading()
@@ -280,7 +283,7 @@
 
     editorInstance.onDidChangeModelContent(debounceUpdateHtmlText)
   }
-  
+
   const debounceUpdateHtmlText = debounce(event => {
     console.log('代码改变 >>>>>>>>>>>>>>>>>>>')
     // startLoading()
@@ -297,17 +300,33 @@
   const isEdit = ref(false)
   const askText = ref('')
 
-  const hoveredElementTagName = computed(() => {
-    return hoveredElementClone.value ? hoveredElementClone.value.tagName.toLowerCase() : ''
-  })
+  const showTagElText = ref('')
+  const tagElouterHTML = ref('')
 
-  const hoveredElementStr = computed(() => {
-    return hoveredElementClone.value ? hoveredElementClone.value.outerHTML : ''
+  const isShowFocusElement = computed(() => {
+    let focusEl = hoveredElementClone.value
+    if (!focusEl) {
+      showTagElText.value = ''
+      tagElouterHTML.value = ''
+      return false
+    } else {
+      let tagElName = focusEl.tagName.toLowerCase()
+      let tagElInnerText = focusEl.innerText
+      let showTagText = tagElName
+      if (tagElInnerText) {
+        showTagText += '.' + tagElInnerText
+      }
+      showTagElText.value = showTagText
+      tagElouterHTML.value = focusEl.outerHTML
+      return true
+    }
   })
-
-  const hoveredElementText = computed(() => {
-    return hoveredElementClone.value ? hoveredElementClone.value.innerText : ''
-  })
+  
+  
+  const handleDelFocusEl = () => {
+    hoveredElement.value = null
+    hoveredElementClone.value = null
+  }
 
   // 鼠标移入元素时，高亮显示元素
   function updateHighlight() {
@@ -398,10 +417,10 @@
   // 组合用户提问的请求体
   const consistSendMsg = () => {
     let list = []
-    if (hoveredElementStr.value) {
+    if (tagElouterHTML.value) {
       list = [
         {
-          html: Base64.encode(hoveredElementStr.value)
+          html: Base64.encode(tagElouterHTML.value)
         }
       ]
     }
@@ -579,7 +598,7 @@
       initMonacoEditor(htmlText.value)
     } else {
       editorInstance.setValue(htmlText.value)
-      setTimeout(_=>{
+      setTimeout(_ => {
         stopLoading()
       }, 1000)
     }
