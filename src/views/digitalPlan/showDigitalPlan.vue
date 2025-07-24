@@ -206,12 +206,12 @@
     }, 800)
   }
 
-  // TODO: 切换版本
+  // 切换版本
   const handleCurrentVersionChange = v => {
     startLoading()
     let versionItem = versionList.value.find(_ => _.version == v)
-    let newFileName = `/resource/${versionItem.resource.filename}`
-    updateURL(id.value, newFileName)
+    let newPath = `/resource/${versionItem.resource.filename}`
+    updateURL(id.value, newPath)
     initFetchHtml()
   }
 
@@ -221,8 +221,8 @@
       if (res.state == 200) {
         let data = res.data
         let newId = data.project.id
-        let newFileName = data.projectChildren[0].resource.filename || ''
-        updateURL(newId, newFileName)
+        let newPath = '/resource/' + data.projectChildren[0].resource.filename || ''
+        updateURL(newId, newPath)
         initWebSocket()
         updateLayout()
         initVersionList()
@@ -286,7 +286,6 @@
   }
 
   const debounceUpdateHtmlText = debounce(event => {
-    console.log('代码改变 >>>>>>>>>>>>>>>>>>>')
     // startLoading()
     htmlText.value = editorInstance.getValue()
   }, 800)
@@ -594,16 +593,20 @@
 
   // 获取讲义文件内容 true: 初始化edit  , 默认false: 更新editor内容
   const initFetchHtml = async (isCreateEdit = false) => {
-    const response = await fetch(relativeFilePath.value)
-    htmlText.value = await response.text()
+    const res = await fetch(relativeFilePath.value)
+    const resText = await res.text()
+    let htmlText = resText || ''
     if (isCreateEdit) {
-      initMonacoEditor(htmlText.value)
+      initMonacoEditor('')
     } else {
-      editorInstance.setValue(htmlText.value)
       setTimeout(_ => {
         stopLoading()
       }, 1000)
     }
+    await nextTick()
+    setTimeout(_=>{
+      updateEditValueAndView(htmlText)
+    })
   }
 
   // 初始化版本列表
@@ -626,10 +629,10 @@
   }
 
   // 更新 url， 参数改变修改核心参数
-  const updateURL = (id, fileName) => {
+  const updateURL = (id, filePath) => {
     let replaceQuery = Object.assign(route.query, {
       id: id,
-      fileName: fileName
+      filePath: filePath
     })
     router.replace({
       path: route.path,

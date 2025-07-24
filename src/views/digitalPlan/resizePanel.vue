@@ -10,7 +10,6 @@
       class="resize-handle"
       ref="resizeHandle"
       @mousedown="startDrag"
-      @touchstart="startDrag"
     />
 
     <div class="panel right-panel" ref="rightPanel">
