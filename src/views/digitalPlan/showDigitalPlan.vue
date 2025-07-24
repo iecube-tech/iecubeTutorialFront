@@ -185,7 +185,7 @@
   import { throttle, debounce } from 'lodash'
   import router from '@/router'
   import resizePanel from './resizePanel.vue'
-  import { updatePlan, createProjectByCaseId, getProjectDetail } from '@/api/plan'
+  import { editorProjectHtml, createProjectByCaseId, getProjectDetail } from '@/api/plan'
 
   const iconSize = ref(20)
   const isPreview = ref(true)
@@ -210,8 +210,9 @@
   const handleCurrentVersionChange = v => {
     startLoading()
     let versionItem = versionList.value.find(_ => _.version == v)
+    currentVersionId.value = versionItem.id
     let newPath = `/resource/${versionItem.resource.filename}`
-    updateURL(id.value, newPath)
+    updateURL(id.value, newPath, currentVersion.value)
     initFetchHtml()
   }
 
@@ -222,10 +223,10 @@
         let data = res.data
         let newId = data.project.id
         let newPath = '/resource/' + data.projectChildren[0].resource.filename || ''
-        updateURL(newId, newPath)
+        updateURL(newId, newPath, 1)
         initWebSocket()
         updateLayout()
-        initVersionList()
+        initVersionList(true)
       }
     })
   }
@@ -242,11 +243,13 @@
   const handleSave = () => {
     const content = editorInstance.getValue()
     const base64Content = Base64.encode(content)
-    updatePlan({
-      id: id.value,
-      htmlContentBase64: base64Content
+    editorProjectHtml({
+      pChildId: currentVersionId.value,
+      htmlBase64: base64Content
     }).then(res => {
-      ElMessage.success('保存成功')
+      if(res.state == 200){
+        ElMessage.success('保存成功')
+      }
     })
   }
 
@@ -540,7 +543,7 @@
           let contentObj = JSON.parse(Base64.decode(data.content))
           let newHmtlText = Base64.decode(contentObj.fullCode)
           updateEditValueAndView(newHmtlText)
-          initVersionList()
+          initVersionList(true)
           break
         default:
           break
@@ -610,10 +613,11 @@
   }
 
   // 初始化版本列表
-  const currentVersion = ref(1)
+  const currentVersion = ref(1) // 核心参数
+  const currentVersionId = ref(0)
   const versionList = ref([])
 
-  const initVersionList = () => {
+  const initVersionList = (isFlashLast) => {
     if (!id.value) {
       return
     }
@@ -622,17 +626,26 @@
         let list = res.data.projectChildren || []
         versionList.value = list.reverse()
         if (list.length > 0) {
-          currentVersion.value = list[0].version
+          if(isFlashLast){
+            currentVersion.value = list[0].version
+            currentVersionId.value = list[0].id
+            updateURL(id.value, relativeFilePath.value, list[0].version)
+          } else {
+            let currenChildItem = list.find( _ => currentVersion.value == _.version)
+            currentVersion.value = currenChildItem.version
+            currentVersionId.value = currenChildItem.id
+          }
         }
       }
     })
   }
 
   // 更新 url， 参数改变修改核心参数
-  const updateURL = (id, filePath) => {
+  const updateURL = (id, filePath, version) => {
     let replaceQuery = Object.assign(route.query, {
       id: id,
-      filePath: filePath
+      filePath: filePath,
+      version: version
     })
     router.replace({
       path: route.path,
@@ -659,6 +672,9 @@
     fileName.value = route.query.fileName
     id.value = route.query.id
     caseId.value = route.query.caseId
+    
+    // 新增核心参数
+    currentVersion.value = route.query.version
   }
 
   // 在组件挂载时调用init函数

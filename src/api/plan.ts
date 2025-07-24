@@ -30,6 +30,7 @@ export function removePlan(projectId: number|string) {
   })
 }
 
+// departed
 export function updatePlan(data: any) {
   return request({
     url: '/material/update',
@@ -57,5 +58,13 @@ export function getProjectDetail(projectId : any) {
     params: {
       projectId 
     }
+  })
+}
+
+export function editorProjectHtml(data: any){
+  return request({
+    url: '/project/edit',
+    method: 'post',
+    data
   })
 }
