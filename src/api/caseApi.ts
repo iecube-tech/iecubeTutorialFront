@@ -80,5 +80,13 @@ export const findCase = (data : any) => {
 }
 
 
+export const getCaseDetail = (id: any) => {
+  return request({
+    url: `/collection/${id}`,
+    method: 'get',
+  })
+}
+
+
   
   

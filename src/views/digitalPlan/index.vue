@@ -522,10 +522,10 @@
     let openPath = router.resolve({
       path: '/showDigitalPlan',
       query: {
-        filePath: filePath,
-        fileName: caseItem.name,
         id: '', // 项目id 从案例进入时 id 为空
         caseId: caseItem.id // 案例id
+        // filePath: filePath,
+        // fileName: caseItem.name,
       }
     })
     window.open(openPath.href, '_blank')
@@ -541,11 +541,11 @@
     let openPath = router.resolve({
       path: '/showDigitalPlan',
       query: {
-        filePath: filePath,
-        fileName: row.project.name,
         id: row.project.id,
-        version: lastVersion.version,
         caseId: ''
+        // filePath: filePath,
+        // fileName: row.project.name,
+        // version: lastVersion.version,
       }
     })
     window.open(openPath.href, '_blank')

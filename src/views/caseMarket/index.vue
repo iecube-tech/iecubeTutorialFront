@@ -2,9 +2,7 @@
   <div class="app-container">
     <div class="wh-full px-10px">
       <div class="tools-bar">
-        <div>
-          
-        </div>
+        <div></div>
         <div>
           <el-input
             v-model="filterText"
@@ -53,6 +51,7 @@
 
 <script setup lang="ts">
   import { getTagList, getCaseList } from '@/api/caseApi'
+  import router from '@/router'
 
   const filterText = ref('')
 
@@ -69,6 +68,14 @@
   const handleCaseClick = (id: number) => {
     // 处理案例点击事件，跳转到详情页
     console.log('点击案例:', id)
+    let openPath = router.resolve({
+      path: '/showDigitalPlan',
+      query: {
+        id: '', // 项目id 从案例进入时 id 为空
+        caseId: id // 案例id
+      }
+    })
+    window.open(openPath.href, '_blank')
   }
 
   /* const tagList = ref([])

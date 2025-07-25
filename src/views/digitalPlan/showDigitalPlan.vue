@@ -37,7 +37,9 @@
                       <span>{{ showTagElText }}</span>
                     </div>
                   </div>
-                  <el-icon size="14" class="inline-block cursor-pointer" @click="handleDelFocusEl"><CircleClose /></el-icon>
+                  <el-icon size="14" class="inline-block cursor-pointer" @click="handleDelFocusEl">
+                    <CircleClose />
+                  </el-icon>
                 </div>
               </div>
               <div class="w-full relative flex items-center justify-between">
@@ -79,7 +81,7 @@
           <div class="h-full flex items-center">
             <el-select
               v-show="!isFromCase"
-              v-model="currentVersion"
+              v-model="currentVersionId"
               class="!w-100px mr-2"
               size="small"
               @change="handleCurrentVersionChange"
@@ -88,7 +90,7 @@
                 v-for="(versionItem, k) in versionList"
                 :key="k"
                 :label="k == 0 ? `最新 V${versionItem.version}` : `历史 V${versionItem.version}`"
-                :value="versionItem.version"
+                :value="versionItem.id"
               ></el-option>
             </el-select>
             <span v-show="!isFromCase" class="hover:text-zeng">版本</span>
@@ -186,6 +188,7 @@
   import router from '@/router'
   import resizePanel from './resizePanel.vue'
   import { editorProjectHtml, createProjectByCaseId, getProjectDetail } from '@/api/plan'
+  import { getCaseDetail } from '@/api/caseApi'
 
   const iconSize = ref(20)
   const isPreview = ref(true)
@@ -206,27 +209,30 @@
     }, 800)
   }
 
+  // 设置文件路径
+  const setFilePath = fileName => {
+    if (!fileName) {
+      return
+    }
+    relativeFilePath.value = '/resource/' + fileName
+  }
+
   // 切换版本
-  const handleCurrentVersionChange = v => {
+  const handleCurrentVersionChange = async v => {
     startLoading()
-    let versionItem = versionList.value.find(_ => _.version == v)
-    currentVersionId.value = versionItem.id
-    let newPath = `/resource/${versionItem.resource.filename}`
-    updateURL(id.value, newPath, currentVersion.value)
-    initFetchHtml()
+    let versionItem = versionList.value.find(_ => _.id == v)
+    setFilePath(versionItem.resource.filename)
+    let htmlText = await initFetchHtml()
+    updateEditValueAndView(htmlText)
   }
 
   // 新建项目
   const handleCreateProject = () => {
     createProjectByCaseId(caseId.value).then(res => {
       if (res.state == 200) {
-        let data = res.data
-        let newId = data.project.id
-        let newPath = '/resource/' + data.projectChildren[0].resource.filename || ''
-        updateURL(newId, newPath, 1)
-        initWebSocket()
-        updateLayout()
-        initVersionList(true)
+        let newId = res.data.project.id
+        updateURL(newId)
+        init()
       }
     })
   }
@@ -239,7 +245,7 @@
     link.click()
   }
 
-  // TODO: 保存文件
+  // 保存文件
   const handleSave = () => {
     const content = editorInstance.getValue()
     const base64Content = Base64.encode(content)
@@ -247,7 +253,7 @@
       pChildId: currentVersionId.value,
       htmlBase64: base64Content
     }).then(res => {
-      if(res.state == 200){
+      if (res.state == 200) {
         ElMessage.success('保存成功')
       }
     })
@@ -294,7 +300,6 @@
   }, 800)
 
   //编辑相关代码
-
   const highlightBoxRef = ref(null)
   const highlightTagRef = ref(null)
   const iframeRef = ref(null)
@@ -324,8 +329,7 @@
       return true
     }
   })
-  
-  
+
   const handleDelFocusEl = () => {
     hoveredElement.value = null
     hoveredElementClone.value = null
@@ -463,10 +467,10 @@
 
     setDefaultThink()
 
-    if (!ws) {
+    if (!ws.value) {
       return
     }
-    
+
     let sendMsg = consistSendMsg()
     ws.value.send(JSON.stringify(sendMsg))
     addMessage(askText.value, true)
@@ -505,13 +509,13 @@
   // 初始化 websocket
   const initWebSocket = () => {
     if (isFromCase.value) return
-
     ws.value = new WebSocket(`/ai/html/edit/${id.value}`)
 
     ws.value.onopen = event => {
+      console.log('WebSocket is open now.')
       // intervalN.value = setInterval(_ => {
       //   sendHeart()
-      // }, 30000)
+      // }, 2000)
     }
 
     ws.value.onmessage = async event => {
@@ -543,7 +547,7 @@
           let contentObj = JSON.parse(Base64.decode(data.content))
           let newHmtlText = Base64.decode(contentObj.fullCode)
           updateEditValueAndView(newHmtlText)
-          initVersionList(true)
+          getProjectDetailById()
           break
         default:
           break
@@ -586,66 +590,72 @@
     startLoading()
     initCoreParamByRoute()
     updateLayout()
-    initVersionList()
-    initWebSocket()
+
+    if (isFromCase.value) {
+      await getCaseDetailById()
+    } else {
+      await getProjectDetailById()
+      initMonacoEditor('')
+      initWebSocket()
+    }
+    
     await nextTick()
-    setTimeout(_ => {
-      initFetchHtml(true)
-    }, 500)
+    let htmlText = await initFetchHtml()
+    updateEditValueAndView(htmlText)
   }
 
-  // 获取讲义文件内容 true: 初始化edit  , 默认false: 更新editor内容
-  const initFetchHtml = async (isCreateEdit = false) => {
-    const res = await fetch(relativeFilePath.value)
-    const resText = await res.text()
-    let htmlText = resText || ''
-    if (isCreateEdit) {
-      initMonacoEditor('')
-    } else {
-      setTimeout(_ => {
-        stopLoading()
-      }, 1000)
-    }
-    await nextTick()
-    setTimeout(_=>{
-      updateEditValueAndView(htmlText)
+  // 根据路由初始化核心参数， 更新url 和 初始化时调用
+  const initCoreParamByRoute = () => {
+    id.value = route.query.id
+    caseId.value = route.query.caseId
+    fileName.value = route.query.fileName
+  }
+
+  const getCaseDetailById = async () => {
+    await getCaseDetail(caseId.value).then(res => {
+      if (res.state == 200) {
+        let caseItem = res.data
+        fileName.value = caseItem.name
+        setFilePath(caseItem.file.filename)
+      }
     })
   }
 
-  // 初始化版本列表
-  const currentVersion = ref(1) // 核心参数
-  const currentVersionId = ref(0)
-  const versionList = ref([])
-
-  const initVersionList = (isFlashLast) => {
-    if (!id.value) {
-      return
-    }
-    getProjectDetail(id.value).then(res => {
+  const getProjectDetailById = async () => {
+    await getProjectDetail(id.value).then(res => {
       if (res.state == 200) {
-        let list = res.data.projectChildren || []
-        versionList.value = list.reverse()
-        if (list.length > 0) {
-          if(isFlashLast){
-            currentVersion.value = list[0].version
-            currentVersionId.value = list[0].id
-            updateURL(id.value, relativeFilePath.value, list[0].version)
-          } else {
-            let currenChildItem = list.find( _ => currentVersion.value == _.version)
-            currentVersion.value = currenChildItem.version
-            currentVersionId.value = currenChildItem.id
-          }
+        let project = res.data.project
+        fileName.value = project.name
+
+        let childList = res.data.projectChildren
+        childList = childList.reverse()
+        if (childList.length > 0) {
+          setFilePath(childList[0].resource.filename)
+          currentVersionId.value = childList[0].id
+          versionList.value = childList
         }
       }
     })
   }
 
+  // 获取讲义文件内容 true: 初始化edit  , 默认false: 更新editor内容
+  const initFetchHtml = async (isCreateEdit = false) => {
+    const res = await fetch(relativeFilePath.value +`?t=${new Date().getTime()}`)
+    const resText = await res.text()
+    setTimeout(_ => {
+      stopLoading()
+    }, 1000)
+    return resText
+  }
+
+  // 初始化版本列表
+  const currentVersionId = ref(0)
+  const versionList = ref([])
+
   // 更新 url， 参数改变修改核心参数
-  const updateURL = (id, filePath, version) => {
+  const updateURL = id => {
     let replaceQuery = Object.assign(route.query, {
-      id: id,
-      filePath: filePath,
-      version: version
+      id: id
     })
     router.replace({
       path: route.path,
@@ -664,17 +674,6 @@
   // 跟新布局 是否显示 ai 对话框, 初始化和创新项目时调用
   const updateLayout = () => {
     resizePanelRef.value.setRightPanelOnly(isFromCase.value)
-  }
-
-  // 根据路由初始化核心参数， 更新url 和 初始化时调用
-  const initCoreParamByRoute = () => {
-    relativeFilePath.value = route.query.filePath
-    fileName.value = route.query.fileName
-    id.value = route.query.id
-    caseId.value = route.query.caseId
-    
-    // 新增核心参数
-    currentVersion.value = route.query.version
   }
 
   // 在组件挂载时调用init函数
