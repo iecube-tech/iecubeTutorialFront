@@ -331,7 +331,7 @@
                   type="primary"
                   :disabled="row.project.status != 'DONE'"
                   link
-                  @click="handleDownload(row.project)"
+                  @click="handleDownload(row)"
                 >
                   下载
                 </el-button>
@@ -639,11 +639,19 @@ import { CompassNorthwest16Filled } from '@vicons/fluent'
 
   // 下载讲义
   const handleDownload = row => {
-    let filePath = `/resource/${row.resource.filename}`
-    const link = document.createElement('a')
-    link.href = filePath
-    link.download = row.name
-    link.click()
+    let project = row.project
+    let childList = row.projectChildren
+    if(childList.length > 0) {
+      let l = childList.length
+      let item = childList[l-1]
+      let filePath = `/resource/${item.resource.filename}`
+      const link = document.createElement('a')
+      link.href = filePath
+      link.download = project.name
+      link.click()
+    }else{
+      ElMessage.error('暂无讲义')
+    }
   }
 
   // 删除讲义
