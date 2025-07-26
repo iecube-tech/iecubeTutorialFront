@@ -221,9 +221,17 @@
   const handleCurrentVersionChange = async v => {
     startLoading()
     let versionItem = versionList.value.find(_ => _.id == v)
-    setFilePath(versionItem.resource.filename)
-    let htmlText = await initFetchHtml()
-    updateEditValueAndView(htmlText)
+    try{
+      setFilePath(versionItem.resource.filename)
+      await nextTick()
+      initFetchHtml().then(htmlText => {
+        updateEditValueAndView(htmlText)
+      })
+    }catch(e){
+      console.error(e)
+    }finally{
+      stopLoading()
+    }
   }
 
   // 新建项目
@@ -594,14 +602,15 @@
     if (isFromCase.value) {
       await getCaseDetailById()
     } else {
-      await getProjectDetailById()
       initMonacoEditor('')
       initWebSocket()
+      await getProjectDetailById()
     }
-    
+
     await nextTick()
-    let htmlText = await initFetchHtml()
-    updateEditValueAndView(htmlText)
+    initFetchHtml().then(htmlText => {
+      updateEditValueAndView(htmlText)
+    })
   }
 
   // 根据路由初始化核心参数， 更新url 和 初始化时调用
@@ -638,14 +647,15 @@
     })
   }
 
-  // 获取讲义文件内容 true: 初始化edit  , 默认false: 更新editor内容
-  const initFetchHtml = async (isCreateEdit = false) => {
-    const res = await fetch(relativeFilePath.value +`?t=${new Date().getTime()}`)
-    const resText = await res.text()
-    setTimeout(_ => {
-      stopLoading()
-    }, 1000)
-    return resText
+  // 获取讲义文件内容
+  const initFetchHtml = async () => {
+    return new Promise(resovle => {
+      fetch(relativeFilePath.value + `?t=${new Date().getTime()}`).then(res => {
+        res.text().then(text => {
+          resovle(text)
+        })
+      })
+    })
   }
 
   // 初始化版本列表

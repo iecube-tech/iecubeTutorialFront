@@ -68,7 +68,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           target: env.VITE_APP_RESOURCE_URL
         },
         '/ai': {
-          target: 'http://192.168.1.252:8087',
+          target: env.VITE_APP_API_URL,
           ws: true,
           changeOrigin: true,
           rewrite: path => path.replace(/^\/ai/, '')

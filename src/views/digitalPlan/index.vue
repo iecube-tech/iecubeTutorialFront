@@ -68,7 +68,7 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="1">
-                  <el-icon
+                  <!-- <el-icon
                     v-if="k == 0"
                     @click="handleAddPoint"
                     class="h32px mb18px leading32px ml-1 cursor-pointer hover:text-zeng"
@@ -81,12 +81,12 @@
                     @click="handleReomvePoint(k)"
                   >
                     <Delete />
-                  </el-icon>
+                  </el-icon> -->
                 </el-col>
               </el-row>
             </div>
             <div class="w-1/2 pl16px">
-              <el-upload
+              <!-- <el-upload
                 ref="uploadRef"
                 class="flex"
                 :on-change="handleChange"
@@ -126,11 +126,11 @@
                     </span>
                   </div>
                 </template>
-              </el-upload>
+              </el-upload> -->
             </div>
           </div>
         </el-form>
-        <div class="mt-0 mb-2 font-bold" v-show="advanceSettingVisible">
+        <!-- <div class="mt-0 mb-2 font-bold" v-show="advanceSettingVisible">
           <el-button type="primary" link @click="toggleAdvanceSettingVisible">
             <span class="font-bold text-bold text-base hover:text-zeng">
               <el-icon>
@@ -208,7 +208,7 @@
               placeholder="请输入提示词"
             ></el-input>
           </el-form-item>
-        </el-form>
+        </el-form> 
         <div>
           <el-button
             v-if="!advanceSettingVisible"
@@ -223,6 +223,13 @@
               高级设置
             </span>
           </el-button>
+          <el-button type="primary" class="w-[160px]" @click="handleSubmit">一键生成</el-button>
+          <el-button type="primary" plain class="w-[160px]" @click="handleGenOutline">
+            先看大纲
+          </el-button>
+        </div> -->
+        
+         <div>
           <el-button type="primary" class="w-[160px]" @click="handleSubmit">一键生成</el-button>
           <el-button type="primary" plain class="w-[160px]" @click="handleGenOutline">
             先看大纲
@@ -334,7 +341,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="operation" label="操作" width="240">
-              <template #default="{row}">
+              <template #default="{ row }">
                 <el-button
                   type="primary"
                   :disabled="row.project.status != 'DONE'"
@@ -390,7 +397,12 @@
       </el-tab-pane>
     </el-tabs>
 
-    <markdownDialog ref="markdownDialogRef" />
+    <markdownDialog
+      ref="markdownDialogRef"
+      @close="setDefaultOutlineParams"
+      @save="handleUpdateOutline"
+      @generate="handleGenPlanFromOutline"
+    />
   </div>
 </template>
 
@@ -405,7 +417,14 @@
 
   import { useUserStore } from '@/store'
   import { genPrompts, genOutlinePrompts } from './promptGen.js'
-  import { getPlanList, generatePlan, removePlan } from '@/api/plan'
+  import {
+    getPlanList,
+    generatePlan,
+    removePlan,
+    genOutlineWebsocketId,
+    updateOutline,
+    genPlanFromOutline
+  } from '@/api/plan'
 
   import markdownDialog from './markdownDialog.vue'
   import { findCase } from '@/api/caseApi'
@@ -464,7 +483,6 @@
     const start = (currentPage.value - 1) * pageSize.value
     const end = start + pageSize.value
     let res = tableData.value.slice(start, end)
-    console.log(res)
     return res
   })
 
@@ -477,18 +495,15 @@
     currentPage.value = newPage
   }
 
-
-
   const getList = () => {
     getPlanList()
       .then(res => {
-        if(res.state == 200) {
+        if (res.state == 200) {
           tableData.value = res.data
         }
       })
       .catch(err => {
         clearInterval(intervalTime.value)
-        console.log(err)
       })
   }
 
@@ -503,29 +518,126 @@
 
   onBeforeUnmount(() => {
     clearInterval(intervalTime.value)
+    setDefaultOutlineParams()
   })
+
+  // 生成大纲时核心参数
+  const ws = ref(null)
+  const tmpText = ref('')
+  const tmpReqObj = ref(null)
+
+  // (关闭弹框时调用方法) 生成大纲核心参数 
+  const setDefaultOutlineParams = () => {
+    if (ws.value) {
+      ws.value.close()
+    }
+    ws.value = null
+    tmpText.value = ''
+    tmpReqObj.value = null
+    markdownDialogRef.value.updateContent('')
+  }
+
+  // TODO 先看大纲 (生成大纲)
+  const handleGenerateOutline = () => {
+    genForm.value.validate(valid => {
+      if (valid) {
+        
+        setDefaultOutlineParams()
+
+        let promptText = ''
+        if (!promptSettingVisible.value) {
+          promptText = genPrompts(
+            formData.type,
+            formData.planType,
+            formData.hasCode,
+            formData.codeRequirement
+          )
+        } else {
+          promptText = formData.prompt
+        }
+
+        promptText = Base64.encode(promptText)
+
+        let req = {
+          name: formData.name,
+          title: formData.title,
+          instruction: promptText,
+          knowledgePoints: formData.knowledgePoints[0]
+        }
+        genOutlineWebsocketId(req).then(res => {
+          if (res.state == 200) {
+            tmpReqObj.value = res.data
+            markdownDialogRef.value.open()
+            initWebsocket(tmpReqObj.value.id)
+          }
+        })
+      }
+    })
+  }
+
+  const handleGenOutline = debounce(handleGenerateOutline, 800)
 
   // TODO: 查看大纲
   const markdownDialogRef = ref(null)
   const handleShowOutline = async row => {
-    // console.log(row)
-    // console.log(row.name)
-    let res = await fetch('/a.md')
-    const htmlContent = await res.text()
-    console.log('查看大纲')
-    markdownDialogRef.value.open(htmlContent)
+    markdownDialogRef.value.open()
+    markdownDialogRef.value.updateContent('aaaa')
+  }
+
+  // TODO 初始化 ws 跟新大纲内容
+  const initWebsocket = moutlineId => {
+    if (ws.value) {
+      ws.value.close()
+    }
+
+    ws.value = new WebSocket(`/ai/outline/receive/${moutlineId}`)
+
+    ws.value.onopen = () => {
+      console.log('WebSocket连接已打开')
+    }
+
+    ws.value.onmessage = event => {
+      let data = JSON.parse(event.data)
+      if (data.type == 'stream') {
+        tmpText.value += data.message
+        markdownDialogRef.value.updateContent(tmpText.value)
+      } else if (data.type == 'message') {
+        tmpText.value = data.message
+        markdownDialogRef.value.updateContent(tmpText.value)
+        markdownDialogRef.value.setCanEdit(true)
+      }
+    }
+  }
+
+  const handleUpdateOutline = outline => {
+    tmpReqObj.value.outline = outline
+    updateOutline(tmpReqObj.value).then(res => {
+      if (res.state == 200) {
+        ElMessage.success('更新成功')
+      }
+    })
+  }
+
+  const handleGenPlanFromOutline = () => {
+    if(tmpReqObj.value.id != '') {
+      genPlanFromOutline(tmpReqObj.value.id).then(res=>{
+        if(res.state == 200){
+          ElMessage.success('提交成功')
+          setDefaultOutlineParams()
+          markdownDialogRef.value.close()
+          getList()
+        }
+      })
+    }
   }
 
   // 查看案例
   const handleShowCase = caseItem => {
-    let filePath = `/resource/${caseItem.file.filename}`
     let openPath = router.resolve({
       path: '/showDigitalPlan',
       query: {
         id: '', // 项目id 从案例进入时 id 为空
         caseId: caseItem.id // 案例id
-        // filePath: filePath,
-        // fileName: caseItem.name,
       }
     })
     window.open(openPath.href, '_blank')
@@ -533,19 +645,11 @@
 
   // 查看项目 最新版本 讲义
   const handleShowPlan = row => {
-    let lastVersion = row.projectChildren.reverse()[0]
-    console.log(lastVersion)
-    console.log(lastVersion.resource.filename)
-    
-    let filePath = `/resource/${lastVersion.resource.filename}`
     let openPath = router.resolve({
       path: '/showDigitalPlan',
       query: {
         id: row.project.id,
         caseId: ''
-        // filePath: filePath,
-        // fileName: row.project.name,
-        // version: lastVersion.version,
       }
     })
     window.open(openPath.href, '_blank')
@@ -576,7 +680,6 @@
           getList()
         })
         .catch(err => {
-          console.log(err)
           ElMessage.error('删除失败')
         })
     })
@@ -621,51 +724,7 @@
     })
   }
 
-  const handleSubmit = debounce(handleGenerate, 1000)
-
-  // 生成大纲
-  const handleGenerateOutline = () => {
-    genForm.value.validate(valid => {
-      if (valid) {
-        //let promptText = ''
-        /* if (!promptSettingVisible.value) {
-          promptText = genPrompts(
-            formData.type,
-            formData.planType,
-            formData.hasCode,
-            formData.codeRequirement
-          )
-        } else {
-          promptText = formData.prompt
-        } 
-
-        promptText = Base64.encode(promptText)*/
-
-        let promises = []
-        formData.knowledgePoints.forEach(knowledgePoints => {
-          let promptText = Base64.encode(
-            `生成${formData.title}课程的${knowledgePoints}知识点教学大纲`
-          )
-          let req = {
-            name: formData.name,
-            title: formData.title,
-            knowledgePoints: knowledgePoints,
-            instruction: promptText
-          }
-          promises.push(doCreatePlan(req))
-        })
-        Promise.all(promises)
-          .then(res => {
-            tipMessage('发送成功！请耐心等待大纲生成完成!')
-          })
-          .catch(err => {
-            getList()
-          })
-      }
-    })
-  }
-
-  const handleGenOutline = debounce(handleGenerateOutline, 1000)
+  const handleSubmit = debounce(handleGenerate, 800)
 
   const tipMessage = msg => {
     ElMessage.success({
@@ -774,7 +833,6 @@
         ElMessage.success(`成功解析 ${firstColumnData.length} 行数据!`)
         formData.knowledgePoints = firstColumnData
       } catch (error) {
-        console.error('解析失败:', error)
         ElMessage.error('文件解析失败，请检查文件格式!')
       } finally {
         loading.value = false

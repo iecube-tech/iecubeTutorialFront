@@ -1,8 +1,8 @@
 <template>
-  <el-dialog title="查看大纲" v-model.sync="visible" width="70%" top="50px" @close="handleClose">
+  <el-dialog title="查看大纲" v-model.sync="visible" width="70%" top="50px" :before-close="handleClose" @close="handleClose">
     <div class="md-wrapper">
-      <div class="flex flex-row-reverse mb-2">
-        <Icon :size="iconSize" class="ml-2">
+      <div v-show="canEidt" class="flex flex-row-reverse mb-2">
+        <Icon :size="iconSize" class="ml-2" @click="handleSaveOutline">
           <Save/>
         </Icon>
         <Icon :size="iconSize" v-if="previewOnly" @click="handleTogglePreviewOnly(false)">
@@ -12,12 +12,6 @@
           <View/>
         </Icon>
       </div>
-      <!-- <MdPreview
-        :modelValue="markdownContent"
-        id="preview-id"
-        :theme="theme"
-        previewTheme="github"
-      ></MdPreview> -->
       <MdEditor
         ref="mdEditorRef"
         id="md-editor"
@@ -31,7 +25,7 @@
     <template #footer>
       <div class="flex flex-row-reverse">
         <el-button @click="handleClose" class="ml-2">取消</el-button>
-        <el-button type="primary" @click="handleClose">生成页面</el-button>
+        <el-button v-show="canEidt" type="primary" @click="handleGen">生成页面</el-button>
       </div>
     </template>
     
@@ -41,7 +35,6 @@
 <script setup>
   import {Edit, Save, View} from '@vicons/carbon'
   const iconSize = ref(20)
-  
   
   import { useSettingsStore } from '@/store'
   const settingsStore = useSettingsStore()
@@ -62,18 +55,51 @@
     handleTogglePreviewOnly(true)
   }
   
+  // 控制是否可以编辑
+  const canEidt = ref(false)
+  
+  const setCanEdit = (b) =>{
+    canEidt.value = b
+  }
+  
   const handleTogglePreviewOnly = val => {
     previewOnly.value = val
     mdEditorRef.value.togglePreviewOnly(previewOnly.value)
   }
-
+  
   const handleClose = () => {
     visible.value = false
+    canEidt.value = false
+    emits('close')
   }
+  
+  const close = () => {
+    visible.value = false
+    canEidt.value = false
+  }
+  
+  const handleGen = () => {
+    emits('generate')
+  }
+  
+  // 保存大纲
+  const handleSaveOutline = () => {
+    emits('save', markdownContent.value)
+  }
+  
+  // 更新大纲内容
+  const updateContent = (text) => {
+    markdownContent.value = text
+  }
+  
+  const emits = defineEmits(['close', 'save', 'generate'])
 
   // 暴露方法供外部使用
   defineExpose({
-    open
+    open,
+    close,
+    setCanEdit,
+    updateContent
   })
 </script>
 

@@ -61,10 +61,38 @@ export function getProjectDetail(projectId : any) {
   })
 }
 
+// 跟新html内容
 export function editorProjectHtml(data: any){
   return request({
     url: '/project/edit',
     method: 'post',
     data
+  })
+}
+
+
+// TODO 先看大纲接口
+export function genOutlineWebsocketId(data: any) {
+  return request({
+    url: '/outline',
+    method: 'post',
+    data
+  })
+}
+
+// 更新新大纲
+export function updateOutline(data: any) {
+  return request({
+    url: '/outline/update',
+    method: 'post',
+    data
+  })
+}
+
+// 根据大纲生成讲义
+export function genPlanFromOutline(mOutlineId: string ){
+  return request({
+    url: `/outline/materials/${mOutlineId}`,
+    method: 'post',
   })
 }
