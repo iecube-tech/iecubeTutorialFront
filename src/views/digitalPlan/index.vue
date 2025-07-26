@@ -48,40 +48,16 @@
           </div>
           <div class="flex">
             <div class="w-1/2 pr16px">
-              <el-row v-for="(knowledgePoint, k) in formData.knowledgePoints" :key="k">
+              <el-row>
                 <el-col :span="23">
-                  <el-form-item
-                    label-width="90px"
-                    :label="k == 0 ? '知识要点' : ' '"
-                    :prop="`knowledgePoints.${k}`"
-                    class="w-full"
-                    :rules="[
-                      { required: true, message: '请输入知识要点', trigger: ['blur', 'change'] }
-                    ]"
-                  >
+                  <el-form-item label="知识要点" prop="knowledgePoints" class="w-full">
                     <el-input
-                      v-model="formData.knowledgePoints[k]"
+                      v-model="formData.knowledgePoints"
                       @input="debounceFindCaseList"
                       placeholder="请输入知识要点"
                       clearable
                     ></el-input>
                   </el-form-item>
-                </el-col>
-                <el-col :span="1">
-                  <!-- <el-icon
-                    v-if="k == 0"
-                    @click="handleAddPoint"
-                    class="h32px mb18px leading32px ml-1 cursor-pointer hover:text-zeng"
-                  >
-                    <Plus />
-                  </el-icon>
-                  <el-icon
-                    v-else
-                    class="h32px mb18px leading32px ml-1 cursor-pointer hover:text-zeng"
-                    @click="handleReomvePoint(k)"
-                  >
-                    <Delete />
-                  </el-icon> -->
                 </el-col>
               </el-row>
             </div>
@@ -228,8 +204,8 @@
             先看大纲
           </el-button>
         </div> -->
-        
-         <div>
+
+        <div>
           <el-button type="primary" class="w-[160px]" @click="handleSubmit">一键生成</el-button>
           <el-button type="primary" plain class="w-[160px]" @click="handleGenOutline">
             先看大纲
@@ -342,14 +318,7 @@
             </el-table-column>
             <el-table-column prop="operation" label="操作" width="240">
               <template #default="{ row }">
-                <el-button
-                  type="primary"
-                  :disabled="row.project.status != 'DONE'"
-                  link
-                  @click="handleShowOutline(row.project.row)"
-                >
-                  大纲
-                </el-button>
+                
                 <el-button
                   type="primary"
                   :disabled="row.project.status != 'DONE'"
@@ -367,6 +336,15 @@
                   下载
                 </el-button>
                 <el-button type="primary" link @click="handleRemove(row.project)">删除</el-button>
+                <el-button
+                  type="primary"
+                  :disabled="row.project.status != 'DONE'"
+                  link
+                  v-show="canShowOutline(row)"
+                  @click="handleShowOutline(row)"
+                >
+                  大纲
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -399,6 +377,7 @@
 
     <markdownDialog
       ref="markdownDialogRef"
+      :isStream="isStream"
       @close="setDefaultOutlineParams"
       @save="handleUpdateOutline"
       @generate="handleGenPlanFromOutline"
@@ -430,6 +409,7 @@
   import { findCase } from '@/api/caseApi'
 
   import { getProjectStatusZn } from '@/utils/cnMap.js'
+import { CompassNorthwest16Filled } from '@vicons/fluent'
 
   const userStore = useUserStore()
 
@@ -438,13 +418,13 @@
   const formData = reactive({
     name: '',
     title: '',
-    knowledgePoints: [''], // 知识要点支持多个
-    type: '1',
-    planType: '1',
-    hasCode: '1',
-    codeRequirement: '',
+    knowledgePoints: '' // 知识要点还原回单个
 
-    prompt: ''
+    // type: '1',  // 废弃
+    // planType: '1', // 废弃
+    // hasCode: '1', // 废弃
+    // codeRequirement: '', // 废弃
+    // prompt: '' // 废弃
   })
 
   const rules = {
@@ -456,10 +436,8 @@
         trigger: ['change', 'blur']
       }
     ],
-    title: [{ required: true, message: '请输入课程名称', trigger: ['change', 'blur'] }]
-    // knowledgePoints: [
-    //   { required: true, message: '请输入知识要点', trigger: ['change', 'blur'] },
-    // ],
+    title: [{ required: true, message: '请输入课程名称', trigger: ['change', 'blur'] }],
+    knowledgePoints: [{ required: true, message: '请输入知识要点', trigger: ['change', 'blur'] }]
   }
 
   const advanceSettingVisible = ref(false)
@@ -525,48 +503,40 @@
   const ws = ref(null)
   const tmpText = ref('')
   const tmpReqObj = ref(null)
+  const isStream = ref(false)
 
-  // (关闭弹框时调用方法) 生成大纲核心参数 
+  // (关闭弹框时调用方法) 生成大纲核心参数
   const setDefaultOutlineParams = () => {
+    closeWs()
+    tmpText.value = ''
+    tmpReqObj.value = null
+    isStream.value = false
+    markdownDialogRef.value.updateContent('')
+  }
+  
+  // close ws
+  const closeWs = () => {
     if (ws.value) {
       ws.value.close()
     }
     ws.value = null
-    tmpText.value = ''
-    tmpReqObj.value = null
-    markdownDialogRef.value.updateContent('')
   }
 
-  // TODO 先看大纲 (生成大纲)
+  // 先看大纲 (生成大纲)
   const handleGenerateOutline = () => {
     genForm.value.validate(valid => {
       if (valid) {
-        
         setDefaultOutlineParams()
-
-        let promptText = ''
-        if (!promptSettingVisible.value) {
-          promptText = genPrompts(
-            formData.type,
-            formData.planType,
-            formData.hasCode,
-            formData.codeRequirement
-          )
-        } else {
-          promptText = formData.prompt
-        }
-
-        promptText = Base64.encode(promptText)
-
         let req = {
           name: formData.name,
           title: formData.title,
-          instruction: promptText,
-          knowledgePoints: formData.knowledgePoints[0]
+          instruction: '',
+          knowledgePoints: formData.knowledgePoints
         }
         genOutlineWebsocketId(req).then(res => {
           if (res.state == 200) {
             tmpReqObj.value = res.data
+            isStream.value = true
             markdownDialogRef.value.open()
             initWebsocket(tmpReqObj.value.id)
           }
@@ -577,14 +547,24 @@
 
   const handleGenOutline = debounce(handleGenerateOutline, 800)
 
-  // TODO: 查看大纲
+  // 查看大纲
   const markdownDialogRef = ref(null)
-  const handleShowOutline = async row => {
+  const handleShowOutline = row => {
+    let outline = row.moutline.outline || ''
     markdownDialogRef.value.open()
-    markdownDialogRef.value.updateContent('aaaa')
+    markdownDialogRef.value.updateContent(outline)
+  }
+  
+  const canShowOutline = (row) => {
+    let moutline = row.moutline
+    if(moutline){
+      return moutline.show
+    }else {
+      return false
+    }
   }
 
-  // TODO 初始化 ws 跟新大纲内容
+  // 初始化 ws 跟新大纲内容
   const initWebsocket = moutlineId => {
     if (ws.value) {
       ws.value.close()
@@ -593,7 +573,7 @@
     ws.value = new WebSocket(`/ai/outline/receive/${moutlineId}`)
 
     ws.value.onopen = () => {
-      console.log('WebSocket连接已打开')
+      // console.log('WebSocket连接已打开')
     }
 
     ws.value.onmessage = event => {
@@ -605,6 +585,8 @@
         tmpText.value = data.message
         markdownDialogRef.value.updateContent(tmpText.value)
         markdownDialogRef.value.setCanEdit(true)
+        isStream.value = false
+        closeWs()
       }
     }
   }
@@ -619,9 +601,9 @@
   }
 
   const handleGenPlanFromOutline = () => {
-    if(tmpReqObj.value.id != '') {
-      genPlanFromOutline(tmpReqObj.value.id).then(res=>{
-        if(res.state == 200){
+    if (tmpReqObj.value.id != '') {
+      genPlanFromOutline(tmpReqObj.value.id).then(res => {
+        if (res.state == 200) {
           ElMessage.success('提交成功')
           setDefaultOutlineParams()
           markdownDialogRef.value.close()
@@ -689,43 +671,25 @@
   const handleGenerate = () => {
     genForm.value.validate(valid => {
       if (valid) {
-        let promptText = ''
-        if (!promptSettingVisible.value) {
-          promptText = genPrompts(
-            formData.type,
-            formData.planType,
-            formData.hasCode,
-            formData.codeRequirement
-          )
-        } else {
-          promptText = formData.prompt
+        let req = {
+          name: formData.name,
+          title: formData.title,
+          knowledgePoints: formData.knowledgePoints,
+          instruction: '',
         }
-
-        promptText = Base64.encode(promptText)
-
-        let promises = []
-        formData.knowledgePoints.forEach(knowledgePoints => {
-          let req = {
-            name: formData.name,
-            title: formData.title,
-            knowledgePoints: knowledgePoints,
-            instruction: promptText
-          }
-          promises.push(doCreatePlan(req))
-        })
-        Promise.all(promises)
-          .then(res => {
+        generatePlan(req).then(res=>{
+          if(res.state == 200){
             tipMessage('发送成功！请耐心等待讲义生成完成!')
-          })
-          .catch(err => {
-            getList()
-          })
+          }
+        })
       }
     })
   }
 
+  // 一键生成
   const handleSubmit = debounce(handleGenerate, 800)
 
+  // 提示弹框
   const tipMessage = msg => {
     ElMessage.success({
       message: msg, //,
@@ -739,6 +703,7 @@
     }, 1000)
   }
 
+  // 废弃 批量知识点相关代码 
   const doCreatePlan = (request: any) => {
     return new Promise((resolve, reject) => {
       generatePlan(request).then(res => {
@@ -747,13 +712,12 @@
     })
   }
 
-  // 批量上传
-
+  // 批量上传 相关代码 ***************************************************************************
   let loading = ref(false)
   const fileName = ref('')
   const uploadRef = ref(null)
 
-  // 文件变化时的处理
+  // 废弃 文件变化时的处理
   const handleChange = (file, fileList) => {
     if (loading.value) {
       return
@@ -773,7 +737,7 @@
     }
   }
 
-  // 文件校验函数
+  // 废弃 文件校验函数
   const validateFile = file => {
     const fileName = file.name.toLowerCase()
     const isExcel =
@@ -796,7 +760,7 @@
     return true
   }
 
-  // 解析 Excel 文件（保持不变）
+  // 废弃 解析 Excel 文件（保持不变）
   const parseExcel = file => {
     loading.value = true
 
@@ -847,18 +811,21 @@
     reader.readAsArrayBuffer(file)
   }
 
-  // 清除文件列表
+  // 废弃 清除文件列表
   const clearFile = () => {
     fileName.value = ''
     uploadRef.value.clearFiles()
   }
 
+  // 废弃
   const handleReomvePoint = index => {
     formData.knowledgePoints.splice(index, 1)
   }
 
+  // 废弃
   const maxPointLength = ref(15) // 限制最多添加15个知识点
 
+  // 废弃
   const handleAddPoint = () => {
     if (formData.knowledgePoints.length < maxPointLength.value) {
       formData.knowledgePoints.push('')
@@ -872,16 +839,17 @@
     router.push('/caseMarket')
   }
 
-  const caseList = ref([])
   const filterCaseList = ref([])
 
   const findCaseList = () => {
     let req = {
       title: formData.title,
-      knowledgePoints: formData.knowledgePoints[0]
+      knowledgePoints: formData.knowledgePoints
     }
     findCase(req).then(res => {
-      filterCaseList.value = res.data
+      if(res.state == 200) {
+        filterCaseList.value = res.data
+      }
     })
   }
 

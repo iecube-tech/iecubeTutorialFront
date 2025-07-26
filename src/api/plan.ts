@@ -71,7 +71,7 @@ export function editorProjectHtml(data: any){
 }
 
 
-// TODO 先看大纲接口
+// 先看大纲接口
 export function genOutlineWebsocketId(data: any) {
   return request({
     url: '/outline',

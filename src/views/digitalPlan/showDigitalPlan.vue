@@ -520,7 +520,7 @@
     ws.value = new WebSocket(`/ai/html/edit/${id.value}`)
 
     ws.value.onopen = event => {
-      console.log('WebSocket is open now.')
+      // console.log('WebSocket is open now.')
       // intervalN.value = setInterval(_ => {
       //   sendHeart()
       // }, 2000)
@@ -687,8 +687,11 @@
   }
 
   // 在组件挂载时调用init函数
-  onMounted(() => {
-    init()
+  onMounted( () => {
+    // await flushHtml()
+    setTimeout(_=>{
+      init()
+    }, 200)
   })
 </script>
 
