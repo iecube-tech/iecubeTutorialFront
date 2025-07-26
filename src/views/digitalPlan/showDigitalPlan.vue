@@ -187,7 +187,12 @@
   import { throttle, debounce } from 'lodash'
   import router from '@/router'
   import resizePanel from './resizePanel.vue'
-  import { editorProjectHtml, createProjectByCaseId, getProjectDetail } from '@/api/plan'
+  import {
+    editorProjectHtml,
+    createProjectByCaseId,
+    getProjectDetail,
+    getHtmlFile
+  } from '@/api/plan'
   import { getCaseDetail } from '@/api/caseApi'
 
   const iconSize = ref(20)
@@ -209,27 +214,28 @@
     }, 800)
   }
 
-  // 设置文件路径
+  //TODO  设置文件路径
   const setFilePath = fileName => {
     if (!fileName) {
       return
     }
     relativeFilePath.value = '/resource/' + fileName
+    currentFileName.value = fileName
   }
 
   // 切换版本
   const handleCurrentVersionChange = async v => {
     startLoading()
     let versionItem = versionList.value.find(_ => _.id == v)
-    try{
+    try {
       setFilePath(versionItem.resource.filename)
       await nextTick()
       initFetchHtml().then(htmlText => {
         updateEditValueAndView(htmlText)
       })
-    }catch(e){
+    } catch (e) {
       console.error(e)
-    }finally{
+    } finally {
       stopLoading()
     }
   }
@@ -272,6 +278,7 @@
   // 核心参数
   const route = useRoute()
   const relativeFilePath = ref('')
+  const currentFileName = ref('')
   const htmlText = ref('')
   const fileName = ref('')
   const id = ref('')
@@ -650,11 +657,24 @@
   // 获取讲义文件内容
   const initFetchHtml = async () => {
     return new Promise(resovle => {
-      fetch(relativeFilePath.value + `?t=${new Date().getTime()}`).then(res => {
-        res.text().then(text => {
-          resovle(text)
-        })
+      // fetch(relativeFilePath.value + `?t=${new Date().getTime()}`).then(res => {
+      //   res.text().then(text => {
+      //     resovle(text)
+      //   })
+      // })
+      getHtmlFile(currentFileName.value).then(async res => {
+        const content = await blobToString(res.data)
+        resovle(content)
       })
+    })
+  }
+
+  async function blobToString(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = reject
+      reader.readAsText(blob)
     })
   }
 
@@ -687,9 +707,9 @@
   }
 
   // 在组件挂载时调用init函数
-  onMounted( () => {
+  onMounted(() => {
     // await flushHtml()
-    setTimeout(_=>{
+    setTimeout(_ => {
       init()
     }, 200)
   })

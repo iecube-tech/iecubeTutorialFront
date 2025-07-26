@@ -96,3 +96,13 @@ export function genPlanFromOutline(mOutlineId: string ){
     method: 'post',
   })
 }
+
+export function getHtmlFile(fileName){
+  return request({
+    url: `/file/resource/${fileName}`,
+    method: 'get',
+    // contentType: 'application/octet-stream',
+    // responseType: 'blob'
+    responseType: 'blob'
+  })
+}
