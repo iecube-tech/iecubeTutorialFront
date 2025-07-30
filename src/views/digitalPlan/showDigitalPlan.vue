@@ -1,8 +1,8 @@
 <template>
   <div class="plan-container">
-    <resizePanel ref="resizePanelRef" class="content-wrapper">
+    <resizePanel ref="resizePanelRef" class="content-wrapper" :rightPanelOnly="isFromCase">
       <template #left-content>
-        <div class="wh-full relative flex flex-col bg-neutral-800">
+        <div class="chat-container-wrapper">
           <div ref="chatContainerRef" class="chart-container my-scroller">
             <div
               v-for="(chatItem, k) in chatHistoryList"
@@ -13,13 +13,12 @@
                 {{ chatItem.content }}
               </div>
               <div v-if="chatItem.role === 'assistant'" class="chat-assistant">
-                {{ chatItem.content }}
-                <MdPreview :modelValue="chatItem.content"></MdPreview>
+                <MdPreview :modelValue="chatItem.content" theme="dark"></MdPreview>
               </div>
             </div>
             <div v-if="thinking" class="chart-assistant-container">
               <div class="chat-assistant">
-                <MdPreview :modelValue="thinkingText"></MdPreview>
+                <MdPreview :modelValue="thinkingText" theme="dark"></MdPreview>
               </div>
             </div>
           </div>
@@ -47,16 +46,17 @@
                   type="text"
                   class="ask-text-input"
                   v-model="askText"
-                  placeholder="请输入你的需求"
+                  placeholder="请先点击下方编辑按钮后，在右侧页面点击选中需要修改的内容，并在此处输入修改意见"
                   @keydown.enter="handleAsk"
                 />
               </div>
               <div class="flex items-center justify-between gap-2 px-4 pb-3">
-                <div class="flex-1 flex items-center justify-start gap-2">
-                  <div class="edit-btn" :class="{ isActive: isEdit }" title="选择右侧页面中的元素">
-                    <Icon @click="startEdit">
-                      <Crosshairs />
+                <div class="flex-1 flex items-center justify-start gap-1">
+                  <div class="edit-btn" @click="startEdit" :class="{ isActive: isEdit }" title="点击下方编辑按钮后，请选中右侧页面中的元素">
+                    <Icon size="20">
+                      <CenterSquare />
                     </Icon>
+                    <span>编辑</span>
                   </div>
                 </div>
                 <div class="flex items-center justify-end gap-2">
@@ -94,17 +94,6 @@
               ></el-option>
             </el-select>
             <span v-show="!isFromCase" class="hover:text-zeng">版本</span>
-
-            <Icon
-              v-show="isFromCase"
-              title="根据案例创建教案"
-              :size="iconSize"
-              class="btn-icon"
-              style="color: var(--zeng)"
-              @click="handleCreateProject"
-            >
-              <CreateNewFolderSharp />
-            </Icon>
           </div>
 
           <div class="h-full flex items-center">
@@ -123,6 +112,15 @@
           </div>
 
           <div class="h-full flex items-center gap-4">
+            <Icon
+              v-show="isFromCase"
+              title="根据案例创建教案"
+              :size="iconSize"
+              class="btn-icon"
+              @click="handleCreateProject"
+            >
+              <FolderAdd />
+            </Icon>
             <Icon
               v-show="!isFromCase"
               title="保存"
@@ -178,10 +176,9 @@
 </template>
 
 <script setup>
-  import { Download, Json, Save, SendAltFilled, Version } from '@vicons/carbon'
-  import { Crosshairs, Eye } from '@vicons/fa'
+  import { Download, FolderAdd, Save, SendAltFilled, CenterSquare } from '@vicons/carbon'
+  import { Crosshairs, Eye} from '@vicons/fa'
   import { ClipboardCode20Filled } from '@vicons/fluent'
-  import { CreateNewFolderSharp } from '@vicons/material'
   import { Base64 } from 'js-base64'
   import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
   import { throttle, debounce } from 'lodash'
@@ -280,9 +277,9 @@
   const relativeFilePath = ref('')
   const currentFileName = ref('')
   const htmlText = ref('')
-  const fileName = ref('')
-  const id = ref('')
-  const caseId = ref('')
+  const fileName = ref(route.query.fileName)
+  const id = ref(route.query.id)
+  const caseId = ref(route.query.caseId)
 
   // 是否从案例跳转过来
   const isFromCase = computed(() => {
@@ -532,6 +529,11 @@
       //   sendHeart()
       // }, 2000)
     }
+    
+    ws.value.onclose = event => {
+      console.log('WebSocket is closed now.')
+      // clearInterval(intervalN.value)
+    }
 
     ws.value.onmessage = async event => {
       const data = JSON.parse(event.data)
@@ -564,6 +566,9 @@
           updateEditValueAndView(newHmtlText)
           getProjectDetailById()
           break
+        case 'error':
+          console.log(data)
+          break;  
         default:
           break
       }
@@ -585,7 +590,9 @@
   // 更新 iframe 和 monaco editor 内容
   const updateEditValueAndView = newHmtlText => {
     htmlText.value = newHmtlText
-    editorInstance.setValue(newHmtlText)
+    if(!isFromCase.value){
+      editorInstance.setValue(newHmtlText)
+    }
   }
 
   const sendHeart = () => {
@@ -604,7 +611,6 @@
   const init = async () => {
     startLoading()
     initCoreParamByRoute()
-    updateLayout()
 
     if (isFromCase.value) {
       await getCaseDetailById()
@@ -702,9 +708,7 @@
   }
 
   // 跟新布局 是否显示 ai 对话框, 初始化和创新项目时调用
-  const updateLayout = () => {
-    resizePanelRef.value.setRightPanelOnly(isFromCase.value)
-  }
+ 
 
   // 在组件挂载时调用init函数
   onMounted(() => {
@@ -762,17 +766,17 @@
   }
 
   .edit-btn {
-    @apply h24px w24px flex justify-center items-center rounded-full cursor-pointer bg-white text-gray-500;
+    display: inline-block;
+    font-size: 14px;
+    @apply h24px px-2 gap-2 flex justify-center items-center rounded-full cursor-pointer bg-white text-gray-500;
   }
 
   .isActive {
-    background-color: var(--zeng);
-    @apply text-white;
+    @apply text-white bg-blue-500;
   }
 
   .ask-btn {
-    background-color: var(--zeng);
-    @apply h24px w24px flex justify-center items-center rounded-full cursor-pointer;
+    @apply h24px w24px bg-blue-500 flex justify-center items-center rounded-full cursor-pointer;
   }
 
   .btn-disable {
@@ -830,8 +834,8 @@
   }
 
   .chat-bg {
-    color: #3f4a54;
-    background-color: #ffffff;
+    color: #E9E9E9;
+    background-color: #2E2E2E;
   }
 
   .chat-user {
@@ -849,4 +853,34 @@
     @apply text-sm inline-block rounded-lg px-16px pt-9px;
     overflow-x: auto;
   }
+  
+  
+  
+  .chat-container-wrapper {
+    background-color: #191919;
+    @apply wh-full relative flex flex-col;
+    
+    :deep(.md-editor-preview) {
+      font-size: 14px;
+    }
+  }
+  
+  .md-editor-dark, .md-editor-modal-container[data-theme='dark'] {
+    --md-color: #E9E9E9;
+    --md-hover-color: #bbb;
+    --md-bk-color: #2E2E2E;
+    --md-bk-color-outstand: #333;
+    --md-bk-hover-color: #1b1a1a;
+    --md-border-color: #2d2d2d;
+    --md-border-hover-color: #636262;
+    --md-border-active-color: #777;
+    --md-modal-mask: #00000073;
+    --md-modal-shadow: 0px 6px 24px 2px #00000066;
+    --md-scrollbar-bg-color: #0f0f0f;
+    --md-scrollbar-thumb-color: #2d2d2d;
+    --md-scrollbar-thumb-hover-color: #3a3a3a;
+    --md-scrollbar-thumb-active-color: #3a3a3a;
+  }
+
+ 
 </style>

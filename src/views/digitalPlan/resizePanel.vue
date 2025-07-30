@@ -1,12 +1,12 @@
 <template>
   <div class="resizable-container" ref="container">
-    <div v-show="!rightPanelOnly" ref="leftPanel" class="panel left-panel" >
+    <div v-show="!props.rightPanelOnly" ref="leftPanel" class="panel left-panel" >
       <div class="mask" v-show="isDragging"></div>
       <slot name="left-content" />
     </div>
 
     <div
-      v-show="!rightPanelOnly"
+      v-show="!props.rightPanelOnly"
       class="resize-handle"
       ref="resizeHandle"
       @mousedown="startDrag"
@@ -22,19 +22,11 @@
 <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-  const rightPanelOnly = ref(false)
-  
-  const toggleRightPanelOnly = () => {
-    rightPanelOnly.value = !rightPanelOnly.value
-  }
-  
-  const setRightPanelOnly = value => {
-    rightPanelOnly.value = value
-  }
-  
-  defineExpose({
-    toggleRightPanelOnly,
-    setRightPanelOnly
+  const props = defineProps({
+    rightPanelOnly: {
+      type: Boolean,
+      default: true
+    }
   })
 
   const container = ref(null)

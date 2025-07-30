@@ -98,15 +98,16 @@
                   </el-table-column>
                   <el-table-column prop="description" label="项目">
                     <template #default="{ row: detail }">
-                      <span v-if="detail.type == 'CONSUME'">
-                        {{ `${detail.materialTitle} - ${detail.materialKnowledgePoint}` }}
+                      <span v-if="isComsumeType(detail.type)">
+                        {{ `${detail.projectTitle} - ${detail.projectKnowledgePoint}` }} 
+                        <span>({{ cnType(detail.type) }})</span>
                       </span>
                       <span v-else-if="detail.type == 'RECHARGE'">充值</span>
                     </template>
                   </el-table-column>
                   <el-table-column prop="points" label="积分" width="180" align="right">
                     <template #default="{ row: detail }">
-                      <span v-if="detail.type == 'CONSUME'">
+                      <span v-if="isComsumeType(detail.type)">
                         <span class="text-red-500 font-medium">-{{ detail.points }}</span>
                       </span>
                       <span
@@ -172,8 +173,7 @@
   const initConsumed = async () => {
     getPointComsumed().then(res => {
       if (res.state === 200) {
-        // console.log(res.data)
-        stats.value.consumed = res.data.consumed
+        stats.value.consumed = res.data.consumeTotal
       }
     })
   }
@@ -205,6 +205,25 @@
 
     monthlyData.value = res
     // console.log(res)
+  }
+  
+  const isComsumeType = type => {
+    return ['CONSUME', 'CONSUME_OUTLINE', 'CONSUME_GEN', 'CONSUME_EDIT'].includes(type)
+  }
+  
+  const cnType = type => {
+    switch (type) {
+      case 'CONSUME':
+        return '消费'
+      case 'CONSUME_OUTLINE':
+        return '大纲消费'
+      case 'CONSUME_GEN':
+        return '生成消费'
+      case 'CONSUME_EDIT':
+        return '编辑消费'
+      default:
+        return ''
+    }
   }
   
   onMounted(()=>{

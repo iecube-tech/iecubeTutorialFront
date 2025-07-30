@@ -388,14 +388,12 @@
 <script setup lang="ts">
   import moment from 'moment'
   import router from '@/router'
-
   import { debounce } from 'lodash'
   import { Base64 } from 'js-base64'
-  import { UploadFilled, Loading } from '@element-plus/icons-vue'
-  import * as XLSX from 'xlsx'
-
-  import { useUserStore } from '@/store'
-  import { genPrompts, genOutlinePrompts } from './promptGen.js'
+  // import { useUserStore } from '@/store'
+  // import { UploadFilled, Loading } from '@element-plus/icons-vue'
+  // import * as XLSX from 'xlsx'
+  // import { genPrompts, genOutlinePrompts } from './promptGen.js'
   import {
     getPlanList,
     generatePlan,
@@ -409,9 +407,9 @@
   import { findCase } from '@/api/caseApi'
 
   import { getProjectStatusZn } from '@/utils/cnMap.js'
-import { CompassNorthwest16Filled } from '@vicons/fluent'
+  // import { CompassNorthwest16Filled } from '@vicons/fluent'
 
-  const userStore = useUserStore()
+  // const userStore = useUserStore()
 
   const genForm = ref(null)
 
@@ -500,7 +498,7 @@ import { CompassNorthwest16Filled } from '@vicons/fluent'
   })
 
   // 生成大纲时核心参数
-  const ws = ref(null)
+  let ws = null
   const tmpText = ref('')
   const tmpReqObj = ref(null)
   const isStream = ref(false)
@@ -516,10 +514,10 @@ import { CompassNorthwest16Filled } from '@vicons/fluent'
   
   // close ws
   const closeWs = () => {
-    if (ws.value) {
-      ws.value.close()
+    if (ws != null) {
+      ws.close()
     }
-    ws.value = null
+    ws = null
   }
 
   // 先看大纲 (生成大纲)
@@ -566,17 +564,18 @@ import { CompassNorthwest16Filled } from '@vicons/fluent'
 
   // 初始化 ws 跟新大纲内容
   const initWebsocket = moutlineId => {
-    if (ws.value) {
-      ws.value.close()
+    if (ws) {
+      ws.close()
     }
 
-    ws.value = new WebSocket(`/ai/outline/receive/${moutlineId}`)
+    ws = new WebSocket(`/ai/outline/receive/${moutlineId}`)
 
-    ws.value.onopen = () => {
-      // console.log('WebSocket连接已打开')
+    ws.onopen = () => {
+      console.log('WebSocket连接已打开')
     }
 
-    ws.value.onmessage = event => {
+    ws.onmessage = event => {
+      console.log(event.data)
       let data = JSON.parse(event.data)
       if (data.type == 'stream') {
         tmpText.value += data.message
@@ -588,6 +587,10 @@ import { CompassNorthwest16Filled } from '@vicons/fluent'
         isStream.value = false
         closeWs()
       }
+    }
+    
+    ws.onclose = ()=>{
+      console.log('WebSocket连接已关闭')
     }
   }
 
