@@ -3,7 +3,6 @@
     <div class="mb-4">
       <div class="flex justify-between items-start gap-4">
         <div>
-          <!--  <el-button type="primary" icon="Plus" @click="openRechargeDialog">申请积分充值</el-button> -->
         </div>
         <div class="flex flex-row gap-4 w-[220px]">
           <el-select v-model="filterForm.status" placeholder="状态筛选" clearable>
@@ -14,12 +13,6 @@
               :value="status.value"
             />
           </el-select>
-         <!--  <el-input
-            v-model="filterForm.text"
-            placeholder="搜索内容"
-            clearable
-            suffix-icon="Search"
-          /> -->
         </div>
       </div>
     </div>
@@ -62,14 +55,12 @@
             <el-button type="primary" link icon="View" @click="handleShowDetail(row)">
               查看
             </el-button>
-            <!-- <el-button type="primary" link icon="Delete" @click="handleDelete(row)">删除</el-button> -->
           </template>
         </el-table-column>
       </el-table>
     </div>
 
     <applyDetailDialog ref="applyDetailDialogRef" :appoverList="appoverList"/>
-    <!-- <rechangeDialog ref="rechangeDialogRef" @refresh="initTableData" /> -->
   </div>
 </template>
 
@@ -79,7 +70,6 @@
   import { applyStatus, getApplyTypeZn, getApplyStatusZn } from '@/utils/cnMap'
   import { getRemark } from '@/utils/applyFuns'
 
-  import rechangeDialog from './rechangeDialog.vue'
   import applyDetailDialog from './applyDetailDialog.vue'
   
   import { getApproverList } from '@/api/dept'
@@ -116,7 +106,6 @@
           item = Object.assign(item, contentJson)
         })
         tableData.value = tmp
-        // console.log(tmp)
       }
     })
   }
@@ -137,16 +126,6 @@
   const applyDetailDialogRef = ref(null)
   function handleShowDetail(row) {
     applyDetailDialogRef.value.open(row)
-  }
-
-  function handleDelete(row) {
-    console.log('删除', row)
-  }
-
-  const rechangeDialogRef = ref(null)
-
-  const openRechargeDialog = () => {
-    rechangeDialogRef.value.open()
   }
 </script>
 

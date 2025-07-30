@@ -172,18 +172,21 @@
       <el-descriptions-item label="审批人">
         {{ approverName(currentRow.approverPhone) }}
       </el-descriptions-item>
-      <el-descriptions-item label="一次消耗积分">
+      <el-descriptions-item label="1 元=积分">
         <span class="text-red-400 font-bold">
-          {{ currentRow.priceChangeQo.howPointsToOneGenerate }} 个
+          {{ currentRow.priceChangeQo.howPointsPerRMB }} 个
         </span>
       </el-descriptions-item>
-      <el-descriptions-item label="兑换一积分">
+      <el-descriptions-item label="1 积分=Token">
         <span class="text-red-400 font-bold">
-          {{ currentRow.priceChangeQo.howRmbToOnePoint }} 元
+          {{ currentRow.priceChangeQo.howTokensPerPoint }} 个
         </span>
       </el-descriptions-item>
       <el-descriptions-item label="积分过期时间">
         <span class="text-red-400 font-bold">{{ currentRow.priceChangeQo.expireDays }} 天</span>
+      </el-descriptions-item>
+      <el-descriptions-item label="审批意见">
+        {{ getRemark(currentRow) }}
       </el-descriptions-item>
     </el-descriptions>
   </el-dialog>
