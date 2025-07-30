@@ -4,19 +4,18 @@
       <Icon>
         <ArrowsHorizontal />
       </Icon>
-      积分与 RMB 兑换比例
+      1 元 = X 积分
     </div>
-    <el-input-number v-model="rmb2OnePoint" class="config-item" :min="0.01"></el-input-number>
-    <span>&nbsp;&nbsp;元&nbsp;</span>
-    <span>= 1 积分</span>
+    <el-input-number v-model="oneRmb2Points" class="config-item" :min="0.01"></el-input-number>
+    <span>&nbsp;&nbsp;积分</span>
 
     <div class="subject-title text-bold">
       <Icon>
-        <Purchase />
+        <ArrowsHorizontal />
       </Icon>
-      生成一次教案消耗积分
+      1 积分 = X Token
     </div>
-    <el-input-number v-model="oneComsumePoints" class="config-item" :min="1"></el-input-number>
+    <el-input-number v-model="onePoint2Tokens" class="config-item" :min="1"></el-input-number>
     <span>&nbsp;&nbsp;个</span>
 
     <div class="subject-title text-bold">
@@ -27,23 +26,6 @@
     </div>
     <el-input-number v-model="expireDays" class="config-item" :min="1"></el-input-number>
     <span>&nbsp;&nbsp;天</span>
-
-    <!-- <div class="subject-title text-bold">
-        <Icon>
-          <Gift />
-        </Icon>
-        首次注册赠送积分
-      </div>
-      <el-input-number v-model="rmb" style="width: 200px"></el-input-number>
-      <span>&nbsp;&nbsp;个</span> -->
-
-    <!-- <div class="subject-title text-bold">
-        <el-icon>
-          <Open />
-        </el-icon>
-        赠送积分全局开关
-      </div>
-      <el-switch v-model="openGive" active-text="开启赠送" inactive-text="关闭赠送" /> -->
     <div class="subject-title text-bold">
       <Icon>
         <UserAdmin />
@@ -61,22 +43,19 @@
 </template>
 
 <script setup lang="ts">
-  import { ArrowsHorizontal, Calendar, Gift, Purchase, User } from '@vicons/carbon'
-  import { UserAltSlash } from '@vicons/fa'
+  import { ArrowsHorizontal, Calendar } from '@vicons/carbon'
   import { UserAdmin } from '@vicons/carbon'
   import { Icon } from '@vicons/utils'
-
   import { getPriceUnits, getExpireDays, updateConfig } from '@/api/config'
   import { getApproverList } from '@/api/dept'
-  
   import { useUserStore } from '@/store'
   
   const userStore = useUserStore()
   const userInfo = userStore.getUserInfo()
   const currentUserPhone = ref(userInfo.phone)
 
-  const rmb2OnePoint = ref(1)
-  const oneComsumePoints = ref(1)
+  const oneRmb2Points = ref(1)
+  const onePoint2Tokens = ref(1)
   const expireDays = ref(1)
   const approverUser = ref('')
   const approvers = ref([])
@@ -85,12 +64,12 @@
     getPriceUnits().then(res => {
       if (res.state == 200) {
         res.data.forEach(item => {
-          if (item.type == 'RECHARGE') {
-            rmb2OnePoint.value = item.need
+          if (item.type == 'RMBTOPOINTS') {
+            oneRmb2Points.value = item.target
           }
 
-          if (item.type == 'CONSUME') {
-            oneComsumePoints.value = item.need
+          if (item.type == 'POINTTOTOKENS') {
+            onePoint2Tokens.value = item.target
           }
         })
       }
@@ -113,8 +92,8 @@
 
   const handleUpdate = () => {
       let req = {
-        howRmbToOnePoint: rmb2OnePoint.value,
-        howPointsToOneGenerate: oneComsumePoints.value,
+        howPointsPerRMB: oneRmb2Points.value,
+        howTokensPerPoint: onePoint2Tokens.value,
         expireDays: expireDays.value,
         approver: approverUser.value
       }
