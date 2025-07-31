@@ -99,7 +99,7 @@
                   <el-table-column prop="description" label="项目">
                     <template #default="{ row: detail }">
                       <span v-if="isComsumeType(detail.type)">
-                        {{ `${detail.projectTitle} - ${detail.projectKnowledgePoint}` }} 
+                        {{ comsumeName(detail) }} 
                         <span>({{ cnType(detail.type) }})</span>
                       </span>
                       <span v-else-if="detail.type == 'RECHARGE'">充值</span>
@@ -207,8 +207,12 @@
     // console.log(res)
   }
   
+  const comsumeName = detail => {
+    return detail.projectTitle ? `${detail.projectTitle} - ${detail.projectKnowledgePoint}` : ''
+  }
+  
   const isComsumeType = type => {
-    return ['CONSUME', 'CONSUME_OUTLINE', 'CONSUME_GEN', 'CONSUME_EDIT'].includes(type)
+    return ['CONSUME', 'CONSUME_OUTLINE', 'CONSUME_GEN', 'CONSUME_EDIT', 'CONSUME_OUTLINE_LOOK_FIRST'].includes(type)
   }
   
   const cnType = type => {
@@ -221,6 +225,8 @@
         return '生成消费'
       case 'CONSUME_EDIT':
         return '编辑消费'
+      case 'CONSUME_OUTLINE_LOOK_FIRST':
+        return '先看大纲扣除'
       default:
         return ''
     }

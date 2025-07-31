@@ -6,7 +6,7 @@
       <span class="text-ms mr-10px text-blod">{{ userInfoFirstName }}老师, 你好 !</span>
     </div>
 
-    <el-dropdown class="nav-action-item" trigger="click" @command="handleCommand">
+    <el-dropdown class="nav-action-item" trigger="click" @command="handleCommand" :hide-on-click="false">
       <div class="flex-center h100% p10px">
         <img :src="userImg" class="rounded-full mr-10px w24px h24px" />
       </div>

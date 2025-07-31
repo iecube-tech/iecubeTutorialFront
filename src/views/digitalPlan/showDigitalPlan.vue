@@ -164,11 +164,7 @@
           ></iframe>
           <div ref="highlightTagRef" v-show="isPreview" class="hightlight-tag"></div>
           <div ref="highlightBoxRef" v-show="isPreview" class="highlight-box"></div>
-          <div
-            ref="editorRef"
-            v-show="!isPreview"
-            class="wh-full absolute top-0 left-0 z-900"
-          ></div>
+          <div ref="editorRef" v-show="!isPreview" class="wh-full absolute top-0 left-0 z-900" ></div>
         </div>
       </template>
     </resizePanel>
@@ -199,24 +195,25 @@
   const loading = ref(true)
   const loadingText = ref('正在为您拼命加载页面中.....')
 
+  // 加载 loading
   const startLoading = () => {
     loading.value = true
   }
 
+  // 停止 loading
   const stopLoading = async () => {
-    // console.log('stop  loading ....')
     await nextTick()
     setTimeout(_ => {
       loading.value = false
     }, 800)
   }
 
-  //TODO  设置文件路径
-  const setFilePath = fileName => {
+  // 设置当前文件路径  (初始化项目、案例和切换版本时调用)
+  // relativeFilePath.value = '/resource/' + fileName  废弃拼接 /resource/ 的方式获取文件路径
+  const setCurrentFileName = fileName => {
     if (!fileName) {
       return
     }
-    relativeFilePath.value = '/resource/' + fileName
     currentFileName.value = fileName
   }
 
@@ -225,7 +222,7 @@
     startLoading()
     let versionItem = versionList.value.find(_ => _.id == v)
     try {
-      setFilePath(versionItem.resource.filename)
+      setCurrentFileName(versionItem.resource.filename)
       await nextTick()
       initFetchHtml().then(htmlText => {
         updateEditValueAndView(htmlText)
@@ -250,10 +247,18 @@
 
   // 下载文件
   const handleDownload = () => {
-    const link = document.createElement('a')
-    link.href = relativeFilePath.value
-    link.download = fileName.value
-    link.click()
+    getHtmlFile(currentFileName.value).then(async res => {
+      if(res.status == 200){
+        let url = URL.createObjectURL(res.data)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = fileName.value + '.html'
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    })
   }
 
   // 保存文件
@@ -274,10 +279,9 @@
 
   // 核心参数
   const route = useRoute()
-  const relativeFilePath = ref('')
-  const currentFileName = ref('')
+  const currentFileName = ref('') // 获取当前文件
   const htmlText = ref('')
-  const fileName = ref(route.query.fileName)
+  const fileName = ref('') // 下载文件的文件名成
   const id = ref(route.query.id)
   const caseId = ref(route.query.caseId)
 
@@ -449,9 +453,15 @@
       message: askText.value,
       selectedElements: list,
       fullCode: Base64.encode(editorInstance.getValue()),
-      fileName: fileName.value
+      fileName: currentFileName.value
     }
-    return msg
+    
+    let msgObj = {
+      type: 'message',
+      message: msg
+    }
+    
+    return msgObj
   }
 
   // 消息加入历史列表中
@@ -479,12 +489,12 @@
 
     setDefaultThink()
 
-    if (!ws.value) {
+    if (!ws) {
       return
     }
 
     let sendMsg = consistSendMsg()
-    ws.value.send(JSON.stringify(sendMsg))
+    ws.send(JSON.stringify(sendMsg))
     addMessage(askText.value, true)
 
     askText.value = ''
@@ -503,7 +513,7 @@
   }
 
   // 初始化websocket
-  const ws = ref(null)
+  let ws = null
 
   // ai 思考时展示的内容
   const thinking = ref(false)
@@ -521,21 +531,21 @@
   // 初始化 websocket
   const initWebSocket = () => {
     if (isFromCase.value) return
-    ws.value = new WebSocket(`/ai/html/edit/${id.value}`)
+    ws = new WebSocket(`/ai/html/edit/${id.value}`)
 
-    ws.value.onopen = event => {
-      // console.log('WebSocket is open now.')
-      // intervalN.value = setInterval(_ => {
-      //   sendHeart()
-      // }, 2000)
+    ws.onopen = event => {
+      console.log('WebSocket is open now.')
+       intervalN.value = setInterval(_ => {
+         sendHeart()
+       }, 20000)
     }
     
-    ws.value.onclose = event => {
+    ws.onclose = event => {
       console.log('WebSocket is closed now.')
-      // clearInterval(intervalN.value)
+      clearInterval(intervalN.value)
     }
 
-    ws.value.onmessage = async event => {
+    ws.onmessage = async event => {
       const data = JSON.parse(event.data)
       switch (data.type) {
         case 'current':
@@ -595,15 +605,16 @@
     }
   }
 
+  // 发送心跳
   const sendHeart = () => {
-    if (!ws.value) {
+    if (!ws) {
       return
     }
     let heart = {
       type: 'ping'
     }
-    if (ws.value.readyState == 1) {
-      ws.value.send(JSON.stringify(heart))
+    if (ws.readyState == 1) {
+      ws.send(JSON.stringify(heart))
     }
   }
 
@@ -630,29 +641,29 @@
   const initCoreParamByRoute = () => {
     id.value = route.query.id
     caseId.value = route.query.caseId
-    fileName.value = route.query.fileName
   }
 
+  // 获取案例详情
   const getCaseDetailById = async () => {
     await getCaseDetail(caseId.value).then(res => {
       if (res.state == 200) {
         let caseItem = res.data
         fileName.value = caseItem.name
-        setFilePath(caseItem.file.filename)
+        setCurrentFileName(caseItem.file.filename)
       }
     })
   }
 
+  // 获取项目详情
   const getProjectDetailById = async () => {
     await getProjectDetail(id.value).then(res => {
       if (res.state == 200) {
         let project = res.data.project
         fileName.value = project.name
-
         let childList = res.data.projectChildren
         childList = childList.reverse()
         if (childList.length > 0) {
-          setFilePath(childList[0].resource.filename)
+          setCurrentFileName(childList[0].resource.filename)
           currentVersionId.value = childList[0].id
           versionList.value = childList
         }
@@ -663,18 +674,16 @@
   // 获取讲义文件内容
   const initFetchHtml = async () => {
     return new Promise(resovle => {
-      // fetch(relativeFilePath.value + `?t=${new Date().getTime()}`).then(res => {
-      //   res.text().then(text => {
-      //     resovle(text)
-      //   })
-      // })
       getHtmlFile(currentFileName.value).then(async res => {
-        const content = await blobToString(res.data)
-        resovle(content)
+        if(res.status == 200){
+          const content = await blobToString(res.data)
+          resovle(content)
+        }
       })
     })
   }
 
+  // 读取 Blob 内容
   async function blobToString(blob) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -707,12 +716,9 @@
     initCoreParamByRoute()
   }
 
-  // 跟新布局 是否显示 ai 对话框, 初始化和创新项目时调用
- 
-
-  // 在组件挂载时调用init函数
-  onMounted(() => {
-    // await flushHtml()
+  // 初始化
+  onMounted(async () => {
+    await nextTick()
     setTimeout(_ => {
       init()
     }, 200)
