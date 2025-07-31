@@ -78,11 +78,10 @@
 
       <template #right-content>
         <div class="btn-tools h-24px flex justify-between items-center">
-          <div class="h-full flex items-center">
+          <div class="h-full inline-flex items-center" v-show="!isFromCase">
             <el-select
-              v-show="!isFromCase"
               v-model="currentVersionId"
-              class="!w-100px mr-2"
+              style="width: 100px; margin-right: 8px;"
               size="small"
               @change="handleCurrentVersionChange"
             >
@@ -93,7 +92,7 @@
                 :value="versionItem.id"
               ></el-option>
             </el-select>
-            <span v-show="!isFromCase" class="hover:text-zeng">版本</span>
+            <span class="hover:text-zeng">版本</span>
           </div>
 
           <div class="h-full flex items-center">
@@ -154,11 +153,10 @@
             </template>
           </el-skeleton>
           <iframe
+            id="iframeRef"
             v-show="isPreview"
-            ref="iframeRef"
             class="wh-full absolute top-0 left-0 z-400"
             src="about:blank"
-            :srcdoc="htmlText"
             loading="lazy"
             @load="stopLoading"
           ></iframe>
@@ -187,6 +185,7 @@
     getHtmlFile
   } from '@/api/plan'
   import { getCaseDetail } from '@/api/caseApi'
+import ComponentsResolver from 'unplugin-icons/resolver'
 
   const iconSize = ref(20)
   const isPreview = ref(true)
@@ -240,7 +239,12 @@
       if (res.state == 200) {
         let newId = res.data.project.id
         updateURL(newId)
-        init()
+        // init()
+        let iframeDom = getIframeDom()
+        let text = iframeDom.srcdoc || ''
+        initMonacoEditor(text)
+        initWebSocket()
+        getProjectDetailById()
       }
     })
   }
@@ -280,7 +284,6 @@
   // 核心参数
   const route = useRoute()
   const currentFileName = ref('') // 获取当前文件
-  const htmlText = ref('')
   const fileName = ref('') // 下载文件的文件名成
   const id = ref(route.query.id)
   const caseId = ref(route.query.caseId)
@@ -311,14 +314,16 @@
   }
 
   const debounceUpdateHtmlText = debounce(event => {
-    // startLoading()
-    htmlText.value = editorInstance.getValue()
+    if(isPreview.value){
+      return 
+    }
+    let newHtml = editorInstance.getValue()
+    setIframeHtml(newHtml)
   }, 800)
 
   //编辑相关代码
   const highlightBoxRef = ref(null)
   const highlightTagRef = ref(null)
-  const iframeRef = ref(null)
   const hoveredElement = ref(null)
   const hoveredElementClone = ref(null)
   const isEdit = ref(false)
@@ -409,7 +414,8 @@
     }
     isEdit.value = true
     hoveredElement.value = null
-    const iframeDoc = iframeRef.value.contentDocument
+    let iframeDom = getIframeDom()
+    const iframeDoc = iframeDom.contentDocument
     iframeDoc.addEventListener('mousemove', throttledUpdate)
     iframeDoc.addEventListener('scroll', updateHighlight)
     iframeDoc.addEventListener('resize', updateHighlight)
@@ -420,7 +426,8 @@
   function stopEdit() {
     isEdit.value = false
     hoveredElementClone.value = hoveredElement.value.cloneNode(true)
-    const iframeDoc = iframeRef.value.contentDocument
+    let iframeDom = getIframeDom()
+    const iframeDoc = iframeDom.contentDocument
     let tag = highlightTagRef.value
     let highlightBox = highlightBoxRef.value
     tag.style.display = 'none'
@@ -596,13 +603,25 @@
       }
     })
   }
+  
+  // 获取ifamre DOM
+  const getIframeDom = () => {
+    let iframeDom = document.getElementById('iframeRef')
+    return iframeDom;
+  }
+  
+  // 设置iframe 内容
+  const setIframeHtml = htmlText => {
+    let iframeDom = getIframeDom()
+    iframeDom.srcdoc = htmlText
+  }
 
   // 更新 iframe 和 monaco editor 内容
   const updateEditValueAndView = newHmtlText => {
-    htmlText.value = newHmtlText
     if(!isFromCase.value){
       editorInstance.setValue(newHmtlText)
     }
+    setIframeHtml(newHmtlText)
   }
 
   // 发送心跳
