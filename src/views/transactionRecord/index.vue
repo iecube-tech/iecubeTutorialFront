@@ -71,7 +71,9 @@
             </Icon>
           </div>
           <div class="ml-4">
-            <span class="stat-number">{{ moment(stats.expiring).format('YYYY-MM-DD') }}</span>
+            <span class="stat-number">
+              {{ handleExpiringTime() }}
+            </span>
             <div class="stat-label">积分过期时间</div>
           </div>
         </div>
@@ -164,10 +166,20 @@
   const initPoint = async () => {
     getPointValid().then(res => {
       if (res.state === 200) {
-        stats.value.balance = res.data.amount
-        stats.value.expiring = res.data.expireDate
+        if(res.data != null){
+          stats.value.balance = res.data.amount
+          stats.value.expiring = res.data.expireDate
+        }
       }
     })
+  }
+  
+  const handleExpiringTime = ()=>{
+    if(stats.value.expiring == 0){
+      return '已过期';
+    } else {
+      return moment(stats.expiring).format('YYYY-MM-DD')
+    }
   }
 
   const initConsumed = async () => {

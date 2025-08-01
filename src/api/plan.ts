@@ -97,7 +97,7 @@ export function genPlanFromOutline(mOutlineId: string ){
   })
 }
 
-export function getHtmlFile(fileName){
+export function getFileResource(fileName){
   return request({
     url: `/file/resource/${fileName}`,
     method: 'get',

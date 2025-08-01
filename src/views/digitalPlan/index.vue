@@ -222,7 +222,7 @@
             <div class="case-card" @click="handleShowCase(caseItem)">
               <div class="case-image-wrapper">
                 <img
-                  :src="`/resource/${caseItem.cover.filename}`"
+                  :src="url.map[caseItem.cover.filename]"
                   alt="案例图片"
                   class="case-img"
                 />
@@ -254,7 +254,7 @@
             <div class="case-card" @click="handleShowCase(caseItem)">
               <div class="case-image-wrapper">
                 <img
-                  :src="`/resource/${caseItem.cover.filename}`"
+                  :src="url.map[caseItem.cover.filename]"
                   alt="案例图片"
                   class="case-img"
                 />
@@ -400,7 +400,8 @@
     removePlan,
     genOutlineWebsocketId,
     updateOutline,
-    genPlanFromOutline
+    genPlanFromOutline,
+    getFileResource,
   } from '@/api/plan'
 
   import markdownDialog from './markdownDialog.vue'
@@ -647,14 +648,25 @@
     if(childList.length > 0) {
       let l = childList.length
       let item = childList[l-1]
-      let filePath = `/resource/${item.resource.filename}`
-      const link = document.createElement('a')
-      link.href = filePath
-      link.download = project.name
-      link.click()
+      handleDownloadFile(item.resource.filename, project.name)
     }else{
       ElMessage.error('暂无讲义')
     }
+  }
+  
+  const handleDownloadFile = (fileName, downloadName) => {
+    getFileResource(fileName).then(async res => {
+      if(res.status == 200){
+        let url = URL.createObjectURL(res.data)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = downloadName + '.html'
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    })
   }
 
   // 删除讲义
@@ -851,6 +863,10 @@
   }
 
   const filterCaseList = ref([])
+  
+  let url = ref({
+    map: {}
+  })
 
   const findCaseList = () => {
     let req = {
@@ -859,14 +875,43 @@
     }
     findCase(req).then(res => {
       if(res.state == 200) {
-        filterCaseList.value = res.data
+        let list = res.data
+        filterCaseList.value = list
+        list.forEach(item =>{
+          url.value.map[item.cover.filename] = null
+        })
+        initCaseItemPngUrl()
       }
     })
   }
 
   findCaseList()
+  
+  const initCaseItemPngUrl = async ()=>{
+    for(let key in url.value.map){
+      if(url.value.map[key] == null){
+        url.value.map[key] = await getFile(key)
+      }
+    }
+  }
+  
+  // 获取文件Blob
+  const getFile = async fileName => {
+    let res = await getFileResource(fileName)
+    let blob = new Blob([res.data], { type: 'image/png' })
+    return URL.createObjectURL(blob)
+  }
 
   const debounceFindCaseList = debounce(findCaseList, 800)
+  
+  onBeforeUnmount(() => {
+  // 释放所有创建的 URL 对象
+    for(let key in url.value.map){
+      if (url.value.map[key]) {
+        URL.revokeObjectURL(url.value.map[key])
+      }
+    }
+  })
 </script>
 
 <style lang="scss" scoped>

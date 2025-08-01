@@ -111,15 +111,15 @@
           </div>
 
           <div class="h-full flex items-center gap-4">
-            <Icon
+            <el-button
               v-show="isFromCase"
               title="根据案例创建教案"
-              :size="iconSize"
               class="btn-icon"
               @click="handleCreateProject"
+              link
             >
-              <FolderAdd />
-            </Icon>
+              <Icon :size="iconSize"><Add/></Icon>创建教案
+            </el-button>
             <Icon
               v-show="!isFromCase"
               title="保存"
@@ -170,7 +170,7 @@
 </template>
 
 <script setup>
-  import { Download, FolderAdd, Save, SendAltFilled, CenterSquare } from '@vicons/carbon'
+  import { Download, FolderAdd, Save, SendAltFilled, CenterSquare, Add } from '@vicons/carbon'
   import { Crosshairs, Eye} from '@vicons/fa'
   import { ClipboardCode20Filled } from '@vicons/fluent'
   import { Base64 } from 'js-base64'
@@ -182,7 +182,7 @@
     editorProjectHtml,
     createProjectByCaseId,
     getProjectDetail,
-    getHtmlFile
+    getFileResource
   } from '@/api/plan'
   import { getCaseDetail } from '@/api/caseApi'
 import ComponentsResolver from 'unplugin-icons/resolver'
@@ -251,7 +251,7 @@ import ComponentsResolver from 'unplugin-icons/resolver'
 
   // 下载文件
   const handleDownload = () => {
-    getHtmlFile(currentFileName.value).then(async res => {
+    getFileResource(currentFileName.value).then(async res => {
       if(res.status == 200){
         let url = URL.createObjectURL(res.data)
         const link = document.createElement('a')
@@ -538,18 +538,23 @@ import ComponentsResolver from 'unplugin-icons/resolver'
   // 初始化 websocket
   const initWebSocket = () => {
     if (isFromCase.value) return
+    chatHistoryList.value = []
     ws = new WebSocket(`/ai/html/edit/${id.value}`)
 
     ws.onopen = event => {
       console.log('WebSocket is open now.')
-       intervalN.value = setInterval(_ => {
-         sendHeart()
-       }, 20000)
+      intervalN.value = setInterval(_ => {
+        sendHeart()
+      }, 20000)
     }
     
     ws.onclose = event => {
       console.log('WebSocket is closed now.')
       clearInterval(intervalN.value)
+      // 异常关闭重连
+      if(event.code != 1000 || event.code != 1001){
+        initWebSocket()
+      }
     }
 
     ws.onmessage = async event => {
@@ -584,6 +589,13 @@ import ComponentsResolver from 'unplugin-icons/resolver'
           getProjectDetailById()
           break
         case 'error':
+          if(data.content == '余额不足'){
+            ElMessage.error({
+              message: '余额不足，请充值',
+              customClass: 'el-message el-message--error is-closable myToast',
+              duration: 3000
+            })
+          }
           console.log(data)
           break;  
         default:
@@ -693,7 +705,7 @@ import ComponentsResolver from 'unplugin-icons/resolver'
   // 获取讲义文件内容
   const initFetchHtml = async () => {
     return new Promise(resovle => {
-      getHtmlFile(currentFileName.value).then(async res => {
+      getFileResource(currentFileName.value).then(async res => {
         if(res.status == 200){
           const content = await blobToString(res.data)
           resovle(content)
