@@ -2,18 +2,14 @@
   "typescript.tsdk": "./node_modules/typescript/lib",
   "npm.packageManager": "pnpm",
   "editor.tabSize": 2,
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.quickSuggestions": {
     "other": true,
     "comments": true,
     "strings": true
   },
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "source.fixAll.eslint": "explicit",
-    "source.fixAll.stylelint": "explicit"
-  },
+  
   "files.eol": "\n",
   "search.exclude": {
     "**/node_modules": true,
@@ -72,6 +68,14 @@
   "i18n-ally.displayLanguage": "zh-CN",
   "i18n-ally.enabledFrameworks": ["vue", "react"],
   "i18n-ally.localesPaths": ["src/lang"],
-  "Codegeex.RepoIndex": true
-  sdfsdfssdfsdfsdfdsf
+  "Codegeex.RepoIndex": true,
+  "typescript.validate.enable": false,  // 禁用 TS 语法检查
+  "javascript.validate.enable": false,  // 禁用 JS 语法检查（可选）
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "typescript.tsserver.log": "off",
+  "javascript.suggestionActions.enabled": false,
+  "typescript.suggestionActions.enabled": false,
+  "volar.takeOverMode.enabled": false, // 禁用 Volar 接管模式
+  "volar.autoComplete.autoImport": false, // 关闭自动导入分析
+  "volar.analysis.updates": false // 关闭自动依赖分析 sdfsdfsd 
 }

@@ -105,7 +105,7 @@
           <el-input v-model="addUserForm.email" />
         </el-form-item>
         <el-form-item label="角色" prop="role">
-          <el-select v-model="addUserForm.role" placeholder="请选择角色" disabled>
+          <el-select v-model="addUserForm.role" placeholder="请选择角色">
             <el-option
               v-for="item in roleOptions"
               :key="item.value"

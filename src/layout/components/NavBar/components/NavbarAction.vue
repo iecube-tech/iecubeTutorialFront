@@ -68,56 +68,12 @@
     </div>
 
     <!-- 用户头像 -->
-    <el-dropdown class="nav-action-item" trigger="click" @command="handleCommand">
+    <el-dropdown class="nav-action-item" trigger="click" @command="handleCommand"  :hide-on-click="false">
       <div class="flex-center h100% p10px">
-        <!-- <img
-          :src="userStore.user.avatar + '?imageView2/1/w/80/h/80'"
-          class="rounded-full mr-10px w24px h24px"
-        /> -->
-        <!-- 固定一个头像 -->
         <img :src="userImg" class="rounded-full mr-10px w24px h24px" />
       </div>
       <template #dropdown>
         <el-dropdown-menu>
-          <!--  <a
-            target="_blank"
-            href="https://gitee.com/youlaiorg/vue3-element-admin"
-          >
-            <el-dropdown-item>{{ $t("navbar.gitee") }}</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://juejin.cn/post/7228990409909108793">
-            <el-dropdown-item>{{ $t("navbar.document") }}</el-dropdown-item>
-          </a> 
-          <el-dropdown-item divided @click="logout">
-            {{ $t("navbar.logout") }}
-          </el-dropdown-item>-->
-          <!-- <el-dropdown-item command="transactionRecord">消费明细</el-dropdown-item>
-
-          <el-dropdown-item>
-            <contact-us></contact-us>
-          </el-dropdown-item>
-
-          <el-dropdown-item>
-            <el-popover placement="left" width="300">
-              <template #default>
-                <div
-                  class="account-wrapper"
-                  v-for="item in 2"
-                  :key="item"
-                >
-                  <div class="group-wrapper">曾</div>
-                  <div class="flex-1">
-                    <div class="group-name">曾益慧创</div>
-                    <div class="usesr-name">朱晓曦</div>
-                  </div>
-                  <el-icon class="cursor-pointer text-xl icon-font">
-                    <ArrowRightBold />
-                  </el-icon>
-                </div>
-              </template>
-              <template #reference>账号切换</template>
-            </el-popover>
-          </el-dropdown-item> -->
           <el-dropdown-item @click="logout">
             {{ $t('navbar.logout') }}
           </el-dropdown-item>

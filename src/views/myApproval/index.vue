@@ -38,10 +38,9 @@
       </div>
     </div>
 
-    <div class="flex justify-between items-center mb-4">
-      <div></div>
-      <div  class="w220px">
-        <el-select v-model="filterForm.status" placeholder="请选择状态" clearable>
+    <div class="flex justify-end items-center mb-4">
+      <div class="w240px mr-2">
+        <el-select v-model="filterForm.status" placeholder="请选择状态" clearable class=" w220px">
           <el-option
             v-for="item in applyStatus"
             :key="item.value"
@@ -50,6 +49,9 @@
           />
         </el-select>
       </div>
+      <el-icon title="刷新" class="cursor-pointer" @click="initTableData">
+        <Refresh/>
+      </el-icon>
     </div>
 
     <div>

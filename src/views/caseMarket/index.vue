@@ -27,7 +27,7 @@
           @click="handleCaseClick(caseItem.id)"
         >
           <div class="case-image-wrapper">
-            <img :src="`/resource/${caseItem.cover.filename}`" alt="案例图片" class="case-img" />
+            <img :src="url.map[caseItem.cover.filename]" alt="案例图片" class="case-img" />
           </div>
           <div class="case-content">
             <div class="w-full flex justify-between">
@@ -147,6 +147,7 @@
 
 <script setup lang="ts">
   import { uploadFile, getTagList, uploadCase, getCaseList, deleteCase } from '@/api/caseApi'
+  import { getFileResource } from '@/api/plan'
 
   import { Add, Delete, CloudUpload } from '@vicons/carbon'
   import {cloneDeep} from 'lodash'
@@ -387,18 +388,51 @@
   }
 
   initTagList()
+  
+  let url = ref({
+    map: {}
+  })
 
   const initCaseList = () => {
     filterText.value = ''
 
     getCaseList().then(res => {
       if (res.state == 200) {
-        caseList.value = res.data
+        let list = res.data
+        caseList.value = list
+        list.forEach(item =>{
+          url.value.map[item.cover.filename] = null
+        })
+        initCaseItemPngUrl()
       }
     })
   }
-
+  
   initCaseList()
+  
+  const initCaseItemPngUrl = async ()=>{
+    for(let key in url.value.map){
+      if(url.value.map[key] == null){
+        url.value.map[key] = await getFile(key)
+      }
+    }
+  }
+  
+  // 获取文件Blob
+  const getFile = async fileName => {
+    let res = await getFileResource(fileName)
+    let blob = new Blob([res.data], { type: 'image/png' })
+    return URL.createObjectURL(blob)
+  }
+  
+  onBeforeUnmount(() => {
+  // 释放所有创建的 URL 对象
+    for(let key in url.value.map){
+      if (url.value.map[key]) {
+        URL.revokeObjectURL(url.value.map[key])
+      }
+    }
+  })
 </script>
 
 <style lang="scss" scoped>

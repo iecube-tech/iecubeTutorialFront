@@ -52,7 +52,9 @@
             </Icon>
           </div>
           <div class="ml-4">
-            <span class="stat-number">{{ moment(stats.expiring).format('YYYY-MM-DD') }}</span>
+            <span class="stat-number">
+              {{ handleExpiringTime() }}
+            </span>
             <div class="stat-label">积分过期时间</div>
           </div>
         </div>
@@ -80,7 +82,7 @@
                   <el-table-column prop="description" label="项目">
                     <template #default="{ row: detail }">
                       <span v-if="isComsumeType(detail.type)">
-                        {{ `${detail.projectTitle} - ${detail.projectKnowledgePoint}` }} 
+                        {{ comsumeName(detail) }} 
                         <span>({{ cnType(detail.type) }})</span>
                       </span>
                       <span v-else-if="detail.type == 'RECHARGE'">充值</span>
@@ -148,11 +150,21 @@
   const initAmount = async () => {
     getAmountDetail(oSecId).then(res => {
       if (res.state == 200) {
-        stats.value.balance = res.data.amount
-        stats.value.expiring = res.data.expireDate
+        if(res.data != null){
+          stats.value.balance = res.data.amount
+          stats.value.expiring = res.data.expireDate
+        }
       }
     })
   }
+  
+    const handleExpiringTime = ()=>{
+      if(stats.value.expiring == 0){
+        return '已过期';
+      } else {
+        return moment(stats.expiring).format('YYYY-MM-DD')
+      }
+    }
 
   const initConsumed = async () => {
     getConsumedDetail(oSecId).then(res => {
@@ -191,8 +203,12 @@
     monthlyData.value = res
   }
   
+  const comsumeName = detail => {
+    return detail.projectTitle ? `${detail.projectTitle} - ${detail.projectKnowledgePoint}` : ''
+  }
+  
   const isComsumeType = type => {
-    return ['CONSUME', 'CONSUME_OUTLINE', 'CONSUME_GEN', 'CONSUME_EDIT'].includes(type)
+    return ['CONSUME', 'CONSUME_OUTLINE', 'CONSUME_GEN', 'CONSUME_EDIT', 'CONSUME_OUTLINE_LOOK_FIRST'].includes(type)
   }
   
   const cnType = type => {
@@ -205,6 +221,8 @@
         return '生成消费'
       case 'CONSUME_EDIT':
         return '编辑消费'
+      case 'CONSUME_OUTLINE_LOOK_FIRST':
+        return '先看大纲扣除'
       default:
         return ''
     }

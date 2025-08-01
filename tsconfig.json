@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "checkJs": false,      // 禁用 JS 文件的 TS 检查
+    "noEmit": true,        // 不输出编译结果
     "target": "esnext",
     "useDefineForClassFields": true,
     "module": "esnext",
@@ -23,6 +25,6 @@
     },
     "types": ["vite/client", "unplugin-icons/types/vue", "element-plus/global"]
   },
-  "include": ["mock/**/*.ts", "src/**/*.ts", "src/**/*.vue", "vite.config.ts"],
-  "exclude": ["node_modules", "dist", "**/*.js"]
+  "include": ["src/**/*", "vite.config.ts"],
+  "exclude": ["**/node_modules","node_modules", "dist", "**/*.js"]
 }

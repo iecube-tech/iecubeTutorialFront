@@ -32,3 +32,11 @@ export function updatePlan(data: any) {
   })
 }
 
+// 获取服务器文件
+export function getFileResource(fileName){
+  return request({
+    url: `/file/resource/${fileName}`,
+    method: 'get',
+    responseType: 'blob'
+  })
+}

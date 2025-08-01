@@ -193,7 +193,7 @@
         <el-form-item label="赠送积分" prop="giftPoints" v-if="subGroupDialog.type === 'add'">
           <el-input-number
             style="width: 100%"
-            :max="100"
+            :max="10000"
             :min="0"
             v-model="subGroupFormData.giftPoints"
             placeholder="请输入赠送积分"
