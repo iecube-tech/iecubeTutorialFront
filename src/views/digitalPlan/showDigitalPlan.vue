@@ -58,11 +58,12 @@
               </div>
               <div class="w-full relative flex items-center justify-between">
                 <el-input
-                  type="text"
+                  type="textarea"
+                  :rows="2"
                   class="ask-text-input"
                   v-model="askText"
                   placeholder="请先点击下方编辑按钮后，在右侧页面点击选中需要修改的内容，并在此处输入修改意见"
-                  @keydown.enter="handleAsk"
+                  @keydown.ctrl.enter.prevent="handleAsk"
                 />
               </div>
               <div class="flex items-center justify-between gap-2 px-4 pb-3">
@@ -75,7 +76,7 @@
                   </div>
                 </div>
                 <div class="flex items-center justify-end gap-2">
-                  <div class="ask-btn" :class="{ 'btn-disable': askText == '' }">
+                  <div class="ask-btn" :class="{ 'btn-disable': askText == '' }" title="发送: ctrl + enter">
                     <Icon
                       class="ask-icon"
                       :class="{ 'icon-disable': askText == '' }"
@@ -841,12 +842,22 @@
     color: var(--zeng);
   }
 
-  .ask-text-input {
-    :deep(.el-input__wrapper) {
-      @apply bg-transparent border-none rounded-none shadow-none;
-    }
-    :deep(.el-input__inner) {
-      @apply w-full bg-transparent outline-none text-neutral-200 placeholder:text-neutral-500 p-4 !pt-2.5;
+  // .ask-text-input {
+  //   :deep(.el-input__wrapper) {
+  //     @apply bg-transparent border-none rounded-none shadow-none;
+  //   }
+  //   :deep(.el-input__inner) {
+  //     @apply w-full bg-transparent outline-none text-neutral-200 placeholder:text-neutral-500 p-4 !pt-2.5;
+  //   }
+  // }
+  
+  .ask-text-input{
+    @apply bg-transparent border-none rounded-none shadow-none;
+    
+    :deep(.el-textarea__inner){
+      resize: none;
+      @extend .my-scroller;
+      @apply border-none shadow-none w-full bg-transparent outline-none text-neutral-200 placeholder:text-neutral-500 p-4 !pt-2.5;
     }
   }
 
