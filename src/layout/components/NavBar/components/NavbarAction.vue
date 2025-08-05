@@ -182,10 +182,7 @@
   
   // 处理命令
   const handleCommand = (command: string) => {
-    if (command === 'transactionRecord') {
-      let path = router.resolve({'path': '/transactionRecord'})
-      window.open(path.href, '_blank')
-    }
+    
   }
 </script>
 <style lang="scss" scoped>

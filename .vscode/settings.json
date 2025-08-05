@@ -59,15 +59,6 @@
     "**/dist/**": true,
     "**/yarn.lock": true
   },
-  "i18n-ally.keystyle": "nested",
-  "i18n-ally.sortKeys": true,
-  "i18n-ally.namespace": false,
-  "i18n-ally.pathMatcher": "{namespaces}/{locale}.{ext}",
-  "i18n-ally.enabledParsers": ["ts"],
-  "i18n-ally.sourceLanguage": "en",
-  "i18n-ally.displayLanguage": "zh-CN",
-  "i18n-ally.enabledFrameworks": ["vue", "react"],
-  "i18n-ally.localesPaths": ["src/lang"],
   "Codegeex.RepoIndex": true,
   "typescript.validate.enable": false,  // 禁用 TS 语法检查
   "javascript.validate.enable": false,  // 禁用 JS 语法检查（可选）
@@ -75,7 +66,4 @@
   "typescript.tsserver.log": "off",
   "javascript.suggestionActions.enabled": false,
   "typescript.suggestionActions.enabled": false,
-  "volar.takeOverMode.enabled": false, // 禁用 Volar 接管模式
-  "volar.autoComplete.autoImport": false, // 关闭自动导入分析
-  "volar.analysis.updates": false // 关闭自动依赖分析 sdfsdfsd 
 }

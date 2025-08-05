@@ -72,7 +72,8 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/groupManage',
     meta: {
-      roles: ['operator']
+      roles: ['operator'],
+      keepAlive: true
     },
     children: [
       {

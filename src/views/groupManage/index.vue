@@ -535,10 +535,9 @@
     rechangeDialogRef.value.disabledOpen(currentGroupId, row.id)
   }
 
-  //
+  // 查看账单
   const openBillPage = row => {
-    let path = router.resolve({ path: `/transactionRecord/${row.id}` })
-    window.open(path.href, '_blank')
+    router.push({ path: `/transactionRecord/${row.id}` })
   }
 </script>
 

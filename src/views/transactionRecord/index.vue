@@ -1,10 +1,16 @@
 <template>
   <div class="transcation-record-container select-none">
-    <div class="flex justify-between align-center mb-8">
-      <span class="text-bold font-bold text-2xl">消费明细</span>
+    <div class="flex justify-between align-center mb-4">
+      <div class="w-0 flex-1 flex justify-start items-center">
+        <el-button type="primary" icon="ArrowLeft" @click="goBack" link class="mr-4">返回</el-button>
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item>消费明细</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
     </div>
 
-    <el-row :gutter="20" class="mb-8">
+    <el-row :gutter="20" class="mb-4">
       <el-col :span="6">
         <div class="stat-card currentUsers">
           <div class="">
@@ -123,6 +129,11 @@
 
   const router = useRouter()
   const route = useRoute()
+  
+  const goBack = () => {
+    router.back()
+  }
+  
 
   const oSecId = route.params.id
 
