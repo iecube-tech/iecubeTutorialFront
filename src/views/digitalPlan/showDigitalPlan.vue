@@ -10,14 +10,29 @@
               :class="`chat-${chatItem.role}-container`"
             >
               <div v-if="chatItem.role === 'user'" class="chat-user">
-                {{ chatItem.content }}
+                <div class="flex justify-end items-center mb-1 text-xs">
+                  <el-tag effect="dark" size="small" hit type="primary" class="mr-2">用户</el-tag>
+                  <span>{{ chatItem.createTime }}</span>
+                </div>
+                <div>
+                  {{ chatItem.content }}
+                </div>
               </div>
               <div v-if="chatItem.role === 'assistant'" class="chat-assistant">
+                <div class="flex justify-start items-center mb-1 text-xs">
+                  <el-tag effect="dark" size="small" hit color="#3b82f6" class="mr-2">IECUBE 助手</el-tag>
+                  <span>{{ chatItem.createTime }}</span>
+                </div>
                 <MdPreview :modelValue="chatItem.content" theme="dark"></MdPreview>
               </div>
             </div>
             <div v-if="thinking" class="chart-assistant-container">
               <div class="chat-assistant">
+                <div class="flex justify-start items-center mb-1 text-xs">
+                  <el-tag effect="dark" size="small" hit color="#3b82f6" class="mr-2">IECUBE 助手</el-tag>
+                  <span class="mr-2">{{ thinkingCreateTime }}</span>
+                  <span style="color:#3b82f6">● 正在输入...</span>
+                </div>
                 <MdPreview :modelValue="thinkingText" theme="dark"></MdPreview>
               </div>
             </div>
@@ -190,6 +205,8 @@
   } from '@/api/plan'
   import { getCaseDetail } from '@/api/caseApi'
   import ComponentsResolver from 'unplugin-icons/resolver'
+  
+  import moment from 'moment'
 
   const iconSize = ref(20)
   const isPreview = ref(true)
@@ -480,17 +497,21 @@
   }
 
   // 消息加入历史列表中
-  const addMessage = (msg, isUser) => {
+  const addMessage = (msgObj, isUser) => {
+    let msg = msgObj.message
+    let createTime = moment(msgObj.createTime).format('MM/DD HH:mm')
     if (isUser) {
       chatHistoryList.value.push({
         role: 'user',
-        content: msg
+        content: msg,
+        createTime,
       })
     } else {
       if (msg) {
         chatHistoryList.value.push({
           role: 'assistant',
-          content: msg
+          content: msg,
+          createTime
         })
       }
     }
@@ -510,13 +531,20 @@
 
     let sendMsg = consistSendMsg()
     ws.send(JSON.stringify(sendMsg))
-    addMessage(askText.value, true)
+    addMessage({
+      message: askText.value,
+      createTime: moment(new Date(),'MM/DD HH:mm')
+    }, true)
 
     askText.value = ''
     hoveredElementClone.value = null
 
     await nextTick()
     scrollRoll()
+    
+    setTimeout( _=> {
+      scrollRoll()
+    }, 1000)
   }
 
   // 滚动
@@ -532,11 +560,14 @@
 
   // ai 思考时展示的内容
   const thinking = ref(false)
+  const thinkingCreateTime = ref('')
   const thinkingText = ref('')
+  
 
   // 设置默认的思考状态
   const setDefaultThink = () => {
     thinking.value = false
+    thinkingCreateTime.value = ''
     thinkingText.value = ''
   }
 
@@ -575,6 +606,7 @@
           break
         case 'stream_start':
           thinking.value = true
+          thinkingCreateTime.value = moment(data.createTime).format('MM/DD HH:mm')
           break
         case 'stream':
           thinkingText.value += data.content
@@ -583,16 +615,21 @@
           break
         case 'stream_end':
           thinking.value = false
+          thinkingCreateTime.value = ''
           break
         case 'complete':
           thinkingText.value = ''
-          addMessage(data.content)
+          addMessage({
+            message: data.content,
+            createTime: data.createTime
+          })
           await nextTick()
           scrollRoll()
           break
         case 'ai':
           let contentObj = JSON.parse(Base64.decode(data.content))
-          let newHmtlText = Base64.decode(contentObj.fullCode)
+          let fullCode = contentObj.fullCode || ''
+          let newHmtlText = Base64.decode(fullCode)
           updateEditValueAndView(newHmtlText)
           getProjectDetailById()
           break
@@ -604,7 +641,6 @@
               duration: 3000
             })
           }
-          console.log(data)
           break;  
         default:
           break
@@ -617,9 +653,9 @@
     list.forEach(chatItem => {
       let contentObj = JSON.parse(Base64.decode(chatItem.content))
       if (contentObj.type === 'user') {
-        addMessage(contentObj.message, true)
+        addMessage(contentObj, true)
       } else {
-        addMessage(contentObj.message)
+        addMessage(contentObj)
       }
     })
   }
@@ -638,6 +674,10 @@
 
   // 更新 iframe 和 monaco editor 内容
   const updateEditValueAndView = newHmtlText => {
+    if(!newHmtlText) {
+      return
+    }
+    
     if(!isFromCase.value){
       editorInstance.setValue(newHmtlText)
     }
@@ -887,6 +927,8 @@
     @extend .chat-bg;
     min-width: 0;
     max-width: 90%;
+    border-right: 3px solid var(--zeng);
+    border-left: none;
     @apply text-sm inline-block rounded-lg py-9px px-16px break-all;
   }
 
@@ -895,6 +937,8 @@
     @extend .chat-bg;
     min-width: 0;
     max-width: 90%;
+    border-right: none;
+    border-left: 3px solid #3b82f6;
     @apply text-sm inline-block rounded-lg px-16px pt-9px;
     overflow-x: auto;
   }

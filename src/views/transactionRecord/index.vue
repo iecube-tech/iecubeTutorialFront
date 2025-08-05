@@ -271,11 +271,6 @@
 </script>
 
 <style lang="scss" scoped>
-  .transcation-record-container {
-    // height: calc(100vh - 50px);
-    // overflow-y: auto;
-  }
-
   .stat-card {
     @apply flex items-center rounded-lg p-4 shadow-md h-[100px];
 
