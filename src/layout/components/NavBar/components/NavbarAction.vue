@@ -1,9 +1,11 @@
 <template>
   <div class="flex">
-    <div class="flex items-center hello-tip">
-      <span class="mr-16px">{{ firstGroup.name }}</span>
-      <span class="mr-16px">{{ secondGroup.name }}</span>
-      <span class="text-ms mr-10px text-blod">{{ userInfoFirstName }}老师, 你好 !</span>
+    <div class="flex items-center text-sm">
+      <span class="mr-4">{{ firstGroup.name }}</span>
+      <span class="mr-4">{{ secondGroup.name }}</span>
+      <span >{{ userInfoFirstName }}老师, 你好 !</span>
+      <el-divider direction="vertical"/>
+      <span class="mr-4">积分： {{ pointStr }}</span>
     </div>
 
     <el-dropdown class="nav-action-item" trigger="click" @command="handleCommand" :hide-on-click="false">
@@ -66,6 +68,8 @@
   import { TOKEN_KEY, TOKEN_REFRESH_KEY } from '@/enums/CacheEnum'
   
   import { debounce } from 'lodash'
+  
+  import { getPointValid } from '@/api/comsumed'
 
   const appStore = useAppStore()
   const tagsViewStore = useTagsViewStore()
@@ -127,7 +131,7 @@
     groupClick(group)
   }, 500)
 
-  /* 注销 */
+  // 注销
   function logout() {
     ElMessageBox.confirm('确定注销并退出系统吗？', '提示', {
       confirmButtonText: '确定',
@@ -135,11 +139,7 @@
       type: 'warning',
       lockScroll: false
     }).then(() => {
-      userStore
-        .logout()
-        // .then(() => {
-        //   tagsViewStore.delAllViews();
-        // })
+      userStore.logout()
         .then(() => {
           router.push(`/login?redirect=${route.fullPath}`)
         })
@@ -149,11 +149,33 @@
   // 处理命令
   const handleCommand = (command: string) => {
     if (command === 'transactionRecord') {
-      let path = router.resolve({ path: '/transactionRecord' })
-      window.open(path.href, '_blank')
+      // let path = router.resolve({ path: '/transactionRecord' })
+      // window.open(path.href, '_blank')
+      router.push({ path: '/transactionRecord' })
     }
   }
+  
+  const point = ref(0)
+  
+  const pointStr = computed(() => {
+    let n = point.value
+    n = n.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+    return n
+  })
+  
+  const initPoint = async () => {
+    getPointValid().then(res => {
+      if (res.state === 200) {
+        if(res.data != null){
+          point.value = res.data.amount
+        }
+      }
+    })
+  }
+  
+  initPoint()
 </script>
+
 <style lang="scss" scoped>
   .nav-action-item {
     display: inline-block;
@@ -229,8 +251,4 @@
     font-size: 12px;
   }
 
-  /* .hello-tip {
-    font-family: '楷体';
-    font-size: 20px;
-  } */
 </style>

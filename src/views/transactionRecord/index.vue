@@ -1,7 +1,15 @@
 <template>
   <div class="transcation-record-container select-none">
-    <div class="flex justify-between align-center mb-8">
-      <span class="text-bold font-bold text-2xl">消费明细</span>
+    <div class="flex justify-between align-center mb-4">
+      <!-- <span class="text-bold font-bold text-2xl">消费明细</span> -->
+      <div class="w-0 flex-1 flex justify-start items-center">
+        <el-button type="primary" icon="ArrowLeft" @click="goBack" link class="mr-4">返回</el-button>
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item>消费明细</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+    
       <contact-us placement="left">
         <template #default>
           <el-button type="primary">立即充值</el-button>
@@ -9,7 +17,7 @@
       </contact-us>
     </div>
 
-    <div class="mb-8" v-if="stats.balance <= 100">
+    <div class="mb-4" v-if="stats.balance <= 100">
       <el-alert type="error" :closable="false" show-icon>
         <template #title>
           <span>账号余额不足，请&nbsp;</span>
@@ -23,7 +31,7 @@
       </el-alert>
     </div>
 
-    <el-row :gutter="20" class="mb-8">
+    <el-row :gutter="20" class="mb-4">
       <el-col :span="6">
         <div class="stat-card currentUsers">
           <div class="">
@@ -139,6 +147,14 @@
 
   import { getPointValid, getPointComsumed, getPointBill } from '@/api/comsumed'
   import { getUserColleague } from '@/api/login'
+  
+  import { useRouter } from 'vue-router'
+
+  const router = useRouter()
+  
+  const goBack = () => {
+    router.back()
+  }
 
   // 卡片图标大小
   const cardIconSize = ref(28)

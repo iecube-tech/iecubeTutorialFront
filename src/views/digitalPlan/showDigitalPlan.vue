@@ -132,6 +132,10 @@
             <Icon title="下载" :size="iconSize" class="btn-icon" @click="handleDownload">
               <Download />
             </Icon>
+            
+            <el-divider direction="vertical" />
+            
+            <el-button type="primary" icon="ArrowLeft" @click="goBack" link class="mr-4">返回</el-button>
           </div>
         </div>
         <div class="w-full relative h-[calc(100%-28px)] mt-4px">
@@ -185,7 +189,7 @@
     getFileResource
   } from '@/api/plan'
   import { getCaseDetail } from '@/api/caseApi'
-import ComponentsResolver from 'unplugin-icons/resolver'
+  import ComponentsResolver from 'unplugin-icons/resolver'
 
   const iconSize = ref(20)
   const isPreview = ref(true)
@@ -193,6 +197,10 @@ import ComponentsResolver from 'unplugin-icons/resolver'
 
   const loading = ref(true)
   const loadingText = ref('正在为您拼命加载页面中.....')
+  
+  const goBack = () =>{
+    router.back()
+  }
 
   // 加载 loading
   const startLoading = () => {

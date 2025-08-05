@@ -68,15 +68,22 @@
 
   const handleCaseClick = (id: number) => {
     // 处理案例点击事件，跳转到详情页
-    console.log('点击案例:', id)
-    let openPath = router.resolve({
+    // console.log('点击案例:', id)
+    // let openPath = router.resolve({
+    //   path: '/showDigitalPlan',
+    //   query: {
+    //     id: '', // 项目id 从案例进入时 id 为空
+    //     caseId: id // 案例id
+    //   }
+    // })
+    // window.open(openPath.href, '_blank')
+    router.push({
       path: '/showDigitalPlan',
       query: {
         id: '', // 项目id 从案例进入时 id 为空
         caseId: id // 案例id
       }
     })
-    window.open(openPath.href, '_blank')
   }
 
   /* const tagList = ref([])

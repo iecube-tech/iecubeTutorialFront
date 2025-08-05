@@ -25,6 +25,6 @@
     },
     "types": ["vite/client", "unplugin-icons/types/vue", "element-plus/global"]
   },
-  "include": ["src/**/*", "vite.config.ts"],
-  "exclude": ["**/node_modules","node_modules", "dist", "**/*.js"]
+  "include": ["vite.config.ts"],
+  "exclude": ["**/node_modules","node_modules", "dist", "**/*.js", "src/**/*"]
 }

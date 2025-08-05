@@ -619,26 +619,26 @@
 
   // 查看案例
   const handleShowCase = caseItem => {
-    let openPath = router.resolve({
+    let openPath = router.push({
       path: '/showDigitalPlan',
       query: {
         id: '', // 项目id 从案例进入时 id 为空
         caseId: caseItem.id // 案例id
       }
     })
-    window.open(openPath.href, '_blank')
+    // window.open(openPath.href, '_blank')
   }
 
   // 查看项目 最新版本 讲义
   const handleShowPlan = row => {
-    let openPath = router.resolve({
+    let openPath = router.push({
       path: '/showDigitalPlan',
       query: {
         id: row.project.id,
         caseId: ''
       }
     })
-    window.open(openPath.href, '_blank')
+    // window.open(openPath.href, '_blank')
   }
 
   // 下载讲义
