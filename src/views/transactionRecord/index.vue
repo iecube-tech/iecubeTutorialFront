@@ -115,6 +115,7 @@
                       <span v-else-if="detail.type == 'RECHARGE'">充值</span>
                     </template>
                   </el-table-column>
+                  <el-table-column prop="userName" label="用户" width="100"></el-table-column>
                   <el-table-column prop="points" label="积分" width="180" align="right">
                     <template #default="{ row: detail }">
                       <span v-if="isComsumeType(detail.type)">
