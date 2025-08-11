@@ -50,7 +50,7 @@
             <div class="w-1/2 pr16px">
               <el-row>
                 <el-col :span="23">
-                  <el-form-item label="知识要点" prop="knowledgePoints" class="w-full">
+                  <el-form-item label="知识要点:" prop="knowledgePoints" class="w-full">
                     <el-input
                       v-model="formData.knowledgePoints"
                       @input="debounceFindCaseList"
@@ -871,7 +871,7 @@
   const findCaseList = () => {
     let req = {
       title: formData.title,
-      knowledgePoints: formData.knowledgePoints
+      knowledgePoint: formData.knowledgePoints
     }
     findCase(req).then(res => {
       if(res.state == 200) {

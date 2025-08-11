@@ -71,6 +71,7 @@ export const deleteCase = (id: string|number) => {
 }
 
 
+// 生成讲义推荐接口
 export const findCase = (data : any) => {
   return request({
     url: '/collection/find',

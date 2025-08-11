@@ -1,20 +1,31 @@
+<!-- suffix-icon="Search"-->
 <template>
   <div class="app-container">
     <div class="wh-full px-10px">
       <div class="tools-bar">
         <div></div>
         <div>
+          <span class="el-form-item__label text-sm mr-1" style="color: var(--el-text-color-regular)">课程名称</span>
           <el-input
-            v-model="filterText"
-            class="w-200px"
-            suffix-icon="Search"
-            placeholder="请输入搜索内容"
+            v-model="SearchForm.title"
+            class="w-200px mr-4"
+            placeholder="请输入课程名称"
+            clearable
           ></el-input>
+          <span class="el-form-item__label text-sm mr-1" style="color: var(--el-text-color-regular)">知识要点</span>
+          <el-input
+            v-model="SearchForm.knowledgePoint"
+            class="w-200px mr-2"
+            placeholder="请输入知识要点"
+            clearable
+          ></el-input>
+          <el-button type="primary" icon="Search" title="搜索" @click="searchCaseList">搜索</el-button>
+          <el-button type="primary" title="重置" @click="reset">重置</el-button>
         </div>
       </div>
       <div class="case-grid">
         <div
-          v-for="caseItem in filterCaseList"
+          v-for="caseItem in caseList"
           :key="caseItem.id"
           class="case-card group"
           @click="handleCaseClick(caseItem.id)"
@@ -42,7 +53,7 @@
           </div>
         </div>
       </div>
-      <div v-if="filterCaseList.length === 0" class="no-match">
+      <div v-if="caseList.length === 0" class="no-match">
         <span>暂无数据</span>
       </div>
     </div>
@@ -50,33 +61,45 @@
 </template>
 
 <script setup lang="ts">
-  import { getTagList, getCaseList } from '@/api/caseApi'
+  import { getTagList, getCaseList, findCase } from '@/api/caseApi'
   import { getFileResource } from '@/api/plan'
   import router from '@/router'
-
-  const filterText = ref('')
-
-  const filterCaseList = computed(() => {
-    return caseList.value.filter(item => {
-      let f =
-        item.title.includes(filterText.value) || item.knowledgePoint.includes(filterText.value)
-      return f
-    })
+  
+  const SearchForm = ref({
+    title: '',
+    knowledgePoint: ''
   })
+  
+  const setDeafaultSearch = () =>{
+    SearchForm.value.title = ''
+    SearchForm.value.knowledgePoint = ''
+  }
+  
+  const reset = () =>{
+    setDeafaultSearch()
+    searchCaseList()
+  }
+  
+  const searchCaseList = () => {
+    if(SearchForm.value.title == '' && SearchForm.value.knowledgePoint == ''){
+      initCaseList()
+    } else {
+      findCase(SearchForm.value).then(res => {
+      if(res.state == 200){
+          let list = res.data
+          caseList.value = list
+          list.forEach(item =>{
+            setUrlMapKey(item.cover.filename)
+          })
+          initCaseItemPngUrl()
+        }
+      })
+    }
+  }
 
   const caseList = ref([])
 
   const handleCaseClick = (id: number) => {
-    // 处理案例点击事件，跳转到详情页
-    // console.log('点击案例:', id)
-    // let openPath = router.resolve({
-    //   path: '/showDigitalPlan',
-    //   query: {
-    //     id: '', // 项目id 从案例进入时 id 为空
-    //     caseId: id // 案例id
-    //   }
-    // })
-    // window.open(openPath.href, '_blank')
     router.push({
       path: '/showDigitalPlan',
       query: {
@@ -85,32 +108,21 @@
       }
     })
   }
-
-  /* const tagList = ref([])
-
-  const initTagList = () => {
-    getTagList().then(res => {
-      if (res.state == 200) {
-        tagList.value = res.data
-      }
-    })
-  }
-
-  initTagList() */
   
   let url = ref({
     map: {}
   })
 
   const initCaseList = () => {
-    filterText.value = ''
+    setDeafaultSearch()
 
     getCaseList().then(res => {
       if (res.state == 200) {
         let list = res.data
         caseList.value = list
         list.forEach(item =>{
-          url.value.map[item.cover.filename] = null
+          // url.value.map[item.cover.filename] = null
+          setUrlMapKey(item.cover.filename)
         })
         initCaseItemPngUrl()
       }
@@ -132,6 +144,12 @@
     let res = await getFileResource(fileName)
     let blob = new Blob([res.data], { type: 'image/png' })
     return URL.createObjectURL(blob)
+  }
+  
+  const setUrlMapKey = (key) => {
+    if(!url.value.map[key]){
+      url.value.map[key] = null
+    }
   }
   
   onBeforeUnmount(() => {
