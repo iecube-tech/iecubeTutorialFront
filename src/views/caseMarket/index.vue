@@ -5,14 +5,14 @@
       <div class="tools-bar">
         <div></div>
         <div>
-          <span class="el-form-item__label text-sm mr-1" style="color: var(--el-text-color-regular)">课程名称</span>
+          <span class="el-form-item__label mr-1" style="font-size: 14px; color: var(--el-text-color-regular)">课程名称</span>
           <el-input
             v-model="SearchForm.title"
             class="w-200px mr-4"
             placeholder="请输入课程名称"
             clearable
           ></el-input>
-          <span class="el-form-item__label text-sm mr-1" style="color: var(--el-text-color-regular)">知识要点</span>
+          <span class="el-form-item__label mr-1" style="font-size: 14px; color: var(--el-text-color-regular)">知识要点</span>
           <el-input
             v-model="SearchForm.knowledgePoint"
             class="w-200px mr-2"

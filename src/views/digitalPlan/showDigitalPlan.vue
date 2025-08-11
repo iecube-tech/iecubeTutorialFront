@@ -101,10 +101,15 @@
               size="small"
               @change="handleCurrentVersionChange"
             >
+             <!--  <el-option
+                :label="versionList[0].saved ?  `版本 V${versionList[0].version}` : `最新版本`"
+                :value="versionList[0].id"
+              ></el-option> -->
+              <el-option v-if="versionList[0]" :label="versionList[0].saved ? `版本 V${versionList[0].userVersion}`: `最新版本` " :value="versionList[0].id"></el-option>
               <el-option
-                v-for="(versionItem, k) in versionList"
+                 v-for="(versionItem, k) in versionOther"
                 :key="k"
-                :label="k == 0 ? `最新 V${versionItem.version}` : `历史 V${versionItem.version}`"
+                :label="`历史 V${versionItem.userVersion}`"
                 :value="versionItem.id"
               ></el-option>
             </el-select>
@@ -300,6 +305,20 @@
       htmlBase64: base64Content
     }).then(res => {
       if (res.state == 200) {
+        
+        if(res.data == null){
+          return
+        }
+        
+        let list = res.data
+        list = list.reverse()
+        let n = list.length
+        let latestVersion = list[0]
+        
+        currentVersionId.value = latestVersion.id
+        setCurrentFileName(latestVersion.resource.filename)
+        versionList.value = list
+        
         ElMessage.success('保存成功')
       }
     })
@@ -776,6 +795,17 @@
   // 初始化版本列表
   const currentVersionId = ref(0)
   const versionList = ref([])
+  
+  const versionOther = computed(()=>{
+    let res = []
+    if(versionList.value.length >= 2) {
+      res  = versionList.value.slice(1).filter( item => {
+        return item.saved
+      })
+    }
+    
+    return res;
+  })
 
   // 更新 url， 参数改变修改核心参数
   const updateURL = id => {

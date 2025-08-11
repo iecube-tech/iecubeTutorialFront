@@ -4,7 +4,6 @@
     "noEmit": true,        // 不输出编译结果
     "target": "esnext",
     "useDefineForClassFields": true,
-    "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
     "noLib": false,
@@ -12,7 +11,6 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
-    "baseUrl": ".",
     "allowJs": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
@@ -20,10 +18,15 @@
     "jsx": "preserve",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
-    "types": ["vite/client", "unplugin-icons/types/vue", "element-plus/global"]
+    "composite": true,
+    "module": "ESNext",
+    "types": ["node"],
   },
   "include": ["vite.config.ts"],
   "exclude": ["**/node_modules","node_modules", "dist", "**/*.js", "src/**/*"]
