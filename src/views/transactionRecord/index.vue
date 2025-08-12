@@ -195,7 +195,7 @@
     if(stats.value.expiring == 0){
       return '已过期';
     } else {
-      return moment(stats.expiring).format('YYYY-MM-DD')
+      return moment(stats.value.expiring).format('YYYY-MM-DD')
     }
   }
 
