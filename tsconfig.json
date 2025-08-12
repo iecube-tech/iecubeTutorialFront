@@ -24,7 +24,8 @@
         "./src/*"
       ]
     },
-    "composite": true,
+    "composite": false,
+    "incremental": false,
     "module": "ESNext",
     "types": ["node"],
   },

@@ -62,7 +62,7 @@
                   :rows="2"
                   class="ask-text-input"
                   v-model="askText"
-                  placeholder="请先点击下方编辑按钮后，在右侧页面点击选中需要修改的内容，并在此处输入修改意见"
+                  placeholder="请点击左下方“编辑”按钮后，描述要修改的内容并提交"
                   @keydown.ctrl.enter.prevent="handleAsk"
                 />
               </div>
