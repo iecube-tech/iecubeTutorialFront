@@ -1,6 +1,6 @@
 <template>
   <div class="plan-container">
-    <resizePanel ref="resizePanelRef" class="content-wrapper" :rightPanelOnly="isFromCase">
+    <resizePanel ref="resizePanelRef" class="content-wrapper" :rightPanelOnly="rightPanelOnly">
       <template #left-content>
         <div class="chat-container-wrapper">
           <div ref="chatContainerRef" class="chart-container my-scroller">
@@ -141,6 +141,15 @@
             >
               <Icon :size="iconSize"><Add/></Icon>创建教案
             </el-button>
+            <Icon 
+              v-show="!isFromCase"
+              :title="rightPanelOnly? '编辑' : '查看'"
+              :size="iconSize"
+              class="btn-icon"
+              @click="toggleRightPanelOnly">
+              <Edit v-if="rightPanelOnly"/>
+              <Screen v-else />
+            </Icon>
             <Icon
               v-show="!isFromCase"
               title="保存"
@@ -195,7 +204,7 @@
 </template>
 
 <script setup>
-  import { Download, FolderAdd, Save, SendAltFilled, CenterSquare, Add } from '@vicons/carbon'
+  import { Download, FolderAdd, Save, SendAltFilled, CenterSquare, Add, Edit, Screen } from '@vicons/carbon'
   import { Crosshairs, Eye} from '@vicons/fa'
   import { ClipboardCode20Filled } from '@vicons/fluent'
   import { Base64 } from 'js-base64'
@@ -213,6 +222,12 @@
   import ComponentsResolver from 'unplugin-icons/resolver'
   
   import moment from 'moment'
+  
+  const rightPanelOnly = ref(true)
+  
+  const toggleRightPanelOnly = () =>{
+    rightPanelOnly.value = !rightPanelOnly.value
+  }
 
   const iconSize = ref(20)
   const isPreview = ref(true)
