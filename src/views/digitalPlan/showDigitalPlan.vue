@@ -62,7 +62,7 @@
                   :rows="2"
                   class="ask-text-input"
                   v-model="askText"
-                  placeholder="请点击左下方“编辑”按钮后，描述要修改的内容并提交"
+                  placeholder="请先点击下方编辑按钮，在右侧页面点击选中需要修改的内容，之后在此处输入修改意见"
                   @keydown.ctrl.enter.prevent="handleAsk"
                 />
               </div>
@@ -142,16 +142,15 @@
               <Icon :size="iconSize"><Add/></Icon>创建教案
             </el-button>
             <Icon 
-              v-show="!isFromCase"
-              :title="rightPanelOnly? '编辑' : '查看'"
+              v-show="!isFromCase && rightPanelOnly"
+              title="编辑"
               :size="iconSize"
               class="btn-icon"
-              @click="toggleRightPanelOnly">
-              <Edit v-if="rightPanelOnly"/>
-              <Screen v-else />
+              @click="handleSliptePage(true)">
+              <Edit />
             </Icon>
             <Icon
-              v-show="!isFromCase"
+              v-show="!isFromCase && !rightPanelOnly"
               title="保存"
               :size="iconSize"
               class="btn-icon"
@@ -225,8 +224,14 @@
   
   const rightPanelOnly = ref(true)
   
-  const toggleRightPanelOnly = () =>{
-    rightPanelOnly.value = !rightPanelOnly.value
+  const handleSliptePage = (v) =>{
+    rightPanelOnly.value = !v
+    
+    if(v){
+      setTimeout(_=>{
+        scrollRoll()
+      }, 200)
+    }
   }
 
   const iconSize = ref(20)
@@ -333,6 +338,8 @@
         currentVersionId.value = latestVersion.id
         setCurrentFileName(latestVersion.resource.filename)
         versionList.value = list
+        
+        handleSliptePage(false)
         
         ElMessage.success('保存成功')
       }
