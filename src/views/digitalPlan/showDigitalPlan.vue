@@ -672,9 +672,18 @@
         case 'ai':
           let contentObj = JSON.parse(Base64.decode(data.content))
           let fullCode = contentObj.fullCode || ''
-          let newHmtlText = Base64.decode(fullCode)
-          updateEditValueAndView(newHmtlText)
-          getProjectDetailById()
+          if(fullCode){
+            let newHmtlText = Base64.decode(fullCode)
+            updateEditValueAndView(newHmtlText)
+            getProjectDetailById()
+          } else {
+            addMessage({
+              message: contentObj.message,
+              createTime: data.createTime
+            })
+            await nextTick()
+            scrollRoll()
+          }
           break
         case 'error':
           if(data.content == '余额不足'){

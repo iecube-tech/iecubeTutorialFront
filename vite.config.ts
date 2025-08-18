@@ -59,9 +59,9 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         [env.VITE_APP_BASE_API]: {
           changeOrigin: true,
           // 接口地址 例如：http://vapi.youlai.tech
-          // secure: true,
+          secure: true,
           target: env.VITE_APP_API_URL,
-          rewrite: path => path.replace(new RegExp('^' + env.VITE_APP_BASE_API), '')
+          // rewrite: path => path.replace(new RegExp('^' + env.VITE_APP_BASE_API), '')
         },
         '/resource': {
           changeOrigin: true,
@@ -71,7 +71,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           target: env.VITE_APP_API_URL,
           ws: true,
           changeOrigin: true,
-          rewrite: path => path.replace(/^\/ai/, '')
+          // rewrite: path => path.replace(/^\/ai/, '')
         }
       }
     },
