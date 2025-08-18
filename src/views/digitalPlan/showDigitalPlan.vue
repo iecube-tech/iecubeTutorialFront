@@ -142,7 +142,7 @@
               <Icon :size="iconSize"><Add/></Icon>创建教案
             </el-button>
             <Icon 
-              v-show="!isFromCase && rightPanelOnly"
+              v-show="!isFromCase"
               title="编辑"
               :size="iconSize"
               class="btn-icon"
@@ -150,7 +150,7 @@
               <Edit />
             </Icon>
             <Icon
-              v-show="!isFromCase && !rightPanelOnly"
+              v-show="!isFromCase"
               title="保存"
               :size="iconSize"
               class="btn-icon"
