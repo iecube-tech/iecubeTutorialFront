@@ -327,6 +327,7 @@
       if (res.state == 200) {
         
         if(res.data == null){
+          handleSliptePage(false)
           return
         }
         
