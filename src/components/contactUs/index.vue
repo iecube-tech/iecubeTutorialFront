@@ -4,7 +4,7 @@
       <el-icon class="mr-2"><Phone /></el-icon>
       <span>联系客服</span>
       <br />
-      <span>电话：400-123-4567</span>
+      <span>电话：021-55698566</span>
     </template>
     <template #reference>
       <slot>我要充值</slot>
