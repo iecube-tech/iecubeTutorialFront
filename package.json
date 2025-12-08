@@ -1,6 +1,6 @@
 {
-  "name": "IECUBE Tutorial",
-  "version": "收费版 V1.0.7",
+  "name": "天津大学自动控制垂域智能体",
+  "version": "天津大学客户端版",
   "private": true,
   "type": "module",
   "scripts": {

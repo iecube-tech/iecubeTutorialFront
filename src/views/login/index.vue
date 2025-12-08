@@ -1,10 +1,10 @@
 <template>
   <div class="login-container">
     <div class="login-header">
-      <img :src="logo" class="logo-image w30px h30px mr10px" />
-      <span class="logo-title">
+      <img :src="logo" class="logo-image h50px w160px mr10px" />
+      <!-- <span class="logo-title">
         {{ defaultSettings.title }}
-      </span>
+      </span> -->
     </div>
 
     <div class="flex-1 flex flex-col justify-center items-center">
@@ -53,6 +53,9 @@
               立即注册
             </span>
           </div> -->
+          <div class="flex justify-center">
+            <span class="text-sm text-gray-500">天津大学 & IECUBE联合开发</span>
+          </div>
         </main>
 
         <!-- step two -->
@@ -185,7 +188,7 @@
 </template>
 
 <script setup lang="ts">
-  import logo from '@/assets/logo.svg'
+  import logo from '@/assets/logo.png'
   // import "@/styles/login.scss";
   import defaultSettings from '@/settings'
   import router from '@/router'
